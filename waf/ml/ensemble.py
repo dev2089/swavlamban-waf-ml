@@ -15,6 +15,7 @@ from waf.ml.anomaly import UnsupervisedAnomalyDetector
 from waf.ml.behaviour import BehaviouralDetector
 from waf.ml.dataset import build_training_dataset
 from waf.ml.factory import trained_models
+from waf.ml.semisupervised import SemiSupervisedDetector
 from waf.ml.supervised import SupervisedDetector
 
 
@@ -23,24 +24,26 @@ class Phase4MLEnsemble:
     supervised: SupervisedDetector
     anomaly: UnsupervisedAnomalyDetector
     behaviour: BehaviouralDetector
+    semi_supervised: SemiSupervisedDetector
     feature_names: tuple[str, ...]
     dataset_version: str
     baseline_version: str
-    model_version: str = "phase4-ml-v1"
+    model_version: str = "phase10-ml-v2"
 
     @classmethod
     def train_default(cls) -> "Phase4MLEnsemble":
-        supervised, anomaly, behaviour, feature_names, dataset_version, baseline_version = trained_models()
-        return cls(supervised, anomaly, behaviour, feature_names, dataset_version, baseline_version)
+        supervised, anomaly, behaviour, semi_supervised, feature_names, dataset_version, baseline_version = trained_models()
+        return cls(supervised, anomaly, behaviour, semi_supervised, feature_names, dataset_version, baseline_version)
 
     @classmethod
     def load(cls, path: str | Path) -> "Phase4MLEnsemble":
         payload = joblib.load(path)
-        if payload.get("artifact_version") != "phase4-model-v1":
+        if payload.get("artifact_version") != "phase10-model-v2":
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        if "supervised" not in payload or "anomaly" not in payload or "behaviour" not in payload:
+        required = {"supervised", "anomaly", "behaviour", "semi_supervised"}
+        if not required.issubset(payload):
             raise ValueError("model artifact missing one or more required detector components")
         if not payload.get("feature_names"):
             raise ValueError("model artifact missing feature manifest")
@@ -48,10 +51,11 @@ class Phase4MLEnsemble:
             payload["supervised"],
             payload["anomaly"],
             payload["behaviour"],
+            payload["semi_supervised"],
             tuple(payload["feature_names"]),
             payload["dataset_version"],
             payload["baseline_version"],
-            payload.get("model_version", "phase4-ml-v1"),
+            payload.get("model_version", "phase10-ml-v2"),
         )
 
     @classmethod
@@ -60,10 +64,11 @@ class Phase4MLEnsemble:
         supervised: SupervisedDetector,
         anomaly: UnsupervisedAnomalyDetector,
         behaviour: BehaviouralDetector,
+        semi_supervised: SemiSupervisedDetector,
         feature_names: tuple[str, ...],
         dataset_version: str,
         baseline_version: str,
-        model_version: str = "phase4-ml-v1",
+        model_version: str = "phase10-ml-v2",
     ) -> "Phase4MLEnsemble":
         isolated_behaviour = BehaviouralDetector(
             model=behaviour.model,
@@ -75,6 +80,7 @@ class Phase4MLEnsemble:
             supervised,
             anomaly,
             isolated_behaviour,
+            semi_supervised,
             feature_names,
             dataset_version,
             baseline_version,
@@ -85,7 +91,7 @@ class Phase4MLEnsemble:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(
             {
-                "artifact_version": "phase4-model-v1",
+                "artifact_version": "phase10-model-v2",
                 "feature_schema": "http-v2",
                 "feature_names": self.feature_names,
                 "dataset_version": self.dataset_version,
@@ -94,6 +100,7 @@ class Phase4MLEnsemble:
                 "supervised": self.supervised,
                 "anomaly": self.anomaly,
                 "behaviour": self.behaviour,
+                "semi_supervised": self.semi_supervised,
             },
             path,
         )
@@ -103,6 +110,7 @@ class Phase4MLEnsemble:
             self.supervised.detect(request, features),
             self.anomaly.detect(request, features),
             self.behaviour.detect(request, features),
+            self.semi_supervised.detect(request, features),
         )
 
     def metadata(self) -> dict[str, Any]:
@@ -112,8 +120,9 @@ class Phase4MLEnsemble:
             "feature_count": len(self.feature_names),
             "dataset_version": self.dataset_version,
             "baseline_version": self.baseline_version,
-            "detectors": [self.supervised.name, self.anomaly.name, self.behaviour.name],
+            "detectors": [self.supervised.name, self.anomaly.name, self.behaviour.name, self.semi_supervised.name],
             "scores_are_risk_not_probability": True,
+            "semi_supervised_labeled_fraction": self.semi_supervised.labeled_fraction,
         }
 
 
@@ -176,18 +185,53 @@ def evaluate_behaviour() -> dict[str, float | int | str]:
     }
 
 
+def evaluate_semi_supervised(seed: int = 42) -> dict[str, float | str | int]:
+    bundle = build_training_dataset(samples=6000, seed=seed)
+    X_train, X_test, y_train, y_test = train_test_split(
+        np.asarray(bundle.X, dtype=float),
+        np.asarray(bundle.y, dtype=int),
+        test_size=0.25,
+        random_state=seed,
+        stratify=bundle.y,
+    )
+    model = SemiSupervisedDetector.train(
+        X_train.tolist(),
+        y_train.tolist(),
+        bundle.feature_names,
+        bundle.dataset_version,
+        labeled_fraction=0.30,
+        seed=seed,
+    )
+    pred = model.model.predict(X_test)
+    tn, fp, fn, tp = confusion_matrix(y_test, pred, labels=[0, 1]).ravel()
+    return {
+        "dataset_version": bundle.dataset_version,
+        "accuracy": float(accuracy_score(y_test, pred)),
+        "precision": float(precision_score(y_test, pred, zero_division=0)),
+        "recall": float(recall_score(y_test, pred, zero_division=0)),
+        "f1": float(f1_score(y_test, pred, zero_division=0)),
+        "fpr": float(fp / max(1, fp + tn)),
+        "test_samples": int(len(y_test)),
+        "training_samples": int(len(y_train)),
+        "labeled_fraction": float(model.labeled_fraction),
+        "unlabeled_samples": int(np.sum(np.asarray(y_train) == -1)),
+        "evaluation_scope": "deterministic synthetic HTTP benchmark with partial labels",
+    }
+
+
 @lru_cache(maxsize=2)
 def _cached_stateless_components(
     path: str,
-) -> tuple[SupervisedDetector, UnsupervisedAnomalyDetector, BehaviouralDetector, tuple[str, ...], str, str, str]:
+) -> tuple[SupervisedDetector, UnsupervisedAnomalyDetector, BehaviouralDetector, SemiSupervisedDetector, tuple[str, ...], str, str, str]:
     artifact_path = Path(path)
     if artifact_path.exists():
         payload = joblib.load(artifact_path)
-        if payload.get("artifact_version") != "phase4-model-v1":
+        if payload.get("artifact_version") != "phase10-model-v2":
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        if "supervised" not in payload or "anomaly" not in payload or "behaviour" not in payload:
+        required = {"supervised", "anomaly", "behaviour", "semi_supervised"}
+        if not required.issubset(payload):
             raise ValueError("model artifact missing one or more required detector components")
         if not payload.get("feature_names"):
             raise ValueError("model artifact missing feature manifest")
@@ -195,16 +239,18 @@ def _cached_stateless_components(
             payload["supervised"],
             payload["anomaly"],
             payload["behaviour"],
+            payload["semi_supervised"],
             tuple(payload["feature_names"]),
             payload["dataset_version"],
             payload["baseline_version"],
-            payload.get("model_version", "phase4-ml-v1"),
+            payload.get("model_version", "phase10-ml-v2"),
         )
     trained = Phase4MLEnsemble.train_default()
     return (
         trained.supervised,
         trained.anomaly,
         trained.behaviour,
+        trained.semi_supervised,
         trained.feature_names,
         trained.dataset_version,
         trained.baseline_version,
