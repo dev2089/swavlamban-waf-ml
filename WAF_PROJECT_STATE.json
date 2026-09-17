@@ -10,12 +10,11 @@
   "validation": {
     "phase1_unit_tests": "PASS: 13/13 at Phase 1 gate",
     "phase2_unit_tests": "PASS: 6/6 at Phase 2 gate",
-    "phase3_suite": "PASS: 10/10",
-    "full_reconstructed_regression": "PASS: 20/20",
+    "phase3_full_regression": "PASS: 34/34",
     "compileall": "PASS",
     "feature_fuzz": "PASS: 20000 requests, 0 exceptions",
-    "feature_benchmark": "100000 extractions, 34854.5 req/s",
-    "phase3_e2e_benchmark": "5000 requests, 4500 allow, 500 block, 2354.3 req/s, 1000 bounded events",
+    "feature_benchmark_latest": "100000 extractions, 33527.0 req/s",
+    "phase3_e2e_benchmark_latest": "5000 requests, 4500 allow, 500 block, 2764.7 req/s, 1000 bounded events",
     "static_secret_scan": "PASS",
     "todo_noop_scan": "PASS",
     "benchmark_scope": "local terminal evidence; not production capacity guarantee"
@@ -29,7 +28,7 @@
     "bounded query/header/body processing",
     "EdgeWAF wired to http-v2",
     "feature/fuzz/performance/live-edge tests",
-    "phase 3 docs and machine-readable handoff state"
+    "phase 3 documentation and machine-readable handoff state"
   ],
   "left": [
     "ModSecurity/Coraza installation verification",
