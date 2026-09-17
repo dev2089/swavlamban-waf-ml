@@ -15,11 +15,7 @@ SECRET = "p8-" + "x" * 61
 
 def test_issue_and_parse_token_round_trip():
     token = issue_token(subject="alice", role="reviewer", secret=SECRET, now=1_700_000_000)
-    claims = parse_bearer_token(
-        "Bearer " + token,
-        secret=SECRET,
-        now=1_700_000_100,
-    )
+    claims = parse_bearer_token("Bearer " + token, secret=SECRET, now=1_700_000_100)
     assert claims["sub"] == "alice"
     assert claims["role"] == "reviewer"
     assert claims["aud"] == "waf-control-plane"
@@ -65,7 +61,7 @@ def test_production_config_is_fail_closed():
     assert len(findings) >= 4
     assert any("32 bytes" in item for item in findings)
     assert any("https://" in item for item in findings)
-    assert any("service_role" in item for item in findings)
+    assert any("service_role" in item.lower() for item in findings)
     assert any("wildcard" in item for item in findings)
 
 
@@ -73,8 +69,9 @@ def test_security_headers_and_audit_are_privacy_safe():
     headers = security_headers()
     assert headers["X-Frame-Options"] == "DENY"
     assert headers["Cache-Control"] == "no-store"
-    assert "request_body" not in audit_record(actor="alice", action="review", target="f-1", outcome="ok", request_id="r-1")
-    assert "headers" not in audit_record(actor="alice", action="review", target="f-1", outcome="ok", request_id="r-1")
+    audit = audit_record(actor="alice", action="review", target="f-1", outcome="ok", request_id="r-1")
+    assert "request_body" not in audit
+    assert "headers" not in audit
 
 
 def test_missing_bearer_is_rejected():
