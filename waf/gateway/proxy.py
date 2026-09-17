@@ -1,8 +1,9 @@
 """Real HTTP reverse-proxy seam for the ML-integrated WAF.
 
 The gateway performs the security decision before forwarding an allowed request to
-an upstream application. It is deliberately independent from Supabase so the
-request path has no synchronous database dependency.
+an upstream application, then inspects the outbound response before returning it
+back to the client. It is deliberately independent from Supabase so the request
+path has no synchronous database dependency.
 """
 from __future__ import annotations
 
@@ -81,7 +82,7 @@ class _RateLimiter:
 
 
 class WAFGateway:
-    """Request interceptor: inspect, decide, and forward only non-blocked traffic."""
+    """Inspect, decide, forward only allowed traffic, then inspect outbound responses."""
 
     def __init__(self, waf: EdgeWAF, config: GatewayConfig | None = None) -> None:
         self.waf = waf
@@ -187,6 +188,7 @@ class WAFGateway:
                 payload = await upstream.content.read(self.config.max_response_bytes + 1)
                 if len(payload) > self.config.max_response_bytes:
                     return web.json_response({"error": "upstream response exceeds configured limit", "request_id": rid}, status=502)
+                outbound = self.waf.inspect_response(upstream.status, dict(upstream.headers), payload)
                 response_headers = {
                     k: v for k, v in upstream.headers.items() if k.lower() not in hop_by_hop
                 }
@@ -194,6 +196,9 @@ class WAFGateway:
                     "X-Swavalamban-WAF-Decision": result.decision.value,
                     "X-Swavalamban-WAF-Risk": f"{result.risk_score:.6f}",
                     "X-Swavalamban-WAF-Request-ID": rid,
+                    "X-Swavalamban-WAF-Outbound-Risk": f"{outbound.score:.6f}",
+                    "X-Swavalamban-WAF-Outbound-Decision": "alert" if outbound.score >= 0.5 else "allow",
+                    "X-Swavalamban-WAF-Outbound-Detector": outbound.detector,
                 })
                 return web.Response(status=upstream.status, body=payload, headers=response_headers)
         except asyncio.TimeoutError:
