@@ -1,25 +1,23 @@
-# Next Execution Step: Phase 8
+# Next Execution Step: External Finalization / Auditor Review
 
-Build production storage, authentication/RBAC, secrets handling and data-minimization hardening without weakening the Phase 5/6/7 evidence and privacy contracts.
+Phase 10 is the current source-and-evidence release candidate. No new engineering milestone should be started until the independent auditor has inspected the exact commit and handoff package.
 
-## Phase 8 goal
-Move the verified WAF control-plane state from local/in-memory demonstration components toward production-safe persistence and authorization boundaries.
+## Remaining external boundaries
+- public certificate issuance/rotation and public HTTPS verification;
+- Internet-scale distributed load/failure validation beyond the free/local environment;
+- venue-specific public deployment if the challenge requires it;
+- final submission portal upload and any required binary export packaging.
 
-## Acceptance focus
-- production storage schema and migration path;
-- authenticated role-aware access control;
-- explicit approval permissions for rule/model promotion actions;
-- secret handling and configuration hygiene;
-- retention/data-minimization controls;
-- regression against Phase 5 evidence, Phase 6 rule lifecycle and Phase 7 learning-control lifecycle;
-- 9.9+ self-exam with critical-defect fail rule.
+## What is already in the release candidate
+- request-side supervised, unsupervised, semi-supervised and behavioural ML;
+- outbound HTTP response anomaly inspection;
+- nginx + ModSecurity enforcement;
+- TLS termination evidence;
+- rule recommendation/replay/approval/deployment lifecycle;
+- learning-control baseline, feedback, drift, retraining, promotion and rollback;
+- secure API, RBAC, asynchronous telemetry and live Supabase verification;
+- dynamic dashboard, benchmark/load harness, reliability evidence and five-minute demo artifact;
+- source, tests, documentation, manifests, logs and portable auditor package.
 
-## Phase 7 evidence to preserve
-- Baseline schema: `baseline-v1`.
-- Feedback schema: `feedback-v1`.
-- Drift schema: `drift-v1`.
-- Model run schema: `model-run-v1`.
-- Model registry schema: `model-registry-v1`.
-- Human promotion is mandatory; runtime model is never silently replaced.
-- Raw request material remains outside learning-control evidence.
-- All Phase 7 tests, smoke evidence, registry history, ledger rows and handoff archive must remain reproducible.
+## Auditor rule
+Treat builder PASS labels as untrusted. Verify the exact commit, execute the clean-checkout commands, inspect the full source tree, and independently mark each requirement PASS / NOT-VERIFIED / FAIL.
