@@ -27,19 +27,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl zip
-      - name: Compile
-        run: python -m compileall -q waf tests scripts
       - name: Strict Phase 10 master exam
         run: python scripts/phase10_master_exam.py
-      - name: Build audit submission artifacts
+      - name: Build binary submission artifacts
         run: python scripts/build_phase10_submission.py
-      - name: Build portable auditor bundle
-        run: python scripts/build_phase10_handoff.py
-      - name: Capture dependency inventory and exact commit
+      - name: Capture dependency inventory and exact clean commit
         run: |
           python -m pip freeze > artifacts/dependency_inventory.txt
           git rev-parse HEAD > artifacts/final_commit_sha.txt
+          test -z "$(git status --porcelain)"
           git status --short > artifacts/clean_checkout_status.txt
+      - name: Build portable auditor bundle
+        run: python scripts/build_phase10_handoff.py
+      - name: Record final bundle checksums
+        run: |
+          sha256sum WAF_PHASE10_FINAL_HANDOFF.zip | tee artifacts/WAF_PHASE10_FINAL_HANDOFF.sha256
+          sha256sum WAF_PHASE10_FINAL_REPOSITORY.zip | tee artifacts/WAF_PHASE10_FINAL_REPOSITORY.sha256
       - name: Upload final auditor bundle
         uses: actions/upload-artifact@v4
         with:
