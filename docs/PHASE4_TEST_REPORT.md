@@ -32,9 +32,12 @@ Normal max score `0.406313`, burst final score `0.980486`, escalation `true`, no
 Scope: deterministic synthetic behavioural workload.
 
 ## Runtime evidence
-- Direct ML final self-test: `2000 requests, 538.0 req/s, 1900 allow, 100 block, 0 alert`.
-- Mandatory bounded E2E final self-test: `1000 requests, 449.4 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 57.310 ms, p95 68.851 ms`.
-- Extended E2E final: `5000 requests, 410.4 req/s, 4250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4250 upstream hits, 1000 events`.
+- Direct ML final self-test rerun: `2000 requests, 529.6 req/s, 1900 allow, 100 block, 0 alert`.
+- Mandatory bounded E2E final self-test rerun: `1000 requests, 400.2 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 64.240 ms, p95 81.686 ms`.
+- Retained extended E2E evidence: `5000 requests, 410.4 req/s, 4250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4250 upstream hits, 1000 events`.
+
+## Final rerun
+After all Phase 4 documentation, state and handoff synchronization, the current workspace was rerun end-to-end. `48/48` regression tests passed, compileall passed, the master exam passed at 10.0/10.0 with zero critical defects, and `phase4_self_test.py` passed. The latest rerun figures above are the current terminal evidence.
 
 ## Model artifact
 - Version: `phase4-model-v1` / model `phase4-ml-v1`.
