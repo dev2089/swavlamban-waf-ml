@@ -3,7 +3,7 @@
   "project_id":"smpmvabjafmrutdhbfbl",
   "project_name":"supabase-pink-village",
   "status":"ACTIVE_HEALTHY",
-  "migration_count":13,
+  "migration_count":11,
   "phase10_migrations":[
     "swavlamban_waf_phase10_function_search_path_hardening",
     "swavlamban_waf_phase10_rls_performance_hardening",
@@ -15,5 +15,6 @@
   "function_search_path":"pinned to public, pg_temp for all six WAF security helper functions",
   "privilege_boundary":"waf_phase_release_audit SELECT is authenticated-only; service_role retains administrative writes; anon has no grant",
   "privacy":"release audit stores gate metadata only; no raw request body, raw headers, raw query or secrets",
+  "release_audit_correction":"A prior release-audit row recorded 13 as a bookkeeping count; a later append-only correction row records the verified live migration count of 11 and preserves the prior row.",
   "verification_time_utc":"2026-09-17T17:06:00Z"
 }
