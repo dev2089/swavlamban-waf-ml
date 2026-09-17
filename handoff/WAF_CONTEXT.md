@@ -20,7 +20,7 @@ Challenge 3. Do not switch unless the user explicitly reopens it.
 MASTER 9.9+ protocol applies to all deliverables. Final project requires executable evidence; critical defects fail regardless of arithmetic score.
 
 ## Current phase
-Phase 2 is complete on branch `phase2-final`. The live edge now inspects real HTTP requests before forwarding, blocks high-risk requests with 403, and has an automated Nginx integration gate. Phase 3 is next: production HTTP feature pipeline.
+Phase 3 is complete on branch `phase3-final`. The live edge now uses the versioned `http-v2` production HTTP feature pipeline with 38 normalized numeric features. Phase 4 is next: supervised + unsupervised + behavioural ML.
 
 ## Important honesty boundary
-Nginx integration is verified. A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified. Overall Challenge 3 remains in progress.
+Nginx/live edge enforcement is verified. A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified. TLS, production ML, learning, secure production storage/auth, dashboard migration, final scenario evidence and final release remain open.
