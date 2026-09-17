@@ -8,15 +8,18 @@
   "phase_cutoff": 9.9,
   "overall_project_status": "IN_PROGRESS",
   "current_branch": "phase2-final",
-  "verified_branch_head_before_state_update": "d28d12043585e824203b1677ff8c39ebc989a559",
   "validation": {
     "phase1_unit_tests": "13/13 PASS",
-    "phase2_unit_tests": "5/5 PASS",
+    "phase2_unit_tests": "6/6 PASS",
+    "config_from_env_regression": "PASS",
     "compileall": "PASS",
+    "nginx_config": "PASS",
     "nginx_integration": "PASS: allow=200, block=403",
     "static_secret_scan": "PASS",
     "static_external_io_scan": "PASS",
-    "phase2_e2e_benchmark": "5000 requests, 3096.7 req/s, 4500 allow, 500 block",
+    "todo_noop_scan": "PASS",
+    "phase2_self_test": "PASS",
+    "phase2_e2e_benchmark": "5000 requests, 3477.8 req/s, 4500 allow, 500 block, 1000 bounded events",
     "phase2_benchmark_scope": "local end-to-end proxy; not a production capacity guarantee"
   },
   "done": [
@@ -28,10 +31,13 @@
     "URL-decoded inspection",
     "request body and response bounds",
     "request IDs and WAF decision headers",
-    "Phase 2 automated tests and handoff evidence"
+    "timeout and upstream failure handling",
+    "Phase 2 automated tests/self-test/benchmark",
+    "portable project ledger including intermediate failures and fixes",
+    "future-chat handoff entrypoint"
   ],
   "left": [
-    "separately installed ModSecurity/Coraza integration verification",
+    "separately installed ModSecurity/Coraza engine verification",
     "TLS/HTTPS handling",
     "production HTTP feature pipeline",
     "supervised/unsupervised/behavioural ML",
@@ -39,12 +45,12 @@
     "ML rule recommendation and approval lifecycle",
     "baseline/feedback/drift/controlled retraining",
     "production storage/auth/RBAC/data minimization",
-    "telemetry/load/failure testing",
+    "telemetry/load/failure testing beyond Phase 2 benchmark",
     "challenge scenarios and reproducible evidence package",
     "dashboard migration",
     "five-minute demo",
     "technical docs/slides",
     "final release gate"
   ],
-  "honesty_boundary": "Phase 2 is complete for its defined acceptance criteria. Overall Challenge 3 is not yet complete."
+  "honesty_boundary": "Phase 2 is complete for its defined acceptance criteria. Nginx/live edge enforcement is verified. A separately installed ModSecurity/Coraza engine is not present in the terminal and is not claimed as verified. Overall Challenge 3 remains in progress."
 }
