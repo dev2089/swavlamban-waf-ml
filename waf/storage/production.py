@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from collections import deque
+from threading import Lock
 from typing import Any, Mapping
 from urllib import error, request
 
@@ -16,27 +17,75 @@ def hash_identifier(value: str | None) -> str | None:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-@dataclass(slots=True)
+def _safe_path(value: str) -> str:
+    """Persist endpoint path only, never query material."""
+    raw = str(value or "")
+    path = raw.split("?", 1)[0].split("#", 1)[0]
+    return path[:8192] or "/"
+
+
+class _RuntimeView:
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._total = 0
+        self._threats = 0
+        self._blocked = 0
+        self._recent: deque[dict[str, Any]] = deque(maxlen=500)
+
+    def record(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
+        path = _safe_path(uri)
+        with self._lock:
+            self._total += 1
+            if result.get("threat_detected"):
+                self._threats += 1
+                self._recent.append({
+                    "threat_type": str(result.get("threat_type", "WAF_DECISION")),
+                    "severity": str(result.get("severity", "low")),
+                    "source_ip": hash_identifier(source_ip) or "unknown",
+                    "target_endpoint": path,
+                    "payload": None,
+                    "confidence": float(result.get("risk_score", 0.0)),
+                    "blocked": bool(result.get("blocked")),
+                    "metadata": {"request_id": request_id, "privacy": "raw_payload_excluded"},
+                })
+            if result.get("blocked"):
+                self._blocked += 1
+
+    def stats(self) -> dict[str, int | float]:
+        with self._lock:
+            return {
+                "total_requests": self._total,
+                "total_threats": self._threats,
+                "blocked_requests": self._blocked,
+                "active_rules": 0,
+                "detection_rate": round((self._blocked / self._total) if self._total else 0.0, 6),
+            }
+
+    def recent_threats(self, limit: int = 100) -> list[dict[str, Any]]:
+        with self._lock:
+            return list(reversed(list(self._recent)[-max(1, min(limit, 500)):]))
+
+
 class MemorySecurityStore:
-    threats: list[dict[str, Any]]
-    request_logs: list[dict[str, Any]]
-    analytics: list[dict[str, Any]]
-    audit: list[dict[str, Any]]
+    """Bounded in-process store used only for local/dev operation."""
 
     def __init__(self) -> None:
-        self.threats = []
-        self.request_logs = []
-        self.analytics = []
-        self.audit = []
+        self.threats: list[dict[str, Any]] = []
+        self.request_logs: list[dict[str, Any]] = []
+        self.analytics: list[dict[str, Any]] = []
+        self.audit: list[dict[str, Any]] = []
+        self._view = _RuntimeView()
 
     def record_decision(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
         source_hash = hash_identifier(source_ip)
+        path = _safe_path(uri)
+        self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
         if result.get("threat_detected"):
             self.threats.append({
                 "threat_type": result["threat_type"],
                 "severity": result["severity"],
                 "source_ip": source_hash or "unknown",
-                "target_endpoint": uri,
+                "target_endpoint": path,
                 "payload": None,
                 "confidence": float(result["risk_score"]),
                 "blocked": bool(result["blocked"]),
@@ -45,7 +94,7 @@ class MemorySecurityStore:
         self.request_logs.append({
             "request_id": request_id,
             "method": method,
-            "uri": uri,
+            "uri": path,
             "source_ip": source_hash or "unknown",
             "user_agent": None,
             "headers": {},
@@ -63,27 +112,14 @@ class MemorySecurityStore:
         self.audit.append(audit_record(actor=actor, action=action, target=target, outcome=outcome, request_id=request_id))
 
     def stats(self) -> dict[str, int | float]:
-        total = len(self.request_logs)
-        blocked = sum(1 for row in self.request_logs if row["blocked"])
-        return {
-            "total_requests": total,
-            "total_threats": len(self.threats),
-            "blocked_requests": blocked,
-            "active_rules": 0,
-            "detection_rate": round((blocked / total) if total else 0.0, 6),
-        }
+        return self._view.stats()
 
     def recent_threats(self, limit: int = 100) -> list[dict[str, Any]]:
-        return list(reversed(self.threats[-max(1, min(limit, 500)):]))
+        return self._view.recent_threats(limit)
 
 
 class SupabaseRESTStore:
-    """Minimal server-only Supabase REST adapter.
-
-    The service-role key never leaves the backend process. Only sanitized decision
-    summaries are transmitted. Raw body, raw headers and raw query material are
-    deliberately excluded from every persisted payload.
-    """
+    """Server-only Supabase REST persistence with a local bounded runtime view."""
 
     def __init__(self, url: str, service_role_key: str, timeout: float = 5.0) -> None:
         if not url.startswith("https://"):
@@ -93,6 +129,7 @@ class SupabaseRESTStore:
         self.base_url = url.rstrip("/")
         self.key = service_role_key
         self.timeout = timeout
+        self._view = _RuntimeView()
 
     def _post(self, table: str, payload: Mapping[str, Any]) -> None:
         encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
@@ -118,12 +155,14 @@ class SupabaseRESTStore:
 
     def record_decision(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
         source_hash = hash_identifier(source_ip) or "unknown"
+        path = _safe_path(uri)
+        self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
         if result.get("threat_detected"):
             self._post("threats", {
                 "threat_type": result["threat_type"],
                 "severity": result["severity"],
                 "source_ip": source_hash,
-                "target_endpoint": uri,
+                "target_endpoint": path,
                 "payload": None,
                 "confidence": float(result["risk_score"]),
                 "blocked": bool(result["blocked"]),
@@ -132,7 +171,7 @@ class SupabaseRESTStore:
         self._post("request_logs", {
             "request_id": request_id,
             "method": method,
-            "uri": uri,
+            "uri": path,
             "source_ip": source_hash,
             "user_agent": None,
             "headers": {},
@@ -156,3 +195,9 @@ class SupabaseRESTStore:
             "request_id": record["request_id"],
             "metadata": {"recorded_at": record["recorded_at"]},
         })
+
+    def stats(self) -> dict[str, int | float]:
+        return self._view.stats()
+
+    def recent_threats(self, limit: int = 100) -> list[dict[str, Any]]:
+        return self._view.recent_threats(limit)
