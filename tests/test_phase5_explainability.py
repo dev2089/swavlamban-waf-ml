@@ -19,12 +19,13 @@ class Phase5EvidenceTests(unittest.TestCase):
         self.extractor = ProductionHTTPFeatureExtractor()
         self.ml = Phase4MLEnsemble.train_default()
         self.policy = EdgeDecisionPolicy()
+        self.phase5_config = WAFConfig(pipeline_version="phase5")
 
     def analyze(self, request: RequestEnvelope, runtime=None):
         runtime = runtime or self.ml
         features = self.extractor.extract(request)
         signature = OpenSourceWAFRuleEngine().detect(request, features)
-        result = self.policy.decide(request, (signature, *runtime.detect(request, features)), WAFConfig().pipeline_version)
+        result = self.policy.decide(request, (signature, *runtime.detect(request, features)), self.phase5_config.pipeline_version)
         return result, features
 
     def test_known_attack_has_reproducible_rule_evidence(self):
@@ -79,7 +80,7 @@ class Phase5EvidenceTests(unittest.TestCase):
         self.assertEqual(evidence1.versions, evidence2.versions)
 
     def test_live_edge_attaches_evidence_to_every_decision(self):
-        waf = EdgeWAF(WAFConfig())
+        waf = EdgeWAF(self.phase5_config)
         requests = (
             RequestEnvelope("live-allow", "GET", "https", "example.test", "/health"),
             RequestEnvelope("live-block", "GET", "https", "example.test", "/", "q=1 union select password from users"),
@@ -93,7 +94,7 @@ class Phase5EvidenceTests(unittest.TestCase):
             self.assertEqual(result.evidence.versions["pipeline_version"], "phase5")
 
     def test_telemetry_contains_evidence_when_attached(self):
-        waf = EdgeWAF(WAFConfig())
+        waf = EdgeWAF(self.phase5_config)
         result = waf.analyze(RequestEnvelope("telemetry", "GET", "https", "example.test", "/health"))
         event = decision_event(result)
         self.assertEqual(event["schema_version"], "event-v2")
