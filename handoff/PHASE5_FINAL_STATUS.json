@@ -18,12 +18,31 @@
     "phase5_evidence_tests": "8/8 PASS",
     "master_exam": "10.0/10.0",
     "privacy_static_gate": "PASS",
-    "overhead_benchmark": {
-      "samples": 100,
-      "core_mean_ms": 1.742,
-      "explanation_mean_ms": 9.778,
-      "overhead_percent_of_core": 561.4,
-      "scope": "local deterministic benchmark; not a production latency claim"
+    "documentation_reverification": {
+      "workflow": "phase5-verification",
+      "run_id": 35211601235,
+      "run_number": 23,
+      "conclusion": "success",
+      "head_commit": "9cd4a306cb5482cf3697df85b10b8228e27fa061"
+    },
+    "overhead_measurements": {
+      "standalone_final_run": {
+        "samples": 100,
+        "core_mean_ms": 1.742,
+        "explanation_mean_ms": 9.778,
+        "overhead_percent_of_core": 561.4
+      },
+      "master_exam_embedded": {
+        "core_mean_ms": 2.376,
+        "explanation_mean_ms": 3.965,
+        "overhead_percent_of_core": 166.89
+      },
+      "other_ci_captured_standalone": {
+        "core_mean_ms": 2.506,
+        "explanation_mean_ms": 4.205,
+        "overhead_percent_of_core": 167.81
+      },
+      "scope": "local deterministic workload benchmarks; timing is environment-dependent and not a production latency claim"
     }
   },
   "implementation": {
@@ -41,17 +60,20 @@
     "enforcement_policy_unchanged": true
   },
   "portable_handoff": {
+    "final_workflow_run": 35211601235,
     "artifact_name": "waf-phase5-handoff",
-    "artifact_id": 10490889663,
-    "zip_sha256": "3491f7624e96ebacb88f539ebb5bb1634bbf2d9aeb9a819ecc00fbde09d46734",
-    "uploaded_bytes": 232051,
-    "source_handoff_bytes": 241237,
-    "source_commit": "51fe08e1ec3421ee1d00fc48a4080013d43b46fd"
+    "artifact_id": 10492127391,
+    "outer_artifact_zip_sha256": "845ae812af9eff62eed07b9b8374489f1e927e4be6b2997aa6f881d7aae32f40",
+    "outer_artifact_zip_bytes": 235848,
+    "inner_handoff_zip_bytes": 245396,
+    "note": "The workflow artifact contains WAF_PHASE5_FINAL_HANDOFF.zip. That inner handoff was verified after extraction and contains the future-chat entrypoint, state, final status, logs, source, tests, model artifact, SQLite ledger and migrations."
   },
   "database": {
     "migration": "supabase/migrations/20260917101500_phase5_decision_evidence.sql",
     "status": "COMMITTED_NOT_LIVE_APPLIED",
     "privacy_static_gate": "PASS",
+    "local_ledger": "state/project_ledger.db",
+    "local_ledger_phase5": "PASS and populated with Phase 5 test, artifact, task and change records",
     "note": "No live Supabase execution result was available in the Phase 5 workflow, so live database application is not claimed."
   },
   "phase4_continuity": {
@@ -79,6 +101,6 @@
     "failed_ci_issue": "An earlier Phase 5 CI run failed 2 legacy config assertions expecting phase3; compatibility was restored without changing Phase 5 enforcement semantics.",
     "remediated": true
   },
-  "honesty_boundary": "Phase 5 implementation plus milestone verification are complete at 10.0/10.0 with zero critical defects. Synthetic ML metrics are benchmark evidence only, not real-world Internet WAF accuracy. The overhead figure is not a production latency claim. The Supabase migration is prepared and privacy-checked but not claimed live-applied.",
+  "honesty_boundary": "Phase 5 implementation plus milestone verification are complete at 10.0/10.0 with zero critical defects. Synthetic ML metrics are benchmark evidence only, not real-world Internet WAF accuracy. Explanation timings are local benchmark measurements and vary with runner conditions. The Supabase migration is prepared and privacy-checked but not claimed live-applied.",
   "future_chat_start": "Read handoff/START_HERE.md, then WAF_PROJECT_STATE.json, this file, and handoff/WAF_PHASE5_LOG.md before changing anything."
 }
