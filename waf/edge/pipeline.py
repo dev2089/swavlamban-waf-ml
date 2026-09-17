@@ -6,15 +6,15 @@ from waf.core.config import WAFConfig
 from waf.core.models import DecisionResult, RequestEnvelope
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
-from waf.features.http import HTTPFeatureExtractor
+from waf.features.http_v2 import ProductionHTTPFeatureExtractor
 
 
 class EdgeWAF:
-    """Phase 2 security path used by the live reverse proxy."""
+    """Phase 3 edge path using the versioned production HTTP feature pipeline."""
 
     def __init__(self, config: WAFConfig) -> None:
         self.config = config
-        self.features = HTTPFeatureExtractor()
+        self.features = ProductionHTTPFeatureExtractor()
         self.detector = OpenSourceWAFRuleEngine()
         self.policy = EdgeDecisionPolicy(config.block_threshold, config.alert_threshold)
 
