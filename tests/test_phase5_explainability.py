@@ -5,11 +5,13 @@ import unittest
 
 from waf.core.config import WAFConfig
 from waf.core.models import Decision, DecisionResult, DetectionSignal, RequestEnvelope
+from waf.edge.pipeline import EdgeWAF
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
 from waf.explainability import build_decision_evidence, evidence_to_dict
 from waf.features.http_v2 import ProductionHTTPFeatureExtractor
 from waf.ml.ensemble import Phase4MLEnsemble
+from waf.telemetry.events import decision_event
 
 
 class Phase5EvidenceTests(unittest.TestCase):
@@ -75,6 +77,50 @@ class Phase5EvidenceTests(unittest.TestCase):
         self.assertEqual(evidence1.feature_snapshot, evidence2.feature_snapshot)
         self.assertEqual(evidence1.feature_attribution, evidence2.feature_attribution)
         self.assertEqual(evidence1.versions, evidence2.versions)
+
+    def test_live_edge_attaches_evidence_to_every_decision(self):
+        waf = EdgeWAF(WAFConfig())
+        requests = (
+            RequestEnvelope("live-allow", "GET", "https", "example.test", "/health"),
+            RequestEnvelope("live-block", "GET", "https", "example.test", "/", "q=1 union select password from users"),
+            RequestEnvelope("live-anomaly", "TRACE", "https", "strange.example", "/" + "A" * 4000, "q=" + "Z" * 8000),
+        )
+        for request in requests:
+            result = waf.analyze(request)
+            self.assertIsNotNone(result.evidence)
+            self.assertEqual(result.evidence.request_id, request.request_id)
+            self.assertEqual(result.evidence.versions["evidence_schema"], "evidence-v1")
+            self.assertEqual(result.evidence.versions["pipeline_version"], "phase5")
+
+    def test_telemetry_contains_evidence_when_attached(self):
+        waf = EdgeWAF(WAFConfig())
+        result = waf.analyze(RequestEnvelope("telemetry", "GET", "https", "example.test", "/health"))
+        event = decision_event(result)
+        self.assertEqual(event["schema_version"], "event-v2")
+        self.assertIn("evidence", event)
+        self.assertEqual(event["evidence"]["schema_version"], "evidence-v1")
+        self.assertFalse(event["evidence"]["privacy"]["raw_payload_retained"])
+
+    def test_privacy_model_rejects_declared_raw_retention(self):
+        request = RequestEnvelope("privacy", "GET", "https", "example.test", "/")
+        result, features = self.analyze(request)
+        evidence = build_decision_evidence(request, features, result, self.ml)
+        with self.assertRaises(ValueError):
+            type(evidence)(
+                schema_version="evidence-v1",
+                decision=evidence.decision,
+                risk_score=evidence.risk_score,
+                detector_contributions=evidence.detector_contributions,
+                feature_groups=evidence.feature_groups,
+                feature_attribution=evidence.feature_attribution,
+                reasons=evidence.reasons,
+                rule_ids=evidence.rule_ids,
+                versions=evidence.versions,
+                explanation=evidence.explanation,
+                privacy={**evidence.privacy, "raw_payload_retained": True},
+                request_id=evidence.request_id,
+                feature_snapshot=evidence.feature_snapshot,
+            )
 
     def test_legacy_result_remains_valid_without_evidence(self):
         result = DecisionResult(
