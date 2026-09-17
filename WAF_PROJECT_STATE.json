@@ -8,24 +8,13 @@
   "critical_defects":0,
   "authoritative_branch":"phase9-final",
   "overall_status":"PHASE9_COMPLETE_RELEASE_WORK_REMAINS",
-  "validation":{
-    "full_regression":"82/82 PASS",
-    "phase8_continuity":"13/13 PASS",
-    "phase9_api":"5/5 PASS",
-    "compileall":"PASS",
-    "static_security_contract":"PASS",
-    "local_tls":"nginx PASS; HTTPS allow 200; SQL block 403",
-    "challenge3_scenarios":"PASS",
-    "master_exam":"10.0/10.0; cutoff 9.9; critical defects 0",
-    "live_supabase":"ACTIVE_HEALTHY; WAF migration chain applied and verified; RLS enabled; anonymous runtime/control-plane access closed; runtime writes service-role controlled",
-    "github_actions":"NOT_OBSERVED; no CI pass claimed"
-  },
+  "validation":{"full_regression":"82/82 PASS","phase8_continuity":"13/13 PASS","phase9_api":"5/5 PASS","compileall":"PASS","static_security_contract":"PASS","local_tls":"nginx PASS; HTTPS allow 200; SQL block 403","challenge3_scenarios":"PASS","master_exam":"10.0/10.0; cutoff 9.9; critical defects 0","live_supabase":"ACTIVE_HEALTHY; WAF migration chain applied and verified; RLS enabled; anonymous runtime/control-plane access closed; runtime writes service-role controlled","github_actions":"NOT_OBSERVED; no CI pass claimed"},
   "live_supabase_project":"smpmvabjafmrutdhbfbl",
   "live_supabase_name":"supabase-pink-village",
   "implemented":["secure FastAPI runtime boundary","signed bearer auth and explicit RBAC","server-only Supabase REST persistence","privacy-safe telemetry and SHA-256 source identity","legacy runtime-table lockdown and raw-field cleanup","local nginx HTTPS/TLS integration","deterministic Challenge 3 scenarios","500-request in-process benchmark","master exam and portable ledger","live Supabase schema/RLS/privilege verification","tracked live privilege-remediation and temporary-surface cleanup migrations"],
   "left":["external certificate issuance/rotation and public HTTPS verification","ModSecurity/Coraza runtime integration","Internet-scale distributed load/failure validation","authenticated dashboard UX","five-minute demo recording","2-3 page technical document","8-10 slide presentation","final release-candidate/submission gate"],
   "database":{"sqlite":"state/project_ledger.db","portable_sql":"state/phase9_ledger.sql","live_project":"smpmvabjafmrutdhbfbl"},
-  "handoff":{"archive":"WAF_PHASE9_FINAL_HANDOFF.zip","sha256":"","files":null,"bytes":null},
+  "handoff":{"archive":"WAF_PHASE9_FINAL_HANDOFF.zip","sha256":"7396820eb5e4fd7b03391a727d7ef4c2eda1e9d719518dbcc6f7179d82e33bca","bytes":507056,"files":211},
   "honesty_boundary":"Repository/local deterministic verification plus live Supabase schema/RLS/privilege verification are complete. External certificate operations, ModSecurity/Coraza, Internet-scale load, dashboard/demo/report/submission remain unverified/open.",
-  "next_phase_entrypoint":"Read this file, handoff/START_HERE.md, handoff/PHASE9_FINAL_STATUS.md, handoff/WAF_PHASE9_LOG.md, phase9 scenario/master evidence and state/project_ledger.db before continuing."
+  "next_phase_entrypoint":"Read this file, handoff/START_HERE.md, handoff/PHASE9_FINAL_STATUS.md, handoff/WAF_PHASE9_LOG.md, handoff/PHASE9_SUPABASE_LIVE_VERIFICATION.json and state/project_ledger.db before continuing."
 }
