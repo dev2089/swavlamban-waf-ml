@@ -21,8 +21,8 @@
 - Header-boundary follow-up -> PASS after limiting normalized header processing to 128 headers.
 - Self-test runner -> PASS.
 - Randomized feature fuzz -> 20,000 requests, 0 exceptions.
-- Final feature benchmark -> 100,000 extractions, 40,134.9 req/s; 38 features.
-- Final E2E proxy benchmark -> 5,000 requests, 4,500 allow, 500 block, 2,599.5 req/s, 1,000 bounded events.
+- Latest feature benchmark -> 100,000 extractions, 33,527.0 req/s; 38 features.
+- Latest E2E proxy benchmark -> 5,000 requests, 4,500 allow, 500 block, 2,764.7 req/s, 1,000 bounded events.
 - Static secret-like scan -> PASS.
 - New Phase 3 TODO/FIXME/pass-only scan -> PASS.
 
