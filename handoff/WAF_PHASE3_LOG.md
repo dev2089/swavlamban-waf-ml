@@ -2,7 +2,7 @@
 
 ## Control point
 - Base milestone: Phase 2 `phase2-final`.
-- Authoritative release branch target: `phase3-final`.
+- Authoritative release branch: `phase3-final`.
 - Terminal lab: `/mnt/data/waf-phase3`.
 - Main branch intentionally untouched.
 
@@ -18,28 +18,30 @@
 9. Added randomized fuzz and performance evidence.
 10. Added phase state, schema documentation, execution logs and handoff entrypoint.
 
-## Failed test cycle and fixes
+## Failed test cycles and fixes
 ### Cycle A - FAIL
-- The percent-encoded feature calculation passed a list into arithmetic, causing a `TypeError` across the feature and edge tests.
-- A Unicode path test expected repeated-separator collapse that the security pipeline intentionally does not perform because path separators can be route-significant.
+- Percent-encoded feature calculation initially passed a list into arithmetic, causing a `TypeError` across feature/edge tests.
+- Unicode-path test initially expected separator collapsing that would alter route semantics.
 
 ### Remediation A
-- Changed the percent-encoding feature to count encoded tokens before forming the ratio.
-- Corrected the test to verify NFKC normalization without changing path semantics.
+- Converted encoded-token result to a count before ratio calculation.
+- Corrected the test to validate Unicode normalization without forcing route canonicalization.
 
 ### Cycle B - PASS
-- 8 feature/regression tests passed.
+- 8 initial feature/regression tests passed after remediation.
 
 ### Cycle C - PASS
 - Live edge regression added and passed.
-- Full local reconstructed regression suite reached 20/20 PASS.
+- Full local reconstructed regression reached 34/34 PASS.
 - 20,000 randomized feature requests completed with 0 exceptions.
-- 100,000 feature extractions measured at 34,854.5 req/s.
-- 5,000-request E2E proxy benchmark measured 2,354.3 req/s with 4,500 allowed and 500 blocked.
+- Final 100,000 feature extractions measured at 40,134.9 req/s.
+- Final 5,000-request E2E proxy benchmark measured 2,599.5 req/s with 4,500 allowed and 500 blocked.
+- Self-test runner completed successfully.
 
 ## Quality checks
 - Feature output verified numeric-only and bounded.
 - Raw payload content absent from feature-vector output.
+- Header processing bounded to 128 normalized headers.
 - Static secret-like scan: PASS.
 - New-code TODO/FIXME/pass-only scan: PASS.
 
