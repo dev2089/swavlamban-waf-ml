@@ -23,10 +23,17 @@ def run(label: str, command: list[str], env: dict[str, str] | None = None) -> di
     return {"id": label, "command": " ".join(command), "result": "PASS" if proc.returncode == 0 else "FAIL", "returncode": proc.returncode, "stdout": proc.stdout[-6000:], "stderr": proc.stderr[-6000:]}
 
 
-def wait(url: str, timeout: float = 15.0) -> None:
+def wait(url: str, timeout: float = 90.0, process: subprocess.Popen[str] | None = None, log_paths: list[Path] | None = None) -> None:
     deadline = time.time() + timeout
     last = None
     while time.time() < deadline:
+        if process is not None and process.poll() is not None:
+            tails = []
+            for path in log_paths or []:
+                if path.exists():
+                    tails.append(f"--- {path.name} ---\n{path.read_text(encoding='utf-8', errors='replace')[-4000:]}")
+            detail = "\n".join(tails)
+            raise RuntimeError(f"service exited before readiness: {url}; returncode={process.returncode}\n{detail}")
         try:
             with urlopen(url, timeout=1) as response:
                 if response.status < 500:
@@ -34,7 +41,12 @@ def wait(url: str, timeout: float = 15.0) -> None:
         except Exception as exc:
             last = exc
         time.sleep(0.25)
-    raise RuntimeError(f"service not ready: {url}: {last}")
+    tails = []
+    for path in log_paths or []:
+        if path.exists():
+            tails.append(f"--- {path.name} ---\n{path.read_text(encoding='utf-8', errors='replace')[-4000:]}")
+    detail = "\n".join(tails)
+    raise RuntimeError(f"service not ready: {url}: {last}\n{detail}")
 
 
 def write_runtime_reports() -> None:
@@ -85,7 +97,7 @@ def main() -> int:
         upstream = subprocess.Popen([sys.executable, "-m", "http.server", "19090", "--bind", "127.0.0.1", "--directory", str(ROOT)], cwd=ROOT, env=env, stdout=upstream_log, stderr=subprocess.STDOUT, text=True)
         gateway = subprocess.Popen([sys.executable, "-m", "waf.gateway.proxy"], cwd=ROOT, env=env, stdout=gateway_log, stderr=subprocess.STDOUT, text=True)
         processes.extend([upstream, gateway])
-        wait("http://127.0.0.1:18081/__waf_health")
+        wait("http://127.0.0.1:18081/__waf_health", process=gateway, log_paths=[ROOT / "phase10_master_upstream.log", ROOT / "phase10_master_gateway.log"])
         checks.append(run("network_load", [sys.executable, "scripts/phase10_load_harness.py", "--url", "http://127.0.0.1:18081/", "--duration", "2", "--concurrency", "20", "--rate", "100", "--payload-profile", "mixed"]))
     finally:
         for process in reversed(processes):
