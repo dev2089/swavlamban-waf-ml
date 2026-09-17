@@ -2,7 +2,7 @@
 
 Baseline main commit: `1cc4f91dd6828039f834ae4dc2b466191d04f229`
 Phase 1 implementation commit: `231a57446421bf5206d44d2af7cc3d65e7a1c6d5`
-Phase 1 latest verified branch head: `cd320ab1d8c80354214f81dce429f3d2ae10847d`
+Phase 1 latest verified branch head: `e12c31f7c6b770445db55ef2ce7af7e05b56c99b`
 Authoritative Phase 1 branch: `phase1-final`
 
 Verified on this branch: baseline README remains present and the new `waf/core/pipeline.py` is present. Main branch was not modified by the Phase 1 work.
