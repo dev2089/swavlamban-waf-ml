@@ -53,6 +53,10 @@ jobs:
           python -m pip freeze > artifacts/dependency_inventory.txt
           cat /tmp/clean_checkout_sha.txt > artifacts/final_commit_sha.txt
           git status --short > artifacts/clean_checkout_status.txt
+          allowed='^(handoff/PHASE10_(REQUIREMENT_TRACEABILITY|PRODUCTION_READINESS|SECURITY_AUDIT|CLAIM_LEDGER|NEGATIVE_EVIDENCE|ML_EVALUATION|PERFORMANCE_BENCHMARK|RELIABILITY_REPORT|MODEL_MANIFEST|DATASET_MANIFEST|RULE_MANIFEST|FILE_TREE|DIFF_FROM_BASELINE|DIFF_FROM_PHASE9|CI_CONTEXT|AUDIT_RESULT)\.(json|md|txt)|phase10_master_exam_result\.json)$'
+          bad=$(git status --porcelain --untracked-files=no | sed 's/^.. //' | grep -Ev "$allowed" || true)
+          test -z "$bad"
+          git diff --check
       - name: Build portable auditor bundle
         run: python scripts/build_phase10_handoff.py
       - name: Record final bundle checksums
