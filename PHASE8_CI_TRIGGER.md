@@ -1,0 +1,1 @@
+Phase 8 verification trigger marker. The authoritative evidence is the GitHub Actions run for `.github/workflows/phase8.yml`, not this marker.
