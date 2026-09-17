@@ -1,48 +1,62 @@
 # WAF Future-Chat START HERE
 
 ## Current control point
-Phase 10 is the current release-candidate milestone. Phase 1-9 evidence is preserved. Phase 10 passed the hard 9.9 gate locally at 10.0/10.0 with 78/78 locally runnable tests, compile PASS, deterministic demo PASS and dashboard/release-material tests PASS. The authoritative Phase 9 branch record of 82/82 remains preserved separately.
-
-Authoritative branch: `phase10-final`.
+Phase 10 is the release-candidate milestone. Phase 1-9 evidence is preserved. The authoritative Phase 10 candidate must be the exact `phase10-final` branch tip after its final green CI run.
 
 ## Read first
 1. `WAF_PROJECT_STATE.json`
 2. `handoff/PHASE10_FINAL_STATUS.md`
 3. `handoff/WAF_PHASE10_LOG.md`
 4. `phase10_master_exam_result.json`
-5. `phase10_demo_evidence.json`
-6. `state/phase10_ledger.sql`
-7. `handoff/PHASE9_FINAL_STATUS.md` and `handoff/WAF_PHASE9_LOG.md`
-8. `handoff/PHASE9_SUPABASE_LIVE_VERIFICATION.json`
-9. Earlier Phase 1-8 logs/status files
+5. `handoff/PHASE10_REQUIREMENT_TRACEABILITY.json`
+6. `handoff/PHASE10_PRODUCTION_READINESS.json`
+7. `handoff/PHASE10_CLAIM_LEDGER.json`
+8. `handoff/PHASE10_NEGATIVE_EVIDENCE.md`
+9. `handoff/PHASE10_SUPABASE_LIVE_VERIFICATION.json`
+10. `state/phase10_ledger.sql`
+11. Phase 9 status/log and earlier historical milestone evidence
 
-## Phase 10 runtime/release controls
-- `dashboard/index.html`
-- `waf/api/production_api.py`
-- `tests/test_phase10_release.py`
-- `scripts/phase10_demo.py`
+## Final runtime/release controls
+- `waf/gateway/proxy.py`
+- `waf/edge/pipeline.py`
+- `waf/ml/ensemble.py`
+- `waf/ml/semisupervised.py`
+- `waf/ml/behaviour.py`
+- `waf/ml/outbound.py`
+- `deploy/nginx/phase10-modsecurity.conf`
 - `scripts/phase10_master_exam.py`
+- `scripts/phase10_waf_enforcement_e2e.py`
+- `scripts/phase10_tls_e2e.py`
+- `scripts/phase10_outbound_e2e.py`
+- `scripts/phase10_rule_replay.py`
+- `scripts/phase10_load_harness.py`
+- `scripts/phase10_dashboard_demo.py`
 - `.github/workflows/phase10.yml`
-- `docs/PHASE10_TECHNICAL_REPORT.md`
-- `docs/PHASE10_PRESENTATION.md`
+- `dashboard/index.html`
+
+## ML contract
+Request feature schema: `http-v2`.
+Request detectors: supervised, unsupervised, semi-supervised, behavioural.
+Outbound response schema: `http-response-v1`.
+Outbound detector: `outbound-oneclasssvm-v1`.
+Model artifact schema: `phase10-model-v3`.
 
 ## Live Supabase
-Project: `smpmvabjafmrutdhbfbl` (`supabase-pink-village`), status `ACTIVE_HEALTHY`.
-The complete WAF baseline through Phase 10 database-control migrations is applied and verified. Security advisors are clear after function search-path hardening. Performance advisors show only expected fresh-schema unused-index INFO notices. No secret is stored in the repository or phase release audit data.
+Project: `smpmvabjafmrutdhbfbl` (`supabase-pink-village`). Live schema/RLS/privilege verification and security hardening evidence are preserved in the Phase 10 package. Secrets are not stored in the repository or handoff.
 
-## Verification
+## Reproduction
 ```bash
 python -m pytest -q
 python -m compileall -q waf tests scripts
-python scripts/phase10_demo.py
 python scripts/phase10_master_exam.py
 ```
+The CI gate additionally builds binary submission artifacts, captures dependency inventory and exact commit, builds the portable auditor handoff, records checksums and uploads the transfer artifacts.
 
-## Phase 10 completed scope
-Authenticated operator dashboard, secure release-status endpoint, deterministic end-to-end demo and benchmark, submission-ready technical report and presentation source, hard-gated release exam, live Supabase release-audit schema, security-advisor remediation, complete execution log and future-chat continuity materials.
+## Evidence discipline
+Measured evidence, deterministic synthetic evaluation, design projections and external constraints are separate categories. Never treat historical milestone prose as current runtime proof. Never treat a README, mock, migration or generated label as evidence unless an executable check connects it to behavior.
 
-## Evidence boundary / still open
-External public certificate issuance/rotation and public HTTPS verification, ModSecurity/Coraza runtime integration, Internet-scale distributed load/failure validation, venue-specific public deployment, final five-minute recording, binary slide export if required and final submission upload remain unverified/open.
+## Remaining external boundaries
+Public certificate issuance/rotation, public Internet HTTPS verification, Internet-scale distributed capacity, venue-specific public deployment and final challenge portal operations remain outside local CI proof. They are explicit non-claims, not hidden omissions.
 
 ## Continuation rule
-Preserve every prior milestone and every failure/remediation record. Never treat documentation or migration SQL as proof of runtime behavior. Never weaken human approval, no-auto-promotion, secret boundaries or raw-request privacy controls. For any non-GitHub connector used on this project, begin the operation context with `swavlamban-waf`.
+Preserve all prior failures/remediations and the exact release branch history. Human approval and no-auto-promotion controls remain mandatory. Raw payload/query/header material must not be added to persisted telemetry or audit bundles.
