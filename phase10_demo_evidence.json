@@ -1,0 +1,14 @@
+{
+  "phase": 10,
+  "health": {"phase": 10, "pipeline_version": "phase3", "security_config_valid": true, "service": "swavlamban-waf-api", "status": "healthy"},
+  "scenarios": [
+    {"case": "benign", "status": 200, "decision": "allow", "blocked": false, "risk_score": 0.004224},
+    {"case": "sql", "status": 200, "decision": "block", "blocked": true, "risk_score": 1.0},
+    {"case": "xss", "status": 200, "decision": "block", "blocked": true, "risk_score": 1.0},
+    {"case": "command_variant", "status": 200, "decision": "block", "blocked": true, "risk_score": 1.0}
+  ],
+  "benchmark": {"requests": 500, "mean_ms": 8.7569, "max_ms": 35.8317, "boundary": "in-process API timing; excludes Internet-scale network/distributed load"},
+  "stats": {"total_requests": 504, "total_threats": 3, "blocked_requests": 3, "detection_rate": 0.005952},
+  "privacy": {"raw_payload_retained": false, "raw_headers_retained": false, "raw_query_retained": false},
+  "generated_from": "local Phase 10 deterministic master-gate run"
+}
