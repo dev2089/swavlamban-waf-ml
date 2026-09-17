@@ -1,28 +1,36 @@
 # Swavlamban WAF ML
 
-ML-integrated open-source WAF for Challenge 3.
+ML-integrated open-source WAF for **Challenge 3**.
 
 ## Current milestone
-**Phase 9 complete under the 9.9 hard gate:** 10.0/10.0, 82/82 full regression PASS, 13/13 Phase 8 continuity PASS, 5/5 Phase 9 API tests PASS, compile/static/TLS/scenario gates PASS, zero critical failures.
+**Phase 10 release candidate complete at the 9.9 hard gate:** 10.0/10.0, 78/78 locally runnable regression, compile PASS, dashboard/release tests PASS, deterministic demo PASS, zero critical defects. The authoritative Phase 9 record remains preserved at 82/82 regression PASS.
 
-Authoritative branch: `phase9-final`.
+Authoritative branch: `phase10-final`.
 
-Phase 9 also verified the live Supabase project `supabase-pink-village` (`smpmvabjafmrutdhbfbl`): the WAF schema and security migration chain is applied, expected tables exist, RLS is enabled, anonymous runtime access is closed, and runtime writes are service-role controlled.
+Live Supabase project `supabase-pink-village` (`smpmvabjafmrutdhbfbl`) is `ACTIVE_HEALTHY`. The WAF baseline through Phase 10 database-control migrations is applied and verified; RLS is enabled across the tracked WAF control/runtime tables. The Supabase security advisor is clear after function-search-path hardening. Performance advice is INFO-only for fresh-schema unused indexes.
 
 ## Read-first continuation
-See `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md`. Then read `handoff/PHASE9_FINAL_STATUS.md`, `handoff/WAF_PHASE9_LOG.md`, `phase9_master_exam_result.json`, `phase9_scenario_evidence.json`, and the portable ledger under `state/`.
+Read `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md`, then `handoff/PHASE10_FINAL_STATUS.md`, `handoff/WAF_PHASE10_LOG.md`, `phase10_master_exam_result.json`, `phase10_demo_evidence.json`, `handoff/PHASE10_SUPABASE_LIVE_VERIFICATION.json`, and `state/phase10_ledger.sql`.
 
-## Phase 9 completed
-- secure production-facing FastAPI runtime adapter
-- signed bearer authentication and explicit RBAC
-- server-only Supabase REST persistence
-- privacy-safe telemetry and SHA-256 source identity hashing
-- legacy runtime-table lockdown and raw-request cleanup
-- local nginx HTTPS/TLS integration
-- deterministic Challenge 3 attack/scenario evidence
-- 500-request in-process performance measurement
-- executable master exam, ledger, remediation history and future-chat handoff
-- live Supabase schema/RLS/privilege verification
+## Phase 10 release candidate
+- authenticated operator dashboard at `/dashboard`
+- secure `/api/release` evidence endpoint
+- deterministic benign/SQL/XSS/command-variant scenario runner
+- 500-request in-process benchmark with explicit boundary
+- hard-gated release exam
+- technical report and ten-slide presentation source
+- live Supabase release audit plus security/performance remediation migrations
+- complete Phase 1-10 evidence, remediation history and future-chat handoff
 
-## Still open for final submission
-External certificate/public HTTPS operations, ModSecurity/Coraza runtime integration, Internet-scale distributed load/failure validation, authenticated dashboard UX, five-minute demo, technical report, presentation slides and final release/submission gate. GitHub Actions Phase 9 CI remains `NOT_OBSERVED` until a real PR-triggered run is returned.
+## Reproduce
+```bash
+python -m pytest -q
+python -m compileall -q waf tests scripts
+python scripts/phase10_demo.py
+python scripts/phase10_master_exam.py
+```
+
+## Evidence boundary
+The repository does **not** claim public certificate issuance/rotation, public Internet HTTPS verification, ModSecurity/Coraza installation, or Internet-scale distributed load/failure validation. Those remain explicitly unverified/open until independently evidenced.
+
+Final venue-specific work may still include the five-minute recording, binary slide export if required, and final submission upload/checklist.
