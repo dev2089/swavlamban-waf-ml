@@ -9,11 +9,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from waf.ml.ensemble import Phase4MLEnsemble, evaluate_behaviour, evaluate_supervised, evaluate_unsupervised
+from waf.ml.ensemble import (
+    Phase4MLEnsemble,
+    evaluate_behaviour,
+    evaluate_semi_supervised,
+    evaluate_supervised,
+    evaluate_unsupervised,
+)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train and persist Phase 4 ML models")
+    parser = argparse.ArgumentParser(description="Train and persist Phase 10 ML models")
     parser.add_argument("--output", default="models/phase4_models.joblib")
     args = parser.parse_args()
     ensemble = Phase4MLEnsemble.train_default()
@@ -27,8 +33,10 @@ def main() -> None:
         "supervised_evaluation": evaluate_supervised(),
         "unsupervised_evaluation": evaluate_unsupervised(),
         "behaviour_evaluation": evaluate_behaviour(),
+        "semi_supervised_evaluation": evaluate_semi_supervised(),
         "training_scope": "deterministic synthetic HTTP benchmark only",
         "behaviour_model_scope": "deterministic synthetic behavioural workload",
+        "semi_supervised_scope": "deterministic synthetic HTTP benchmark with partial labels",
     }
     output.with_suffix(".json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(manifest, indent=2))
