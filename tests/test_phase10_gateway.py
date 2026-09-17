@@ -1,5 +1,3 @@
-import asyncio
-import os
 import sys
 from pathlib import Path
 
@@ -10,9 +8,9 @@ from aiohttp.test_utils import TestClient as AiohttpTestClient, TestServer
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from waf.gateway.proxy import GatewayConfig, WAFGateway
 from waf.core.config import WAFConfig
 from waf.edge.pipeline import EdgeWAF
+from waf.gateway.proxy import GatewayConfig, WAFGateway
 
 
 SECRET = "phase10-gateway-secret-" + "x" * 32
@@ -30,13 +28,14 @@ async def test_gateway_forwards_benign_and_blocks_sql():
         calls.append(request.path_qs)
         return web.Response(text="SWAVLAMBAN_UPSTREAM_REACHED")
 
-    upstream = TestServer(web.Application())
-    upstream.app.router.add_route("*", "/{path:.*}", protected)
+    upstream_app = web.Application()
+    upstream_app.router.add_route("*", "/{path:.*}", protected)
+    upstream = TestServer(upstream_app)
     await upstream.start_server()
     try:
-        config = GatewayConfig(upstream_url=str(upstream.make_url("/")), rate_limit_per_minute=100)
+        config = GatewayConfig(upstream_url=str(upstream.make_url("/")).rstrip("/"), rate_limit_per_minute=100)
         gateway = WAFGateway(_waf(), config)
-        app = web.Application(client_max_size=config.max_body_bytes)
+        app = web.Application(client_max_size=config.max_body_bytes + 1)
         app.router.add_get("/__waf_health", gateway.health)
         app.router.add_route("*", "/{path_info:.*}", gateway.handle)
         app.on_startup.append(gateway.startup)
@@ -60,11 +59,12 @@ async def test_gateway_rejects_oversized_and_rate_limited_requests():
     async def protected(request):
         return web.Response(text="SWAVLAMBAN_UPSTREAM_REACHED")
 
-    upstream = TestServer(web.Application())
-    upstream.app.router.add_route("*", "/{path:.*}", protected)
+    upstream_app = web.Application()
+    upstream_app.router.add_route("*", "/{path:.*}", protected)
+    upstream = TestServer(upstream_app)
     await upstream.start_server()
     try:
-        config = GatewayConfig(upstream_url=str(upstream.make_url("/")), max_body_bytes=8, rate_limit_per_minute=1)
+        config = GatewayConfig(upstream_url=str(upstream.make_url("/")).rstrip("/"), max_body_bytes=8, rate_limit_per_minute=2)
         gateway = WAFGateway(_waf(), config)
         app = web.Application(client_max_size=config.max_body_bytes + 1)
         app.router.add_route("*", "/{path_info:.*}", gateway.handle)
