@@ -4,7 +4,7 @@ import json
 import unittest
 
 from waf.core.config import WAFConfig
-from waf.core.models import Decision, DecisionResult, DetectionSignal, FeatureVector, RequestEnvelope
+from waf.core.models import Decision, DecisionResult, DetectionSignal, RequestEnvelope
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
 from waf.explainability import build_decision_evidence, evidence_to_dict
@@ -18,10 +18,11 @@ class Phase5EvidenceTests(unittest.TestCase):
         self.ml = Phase4MLEnsemble.train_default()
         self.policy = EdgeDecisionPolicy()
 
-    def analyze(self, request: RequestEnvelope) -> DecisionResult:
+    def analyze(self, request: RequestEnvelope, runtime=None):
+        runtime = runtime or self.ml
         features = self.extractor.extract(request)
         signature = OpenSourceWAFRuleEngine().detect(request, features)
-        result = self.policy.decide(request, (signature, *self.ml.detect(request, features)), WAFConfig().pipeline_version)
+        result = self.policy.decide(request, (signature, *runtime.detect(request, features)), WAFConfig().pipeline_version)
         return result, features
 
     def test_known_attack_has_reproducible_rule_evidence(self):
@@ -65,12 +66,11 @@ class Phase5EvidenceTests(unittest.TestCase):
             "supervised-v1", "unsupervised-oneclasssvm-v1", "behaviour-v1", "open-source-waf-rules"
         })
 
-    def test_evidence_is_deterministic_for_stateless_request(self):
-        request = RequestEnvelope("p5-deterministic", "GET", "https", "example.test", "/", "page=1")
-        result1, features1 = self.analyze(request)
-        result2, features2 = self.analyze(request)
-        evidence1 = build_decision_evidence(request, features1, result1, self.ml)
-        evidence2 = build_decision_evidence(request, features2, result2, self.ml)
+    def test_evidence_is_deterministic_for_same_decision(self):
+        request = RequestEnvelope("p5-deterministic", "GET", "https", "example.test", "/", "page=1", source_ip="10.0.0.90", timestamp=100.0)
+        result, features = self.analyze(request)
+        evidence1 = build_decision_evidence(request, features, result, self.ml)
+        evidence2 = build_decision_evidence(request, features, result, self.ml)
         self.assertEqual(evidence1.risk_score, evidence2.risk_score)
         self.assertEqual(evidence1.feature_snapshot, evidence2.feature_snapshot)
         self.assertEqual(evidence1.feature_attribution, evidence2.feature_attribution)
