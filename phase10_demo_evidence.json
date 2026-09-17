@@ -1,5 +1,5 @@
 {
-  "benchmark":{"requests":500,"mean_ms":8.7119,"max_ms":21.528,"boundary":"in-process API timing; excludes Internet-scale network/distributed load"},
+  "benchmark":{"requests":500,"mean_ms":8.709,"max_ms":21.8355,"boundary":"in-process API timing; excludes Internet-scale network/distributed load; timing varies with local runtime load"},
   "health":{"phase":10,"pipeline_version":"phase3","security_config_valid":true,"service":"swavlamban-waf-api","status":"healthy"},
   "phase":10,
   "privacy":{"raw_headers_retained":false,"raw_payload_retained":false,"raw_query_retained":false},
