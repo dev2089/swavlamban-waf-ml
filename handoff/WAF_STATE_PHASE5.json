@@ -1,0 +1,47 @@
+{
+  "project": "swavlamban-waf-ml",
+  "challenge": "Challenge 3 - ML-integrated open-source WAF",
+  "phase": 5,
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "cutoff": 9.9,
+  "authoritative_branch": "phase5-final",
+  "pull_request": 1,
+  "goal": "reproducible decision explainability and privacy-safe evidence without raw payload retention",
+  "implemented": [
+    "DecisionEvidence evidence-v1",
+    "detector-level risk contributions",
+    "feature-group attribution",
+    "human-readable explanations",
+    "rule/model/feature/dataset/pipeline provenance",
+    "privacy-safe numeric feature snapshot",
+    "live EdgeWAF evidence attachment",
+    "telemetry event-v2 evidence field",
+    "Phase 5 evidence tests",
+    "Phase 5 master exam",
+    "separate explanation-overhead benchmark",
+    "CI workflow",
+    "privacy-safe Supabase decision_evidence migration"
+  ],
+  "verification": {
+    "full_regression": "UNVERIFIED",
+    "compileall": "UNVERIFIED",
+    "phase5_tests": "UNVERIFIED",
+    "master_exam": "UNVERIFIED",
+    "overhead_benchmark": "UNVERIFIED",
+    "workflow_runs_for_head": 0
+  },
+  "phase4_baseline_preserved": {
+    "regression": "48/48 PASS",
+    "master_exam": "10.0/10.0",
+    "critical_defects": 0,
+    "artifact_sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571"
+  },
+  "remaining": [
+    "execute Phase 5 gates on a real runner",
+    "record actual Phase 5 score",
+    "record explanation overhead",
+    "apply Supabase migration when database environment is connected",
+    "continue post-Phase-5 challenge milestones"
+  ],
+  "honesty_boundary": "Implementation is complete on phase5-final. Acceptance is not marked PASS until an actual execution result exists. Overall Challenge 3 remains IN_PROGRESS."
+}

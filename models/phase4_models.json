@@ -1,0 +1,38 @@
+{
+  "model_version": "phase4-ml-v1",
+  "artifact_version": "phase4-model-v1",
+  "feature_schema": "http-v2",
+  "feature_count": 38,
+  "dataset_version": "synthetic-http-v4-s5000-seed42",
+  "baseline_version": "benign-baseline-v4-s2200-seed123",
+  "detectors": ["supervised-v1", "unsupervised-oneclasssvm-v1", "behaviour-v1"],
+  "scores_are_risk_not_probability": true,
+  "artifact": "models/phase4_models.joblib",
+  "artifact_bytes": 199123,
+  "artifact_sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571",
+  "supervised_evaluation": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "fpr": 0.0,
+    "test_samples": 1500,
+    "evaluation_scope": "deterministic synthetic HTTP benchmark only"
+  },
+  "unsupervised_evaluation": {
+    "false_positive_rate": 0.02266666666666667,
+    "attack_detection_rate": 0.898,
+    "benign_eval_samples": 750,
+    "attack_eval_samples": 3000,
+    "evaluation_scope": "deterministic synthetic HTTP benchmark only"
+  },
+  "behaviour_evaluation": {
+    "normal_max_score": 0.406313,
+    "burst_final_score": 0.980486,
+    "burst_escalated": true,
+    "normal_requests": 10,
+    "burst_requests": 40,
+    "evaluation_scope": "deterministic synthetic behavioural workload"
+  },
+  "honesty_boundary": "Synthetic metrics/workloads are reproducibility evidence only and are not real-world Internet WAF accuracy claims."
+}

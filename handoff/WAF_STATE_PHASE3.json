@@ -1,0 +1,52 @@
+{
+  "project": "swavlamban-waf-ml",
+  "challenge": "Challenge 3 - ML-integrated open-source WAF",
+  "phase": 3,
+  "phase_status": "PASS",
+  "phase_score": 10.0,
+  "cutoff": 9.9,
+  "authoritative_branch": "phase3-final",
+  "overall_project_status": "IN_PROGRESS",
+  "feature_schema": "http-v2",
+  "feature_count": 38,
+  "validation": {
+    "compileall": "PASS",
+    "full_regression": "34/34 PASS",
+    "phase3_feature_tests": "11/11 PASS",
+    "phase3_edge_tests": "2/2 PASS",
+    "feature_fuzz": "20000 requests, 0 exceptions",
+    "feature_benchmark": "100000 extractions, 33527.0 req/s",
+    "e2e_benchmark": "5000 requests, 4500 allow, 500 block, 2764.7 req/s, 1000 bounded events",
+    "static_secret_scan": "PASS",
+    "todo_noop_scan": "PASS",
+    "self_test_runner": "PASS"
+  },
+  "done": [
+    "versioned http-v2 schema",
+    "38 bounded normalized HTTP features",
+    "safe path/query URL decoding",
+    "Unicode NFKC normalization",
+    "query/header/body bounds",
+    "edge integration with v2 feature extractor",
+    "regression suite",
+    "fuzz benchmark",
+    "performance evidence",
+    "phase 3 documentation and handoff state"
+  ],
+  "left": [
+    "ModSecurity/Coraza installation verification",
+    "TLS/HTTPS termination",
+    "supervised/unsupervised/behavioural ML",
+    "explainability expansion",
+    "ML rule recommendation and approval",
+    "baseline/feedback/drift/retraining",
+    "production storage/auth/RBAC/data minimization",
+    "full load/failure testing",
+    "challenge scenarios/evidence package",
+    "dashboard migration",
+    "five-minute demo",
+    "technical docs/slides",
+    "final release gate"
+  ],
+  "honesty_boundary": "Phase 3 is complete for its defined milestone only; the overall hackathon system remains in progress."
+}

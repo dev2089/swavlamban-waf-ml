@@ -1,222 +1,71 @@
 # Swavlamban WAF ML
 
-A machine learning solution for Web Application Firewall (WAF) detection and analysis using Swavlamban framework.
+ML-augmented Web Application Firewall prototype for **Challenge 3**.
 
-## Overview
+## Current verified state
 
-This project implements machine learning models for Web Application Firewall (WAF) detection, utilizing the Swavlamban framework to identify and classify security threats in web traffic.
+- Phase 1: PASS, 10.0/10.0
+- Phase 2: PASS, 10.0/10.0
+- Phase 3: PASS, 10.0/10.0
+- Phase 4: PASS, 10.0/10.0, critical defects 0
+- Authoritative development branch: `phase4-final`
+- `main` remains untouched by milestone work
 
-## Prerequisites
+## Phase 4 ML
 
-Before you begin, ensure you have the following installed:
+The live edge uses the canonical `RequestEnvelope` + `http-v2` feature seam and consumes:
 
-- Python 3.8 or higher
-- pip (Python package manager)
-- Git
-- Virtual environment tool (venv or conda)
+1. supervised `HistGradientBoostingClassifier`;
+2. benign-only unsupervised `OneClassSVM`;
+3. learned stateful behavioural `LogisticRegression`;
+4. deterministic signature rules for known attacks.
 
-## Installation
+Model artifact: `models/phase4_models.joblib`.
 
-### 1. Clone the Repository
+## Reproducibility
 
-```bash
-git clone https://github.com/dev2089/swavlamban-waf-ml.git
-cd swavlamban-waf-ml
-```
-
-### 2. Create a Virtual Environment
-
-**Using venv:**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-**Using conda:**
-```bash
-conda create -n swavlamban-waf-ml python=3.8
-conda activate swavlamban-waf-ml
-```
-
-### 3. Install Dependencies
+Install Phase 4 dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements-phase4.txt
 ```
 
-## Configuration
-
-1. Create a `.env` file in the project root (if needed):
-```bash
-cp .env.example .env
-```
-
-2. Update the `.env` file with your configuration parameters:
-```
-LOG_LEVEL=INFO
-DATA_PATH=./data
-MODEL_PATH=./models
-```
-
-## Usage
-
-### Running the Application
+Train/refresh the model artifact:
 
 ```bash
-python main.py
+python scripts/train_phase4_models.py
 ```
 
-### Running with Configuration
+Run the full regression:
 
 ```bash
-python main.py --config config.yaml --log-level DEBUG
+python -m pytest -q
 ```
 
-### Running Tests
+Run the milestone self-test:
 
 ```bash
-python -m pytest tests/
+python phase4_self_test.py
 ```
 
-### Running with Coverage
+Run the master gate:
 
 ```bash
-python -m pytest tests/ --cov=src --cov-report=html
+python scripts/phase4_master_exam.py
 ```
 
-## Project Structure
-
-```
-swavlamban-waf-ml/
-├── README.md
-├── requirements.txt
-├── setup.py
-├── .env.example
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── waf_detector.py
-│   ├── data/
-│   │   ├── __init__.py
-│   │   └── loader.py
-│   └── utils/
-│       ├── __init__.py
-│       └── helpers.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_models.py
-│   └── test_data.py
-├── data/
-│   ├── raw/
-│   └── processed/
-└── models/
-```
-
-## Training Models
-
-To train the WAF ML models:
+Run the extended local E2E benchmark:
 
 ```bash
-python src/train.py --data data/processed --output models/
+python phase4_e2e_benchmark.py
 ```
 
-### Training Options
+## Evidence
 
-- `--data`: Path to processed training data
-- `--output`: Output directory for trained models
-- `--epochs`: Number of training epochs (default: 100)
-- `--batch-size`: Batch size for training (default: 32)
-- `--validation-split`: Validation data split ratio (default: 0.2)
+Read `handoff/START_HERE.md` first for continuation state and exact evidence locations. The project ledger in `state/project_ledger.db` is the portable execution/state database; it is separate from the future runtime WAF traffic store.
 
-## Making Predictions
+## Important honesty boundary
 
-To use trained models for predictions:
+Phase 4 ML evaluation uses deterministic synthetic HTTP data and deterministic behavioural workloads. Those metrics are reproducibility evidence only and are not claims of real-world Internet WAF accuracy or production capacity.
 
-```bash
-python src/predict.py --model models/waf_model.pkl --input data/test_data.csv
-```
-
-## Data Format
-
-Input data should be in CSV format with the following structure:
-
-```
-feature_1,feature_2,feature_3,...,feature_n,label
-value1,value2,value3,...,valuen,attack_type
-```
-
-Supported attack types:
-- SQL_INJECTION
-- XSS
-- DDOS
-- NORMAL
-- BRUTE_FORCE
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue: Module not found error**
-```bash
-# Solution: Ensure virtual environment is activated and dependencies installed
-pip install -r requirements.txt
-```
-
-**Issue: Port already in use**
-```bash
-# Solution: Change the port in configuration or kill the process using the port
-```
-
-**Issue: Data not found**
-```bash
-# Solution: Ensure data files are in the correct directory (./data/)
-```
-
-## Performance Metrics
-
-The models are evaluated using:
-
-- **Accuracy**: Overall classification accuracy
-- **Precision**: True positive rate among predicted positives
-- **Recall**: True positive rate among actual positives
-- **F1-Score**: Harmonic mean of precision and recall
-- **ROC-AUC**: Area under the receiver operating characteristic curve
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues, questions, or suggestions, please:
-
-- Open an issue on [GitHub Issues](https://github.com/dev2089/swavlamban-waf-ml/issues)
-- Contact the maintainers
-
-## Authors
-
-- dev2089
-
-## Changelog
-
-### [1.0.0] - 2025-12-25
-- Initial release
-- Basic WAF ML detection model
-- Training and prediction modules
-- Comprehensive documentation
-
----
-
-**Last Updated**: 2025-12-25
+The complete Challenge 3 submission is **not finished yet**. Remaining milestones include TLS/HTTPS handling, expanded explainability, ML-generated rule lifecycle, production baseline/feedback/drift/retraining, secure production storage/authentication, full scenario evidence, dashboard migration, the five-minute demo, submission documentation/slides and the final release gate.

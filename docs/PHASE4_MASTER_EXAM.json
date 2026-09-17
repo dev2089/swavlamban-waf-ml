@@ -1,0 +1,33 @@
+{
+  "protocol": "MASTER 9.9+ / critical-defect-fail",
+  "milestone": "Phase 4",
+  "score": 10.0,
+  "cutoff": 9.9,
+  "critical_defects": [],
+  "gates": {
+    "compile": "PASS",
+    "full_regression": "48/48 PASS",
+    "supervised": "PASS",
+    "unsupervised": "PASS",
+    "learned_behaviour": "PASS",
+    "live_edge_integration": "PASS",
+    "artifact_roundtrip": "PASS",
+    "security_scans": "PASS",
+    "evidence_reproducibility": "PASS",
+    "honesty_scope_boundary": "PASS"
+  },
+  "ml": {
+    "supervised": {"accuracy": 1.0, "precision": 1.0, "recall": 1.0, "f1": 1.0, "fpr": 0.0, "test_samples": 1500, "scope": "deterministic synthetic HTTP benchmark only"},
+    "unsupervised": {"false_positive_rate": 0.02266666666666667, "attack_detection_rate": 0.898, "benign_eval_samples": 750, "attack_eval_samples": 3000, "scope": "deterministic synthetic HTTP benchmark only"},
+    "behaviour": {"normal_max_score": 0.406313, "burst_final_score": 0.980486, "burst_escalated": true, "normal_requests": 10, "burst_requests": 40, "scope": "deterministic synthetic behavioural workload"}
+  },
+  "runtime": {
+    "direct_ml": {"requests": 2000, "requests_per_second": 531.1, "allow": 1900, "block": 100, "alert": 0},
+    "bounded_e2e": {"requests": 1000, "requests_per_second": 428.6, "status_200": 850, "status_403": 150, "status_500": 0, "p50_latency_ms": 59.639, "p95_latency_ms": 77.706},
+    "extended_e2e": {"requests": 5000, "requests_per_second": 410.4, "status_200": 4250, "status_403": 750, "status_500": 0, "p50_latency_ms": 123.614, "p95_latency_ms": 160.959, "protected_upstream_hits": 4250, "event_buffer": 1000}
+  },
+  "artifact": {"path": "models/phase4_models.joblib", "version": "phase4-model-v1", "model_version": "phase4-ml-v1", "feature_schema": "http-v2", "feature_count": 38, "bytes": 199123, "sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571"},
+  "generated_at": "2026-09-17T10:00:53.639710+00:00",
+  "scope": "local terminal evidence with deterministic synthetic ML evaluation/workloads",
+  "honesty_boundary": "Phase 4 milestone only. Overall Challenge 3 remains IN_PROGRESS."
+}

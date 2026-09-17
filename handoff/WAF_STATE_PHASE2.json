@@ -1,0 +1,53 @@
+{
+  "project": "swavlamban-waf-ml",
+  "selected_challenge": "Challenge 3 - ML-integrated open-source WAF",
+  "phase": 2,
+  "phase_status": "PASS",
+  "phase_score": 10.0,
+  "cutoff": 9.9,
+  "base_branch": "phase1-final",
+  "authoritative_branch": "phase2-final",
+  "baseline_main_commit": "1cc4f91dd6828039f834ae4dc2b466191d04f229",
+  "evidence": {
+    "python_tests": "6/6 PASS",
+    "config_from_env_regression": "PASS",
+    "nginx_config": "PASS",
+    "nginx_integration": "PASS: allow=200, block=403",
+    "compileall": "PASS",
+    "static_secret_scan": "PASS",
+    "static_dangerous_io_scan": "PASS",
+    "todo_noop_scan": "PASS",
+    "self_test": "PASS",
+    "benchmark": "5000 requests, 3477.8 req/s, 4500 allow, 500 block, 1000 bounded events",
+    "benchmark_scope": "local end-to-end Phase 2 proxy"
+  },
+  "done": [
+    "real HTTP interception",
+    "actual upstream block enforcement",
+    "benign forwarding",
+    "Nginx edge integration",
+    "URL-decoded signature inspection",
+    "request IDs and WAF decision headers",
+    "bounded request body",
+    "upstream timeout and response-size limits",
+    "Phase 2 tests, self-test, benchmark and execution log",
+    "portable project ledger with intermediate failures and fixes"
+  ],
+  "left": [
+    "separately installed ModSecurity/Coraza engine verification",
+    "TLS/HTTPS termination",
+    "production HTTP feature pipeline",
+    "supervised/unsupervised/behavioural ML",
+    "explainability expansion",
+    "ML rule recommendation and approval lifecycle",
+    "baseline/feedback/drift/controlled retraining",
+    "production storage/auth/RBAC/data minimization",
+    "telemetry/load/failure testing beyond the Phase 2 benchmark",
+    "challenge scenarios and evidence package",
+    "dashboard migration",
+    "five-minute demo",
+    "technical docs/slides",
+    "final 9.9+ release gate"
+  ],
+  "honesty_boundary": "Phase 2 is complete for its defined acceptance criteria. Nginx/live edge enforcement is verified. A separately installed ModSecurity/Coraza engine is not present in the terminal and is not claimed as verified. Overall Challenge 3 remains in progress."
+}

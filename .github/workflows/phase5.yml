@@ -1,0 +1,37 @@
+name: phase5-verification
+
+on:
+  push:
+    branches: [phase5-final]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install WAF verification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-phase4.txt pytest
+      - name: Full regression
+        run: python -m pytest -q
+      - name: Compile gate
+        run: python -m compileall -q waf tests
+      - name: Train Phase 4 model artifact for handoff
+        run: python scripts/train_phase4_models.py --output models/phase4_models.joblib
+      - name: Phase 5 master exam
+        run: python scripts/phase5_master_exam.py > phase5_master_exam_result.json
+      - name: Explanation overhead benchmark
+        run: python phase5_explainability_benchmark.py > phase5_explainability_benchmark_result.txt
+      - name: Build portable handoff archive
+        run: python scripts/build_phase5_handoff.py
+      - name: Upload portable handoff archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: waf-phase5-handoff
+          path: WAF_PHASE5_FINAL_HANDOFF.zip
+          if-no-files-found: error
+          retention-days: 30
