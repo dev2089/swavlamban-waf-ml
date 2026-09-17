@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,6 +15,7 @@ def load(name: str) -> dict:
 
 def build_pptx() -> Path:
     from pptx import Presentation
+    from pptx.dml.color import RGBColor
     from pptx.util import Inches, Pt
 
     prs = Presentation()
@@ -36,7 +36,8 @@ def build_pptx() -> Path:
     for idx, (title, body) in enumerate(slides, 1):
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         bg = slide.background.fill
-        bg.solid(); bg.fore_color.rgb = __import__('pptx').dml.color.RGBColor(248,250,252)
+        bg.solid()
+        bg.fore_color.rgb = RGBColor(248, 250, 252)
         title_box = slide.shapes.add_textbox(Inches(0.7), Inches(0.55), Inches(12), Inches(0.8))
         p = title_box.text_frame.paragraphs[0]
         p.text = f"{idx:02d}  {title}"; p.font.size = Pt(28); p.font.bold = True
@@ -51,11 +52,11 @@ def build_pptx() -> Path:
 
 
 def build_pdf() -> Path:
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import mm
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
     from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
     demo = load("phase10_demo_evidence.json")
     load_e = load("phase10_load_evidence.json")
