@@ -11,13 +11,15 @@
   "feature_count": 38,
   "validation": {
     "compileall": "PASS",
-    "phase3_tests": "10/10 PASS",
-    "full_reconstructed_regression": "20/20 PASS",
+    "full_regression": "34/34 PASS",
+    "phase3_feature_tests": "11/11 PASS",
+    "phase3_edge_tests": "2/2 PASS",
     "feature_fuzz": "20000 requests, 0 exceptions",
-    "feature_benchmark": "100000 extractions, 34854.5 req/s",
-    "e2e_benchmark": "5000 requests, 4500 allow, 500 block, 2354.3 req/s, 1000 bounded events",
+    "feature_benchmark": "100000 extractions, 40134.9 req/s",
+    "e2e_benchmark": "5000 requests, 4500 allow, 500 block, 2599.5 req/s, 1000 bounded events",
     "static_secret_scan": "PASS",
-    "todo_noop_scan": "PASS"
+    "todo_noop_scan": "PASS",
+    "self_test_runner": "PASS"
   },
   "done": [
     "versioned http-v2 schema",
