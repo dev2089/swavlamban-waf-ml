@@ -57,7 +57,7 @@ The master-exam script initially failed to import the repository package. Reposi
 - TODO/no-op scan -> **PASS**.
 
 ## Final handoff verification
-The final handoff ZIP contains the verified Phase 4 workspace, source challenge PDFs, expanded Phase 3 history, SQLite project ledger, tests, documentation, model artifact and continuation instructions. The archive was extracted into a clean directory and successfully ran 48/48 tests, compileall, master exam and self-test.
+The final handoff ZIP contains the verified Phase 4 workspace, challenge source PDFs, expanded Phase 3 history, SQLite project ledger, tests, documentation, model artifact and continuation instructions. The archive was extracted into a clean directory and successfully ran 48/48 tests, compileall, master exam and self-test.
 
 ## Honest boundary
 Phase 4 is complete for the defined milestone only. All ML evaluation data/workloads are deterministic synthetic evidence. They are not real-world Internet WAF accuracy claims. Overall Challenge 3 remains IN_PROGRESS.
