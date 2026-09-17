@@ -1,0 +1,9 @@
+[project]
+name = "waf-ml-phase1"
+version = "0.1.0"
+description = "Architecture foundation for ML-augmented WAF"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
