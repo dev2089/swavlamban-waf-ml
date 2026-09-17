@@ -1,0 +1,31 @@
+{
+  "context_prefix": "swavlamban-waf",
+  "project_id": "smpmvabjafmrutdhbfbl",
+  "project_name": "supabase-pink-village",
+  "status_at_verification": "ACTIVE_HEALTHY",
+  "initial_state": {"tables": 0, "migrations": 0},
+  "migrations_applied": [
+    "swavlamban_waf_20260112052623_create_waf_schema",
+    "swavlamban_waf_20260917101500_phase5_decision_evidence",
+    "swavlamban_waf_20260917120000_phase7_learning_control",
+    "swavlamban_waf_20260917120001_phase8_security",
+    "swavlamban_waf_20260917130000_phase8_security_hardening",
+    "swavlamban_waf_20260917150000_phase9_runtime_security",
+    "swavlamban_waf_20260917164110_phase9_privilege_remediation",
+    "swavlamban_waf_20260917164200_remove_temporary_v2_audit_surface"
+  ],
+  "verified_tables": [
+    "alerts", "analytics", "decision_evidence", "ml_models", "phase7_baselines",
+    "phase7_drift_reports", "phase7_feedback", "phase7_model_events", "phase7_model_runs",
+    "request_logs", "security_rules", "threats", "waf_runtime_events", "waf_security_audit", "waf_user_roles"
+  ],
+  "security_verification": {
+    "rls_enabled": true,
+    "anonymous_runtime_access_closed": true,
+    "runtime_writes_service_role_controlled": true,
+    "raw_request_material_constraints_applied": true,
+    "temporary_audit_verification_surface_removed": true
+  },
+  "remediation": "The Phase 8 hardening source has an audit-table schema collision with the earlier Phase 8 security migration. Live application used a temporary v2 audit surface solely to avoid overwriting the established audit schema; that surface was dropped before completion. The required privilege remediation was then recorded as a tracked migration.",
+  "honesty_boundary": "This checkpoint verifies live Supabase schema/RLS/privileges only. It does not prove public HTTPS, ModSecurity/Coraza, Internet-scale load behavior, dashboard UX, demo recording, or final submission readiness."
+}
