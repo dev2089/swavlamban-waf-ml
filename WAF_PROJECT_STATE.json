@@ -15,6 +15,13 @@
     "conclusion": "success",
     "verified_at": "2026-09-17T10:31:07Z"
   },
+  "documentation_reverification_run": {
+    "workflow": "phase5-verification",
+    "run_id": 35211601235,
+    "run_number": 23,
+    "conclusion": "success",
+    "head_commit": "9cd4a306cb5482cf3697df85b10b8228e27fa061"
+  },
   "validation": {
     "phase4_full_regression": "48/48 PASS",
     "phase4_master_exam": "10/10; critical defects 0",
@@ -25,20 +32,32 @@
     "phase5_evidence_tests": "8/8 PASS",
     "phase5_master_exam": "10.0/10.0; cutoff 9.9; critical defects 0",
     "phase5_explanation_overhead": {
-      "samples": 100,
-      "core_mean_ms": 1.742,
-      "explanation_mean_ms": 9.778,
-      "explanation_overhead_percent_of_core": 561.4,
-      "scope": "local deterministic benchmark; not a production latency claim"
+      "standalone_final_run": {
+        "samples": 100,
+        "core_mean_ms": 1.742,
+        "explanation_mean_ms": 9.778,
+        "explanation_overhead_percent_of_core": 561.4
+      },
+      "master_exam_embedded": {
+        "core_mean_ms": 2.376,
+        "explanation_mean_ms": 3.965,
+        "explanation_overhead_percent_of_core": 166.89
+      },
+      "other_ci_captured_standalone": {
+        "core_mean_ms": 2.506,
+        "explanation_mean_ms": 4.205,
+        "explanation_overhead_percent_of_core": 167.81
+      },
+      "scope": "local deterministic workload benchmark; timing is environment-dependent and not a production latency claim"
     },
     "phase5_privacy_static_gate": "PASS",
-    "portable_handoff_archive": {
+    "portable_handoff_artifact_final_download": {
+      "workflow_run": 35211601235,
       "artifact_name": "waf-phase5-handoff",
-      "artifact_id": 10490889663,
-      "zip_size_uploaded_bytes": 232051,
-      "zip_sha256": "3491f7624e96ebacb88f539ebb5bb1634bbf2d9aeb9a819ecc00fbde09d46734",
-      "source_handoff_bytes_before_upload": 241237,
-      "source_commit": "51fe08e1ec3421ee1d00fc48a4080013d43b46fd"
+      "artifact_id": 10492127391,
+      "outer_artifact_zip_bytes": 235848,
+      "outer_artifact_zip_sha256": "845ae812af9eff62eed07b9b8374489f1e927e4be6b2997aa6f881d7aae32f40",
+      "inner_handoff_zip_size_bytes": 245396
     }
   },
   "done": [
@@ -61,7 +80,9 @@
     "Phase 5 explanation-overhead benchmark",
     "Phase 5 privacy-safe Supabase evidence migration",
     "real GitHub Actions verification executed successfully",
-    "reproducible Phase 5 final handoff archive built and uploaded"
+    "final executed Phase 5 test report",
+    "reproducible Phase 5 final handoff archive built and uploaded",
+    "future-chat START_HERE documentation synchronized with verified state"
   ],
   "left": [
     "Apply the Phase 5 Supabase migration to the actual connected runtime database; migration is committed but was not executed against a live database in this run",
@@ -78,7 +99,7 @@
     "technical docs/slides",
     "final release gate"
   ],
-  "honesty_boundary": "Phase 5 implementation and milestone verification are complete and verified at 10.0/10.0 on GitHub Actions run 35210837101. The explanation-overhead number is explicitly a local deterministic benchmark, not a production latency claim. ML evaluation metrics remain deterministic synthetic benchmark evidence and are not real-world Internet WAF accuracy claims. The database migration is prepared in-repository but has not been claimed as applied to a live Supabase database because no live database execution result is available in this workflow.",
-  "next_phase_entrypoint": "Use the portable WAF_PHASE5_FINAL_HANDOFF.zip, read handoff/START_HERE.md first, then handoff/WAF_PHASE5_LOG.md and handoff/PHASE5_FINAL_STATUS.json. Preserve phase5-final as the authoritative branch until release decisions are made.",
-  "last_updated": "2026-09-17T10:36:00Z"
+  "honesty_boundary": "Phase 5 implementation and milestone verification are complete and verified at 10.0/10.0 on GitHub Actions run 35210837101. Documentation-only changes were also re-executed successfully on run 35211601235. The explanation-overhead measurements are local timing benchmarks and differ across runner executions; none is a production latency claim. ML evaluation metrics remain deterministic synthetic benchmark evidence and are not real-world Internet WAF accuracy claims. The database migration is prepared in-repository but has not been claimed as applied to a live Supabase database because no live database execution result is available in this workflow.",
+  "next_phase_entrypoint": "Use the final WAF_PHASE5_FINAL_HANDOFF.zip package, read handoff/START_HERE.md first, then WAF_PROJECT_STATE.json, handoff/PHASE5_FINAL_STATUS.json and handoff/WAF_PHASE5_LOG.md. Preserve phase5-final as the authoritative branch until release decisions are made.",
+  "last_updated": "2026-09-17T10:40:00Z"
 }
