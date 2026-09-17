@@ -40,8 +40,10 @@ class Phase4MLEnsemble:
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        if "behaviour" not in payload:
-            raise ValueError("model artifact missing learned behavioural component")
+        if "supervised" not in payload or "anomaly" not in payload or "behaviour" not in payload:
+            raise ValueError("model artifact missing one or more required detector components")
+        if not payload.get("feature_names"):
+            raise ValueError("model artifact missing feature manifest")
         return cls(
             payload["supervised"],
             payload["anomaly"],
@@ -185,8 +187,10 @@ def _cached_stateless_components(
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        if "behaviour" not in payload:
-            raise ValueError("model artifact missing learned behavioural component")
+        if "supervised" not in payload or "anomaly" not in payload or "behaviour" not in payload:
+            raise ValueError("model artifact missing one or more required detector components")
+        if not payload.get("feature_names"):
+            raise ValueError("model artifact missing feature manifest")
         return (
             payload["supervised"],
             payload["anomaly"],
