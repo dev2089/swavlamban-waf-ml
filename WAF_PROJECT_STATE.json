@@ -5,13 +5,43 @@
   "phase_status": "COMPLETE_VERIFIED",
   "phase_score": 10.0,
   "cutoff": 9.9,
-  "overall_status": "PHASE8_COMPLETE_NEXT_RELEASE_WORK_REMAINS",
+  "critical_defects": 0,
   "authoritative_branch": "phase8-final",
-  "validation": {"phase8_full_regression":"71/71 PASS","phase8_focused_tests":"7/7 PASS","phase8_compileall":"PASS","phase7_focused_regression":"5/5 PASS","phase8_master_exam":"10.0/10.0; cutoff 9.9; critical defects 0","storage_privacy_retention":"PASS; durable local adapter rejects raw HTTP fields and purges expired records","authentication":"PASS; signed short-lived auth-v1 tokens with tamper and expiry checks","rbac":"PASS; explicit role/action permissions for rule/model lifecycle","secrets":"PASS; environment-only provider rejects missing/weak/placeholders","supabase_migration_contract":"PASS static; RLS/RBAC/legacy raw-table seal and retention function present","default_runtime_model":"UNCHANGED by Phase 7; no Phase 8 control bypasses human promotion"},
-  "implementation": {"storage_schema":"storage-v1","auth_schema":"auth-v1","roles":["viewer","analyst","rule_approver","model_approver","admin"],"runtime_storage":"waf.storage.persistent.SQLiteSecurityStore","production_storage_contract":"supabase/migrations/20260917130000_phase8_security_hardening.sql","retention_days_default":30,"production_requires":["persistent storage","authentication"],"phase7_preserved":["human promotion","no automatic runtime model replacement","raw request excluded from learning-control evidence"]},
-  "done":["Phase 7 continuation baseline read and preserved","durable structured runtime evidence storage reference adapter","authenticated signed actor-token contract","role-aware rule/model control-plane authorization","environment-only secret handling and source redaction","production configuration hardening","raw request data minimization and retention cleanup","Supabase/Postgres RLS/RBAC migration contract and legacy raw-table seal","Phase 8 tests, master exam, ledger and portable handoff","historical Phase 1-7 handoff continuity"],
-  "left":["live Supabase application/migration","hosted identity-provider integration","ModSecurity/Coraza verification","TLS/HTTPS deployment verification","telemetry, load/performance and failure testing","challenge-specific scenario evidence","dashboard migration","deterministic five-minute demo","technical documentation/slides/report","final release-candidate gate"],
-  "artifacts":{"phase8_master_exam":"phase8_master_exam_result.json","phase8_migration":"supabase/migrations/20260917130000_phase8_security_hardening.sql","sqlite_ledger":"state/project_ledger.db","portable_sql_ledger":"state/phase8_ledger.sql","portable_handoff":"WAF_PHASE8_FINAL_HANDOFF.zip"},
-  "honesty_boundary":"Phase 8 is verified on executable local security/storage controls and a statically contract-tested Postgres migration. It does not claim live Supabase application, hosted identity integration, production TLS, ModSecurity/Coraza deployment, production load/failure validation, or final challenge completion.",
-  "next_phase_entrypoint":"Read handoff/START_HERE.md, handoff/PHASE8_FINAL_STATUS.json, handoff/WAF_PHASE8_LOG.md and state/project_ledger.db before continuing."
+  "overall_status": "PHASE8_COMPLETE_RELEASE_WORK_REMAINS",
+  "validation": {
+    "phase8_full_regression": "70/70 PASS",
+    "phase8_security_tests": "6/6 PASS",
+    "phase8_compileall": "PASS",
+    "phase8_static_contract": "PASS",
+    "phase8_master_exam": "10.0/10.0; cutoff 9.9; critical defects 0",
+    "phase8_ci": "NOT_OBSERVED through connected GitHub Actions query",
+    "phase8_first_failure_and_remediation": "5/6 focused initially due case-sensitive service_role assertion; assertion corrected; final 6/6",
+    "phase7_continuity": "64/64 PASS; preserved"
+  },
+  "implemented": [
+    "signed short-lived bearer authentication",
+    "explicit viewer/operator/reviewer/admin RBAC",
+    "reviewer-gated model/rule approvals and admin-only management permissions",
+    "fail-closed production secret/HTTPS/CORS/token configuration checks",
+    "privacy-safe audit record and standard response security headers",
+    "Supabase role/audit schema with RLS, helper functions, grants and anonymous-access revocation",
+    "dedicated Phase 8 master exam and security tests",
+    "portable SQLite/SQL ledger and future-chat handoff"
+  ],
+  "left": [
+    "live Supabase migration/application execution",
+    "production FastAPI endpoint authentication/authorization wiring and deployment verification",
+    "ModSecurity/Coraza verification",
+    "TLS/HTTPS external deployment verification",
+    "full load/performance/failure testing",
+    "challenge-specific scenario evidence",
+    "dashboard migration",
+    "five-minute deterministic demo",
+    "technical documentation/slides/report",
+    "final release-candidate gate"
+  ],
+  "database": {"sqlite":"state/project_ledger.db","portable_sql":"state/phase8_ledger.sql"},
+  "handoff": {"archive":"WAF_PHASE8_FINAL_HANDOFF.zip","sha256":"071472dc87de9e006583e7103385443e8a509e448324f4bca9ad905a78a6c4b9","files":187,"bytes":446311},
+  "honesty_boundary": "Phase 8 is verified on deterministic repository-local workloads. It does not claim live Supabase deployment, production endpoint deployment, external TLS/HTTPS or ModSecurity/Coraza verification, production-scale load/failure validation, or final Challenge 3 completion.",
+  "next_phase_entrypoint": "Read handoff/START_HERE.md, this file, handoff/PHASE8_FINAL_STATUS.json, handoff/WAF_PHASE8_LOG.md and state/project_ledger.db before continuing."
 }
