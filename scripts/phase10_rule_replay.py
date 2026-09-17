@@ -40,6 +40,14 @@ def main() -> int:
     if not validation.valid:
         raise AssertionError(validation.errors)
 
+    # Replay against the actual active managed ruleset. Validation alone only
+    # moves the rule to pending_approval, so explicitly exercise the required
+    # approval + deployment lifecycle before asking the matcher to match it.
+    waf.rule_lifecycle.approve(rule.rule_id, "phase10-ci")
+    deployment = waf.rule_lifecycle.deploy_approved()
+    if rule.rule_id not in deployment["active_rule_ids"]:
+        raise AssertionError("validated rule was not activated by deployment")
+
     positive = RequestEnvelope("phase10-positive", "GET", "https", "replay.example", "/search", "q=select * from users")
     negative = RequestEnvelope("phase10-negative", "GET", "https", "replay.example", "/search", "q=hello-world")
     pos_features = extractor.extract(positive)
@@ -56,6 +64,8 @@ def main() -> int:
         "source": rule.source,
         "source_detector": rule.source_detector,
         "validation": {"valid": validation.valid, "errors": list(validation.errors)},
+        "approval": {"approved": True, "approved_by": "phase10-ci"},
+        "deployment": deployment,
         "positive_example": {"query_profile": "sql-like-select", "matched": matches_positive},
         "negative_example": {"query_profile": "benign", "matched": matches_negative},
         "decision_source_request": result.request_id,
