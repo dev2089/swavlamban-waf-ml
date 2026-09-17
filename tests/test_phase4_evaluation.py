@@ -3,7 +3,7 @@ from __future__ import annotations
 from waf.core.config import WAFConfig
 from waf.core.models import Decision, RequestEnvelope
 from waf.edge.pipeline import EdgeWAF
-from waf.ml.ensemble import evaluate_behaviour, evaluate_supervised, evaluate_unsupervised
+from waf.ml.ensemble import evaluate_behaviour, evaluate_semi_supervised, evaluate_supervised, evaluate_unsupervised
 
 
 def test_supervised_eval_has_explicit_metrics_and_scope():
@@ -11,6 +11,16 @@ def test_supervised_eval_has_explicit_metrics_and_scope():
     assert result["evaluation_scope"] == "deterministic synthetic HTTP benchmark only"
     assert result["test_samples"] == 1500
     assert result["f1"] >= 0.95
+    assert 0.0 <= result["fpr"] <= 1.0
+
+
+def test_semi_supervised_eval_uses_partial_labels_and_has_explicit_metrics():
+    result = evaluate_semi_supervised(seed=19)
+    assert result["evaluation_scope"] == "deterministic synthetic HTTP benchmark with partial labels"
+    assert 0.0 < result["labeled_fraction"] < 1.0
+    assert result["unlabeled_samples"] > 0
+    assert result["test_samples"] == 1500
+    assert result["f1"] >= 0.90
     assert 0.0 <= result["fpr"] <= 1.0
 
 
