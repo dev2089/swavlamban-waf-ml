@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from queue import Full, Queue
-from threading import Event, Lock, Thread
+from queue import Full, Empty, Queue
+from threading import Lock, Thread
 from typing import Any, Mapping
 
 
@@ -21,7 +21,7 @@ class AsyncTelemetryDispatcher:
             raise ValueError("max_queue must be positive")
         self.store = store
         self.queue: Queue[_Task | None] = Queue(maxsize=max_queue)
-        self.stop = Event()
+        self._closed = False
         self._thread: Thread | None = None
         self._lock = Lock()
         self._dropped = 0
@@ -29,9 +29,10 @@ class AsyncTelemetryDispatcher:
         self._last_error = ""
 
     def _ensure_started(self) -> None:
+        if self._closed:
+            raise RuntimeError("telemetry dispatcher is closed")
         if self._thread is not None and self._thread.is_alive():
             return
-        self.stop.clear()
         self._thread = Thread(target=self._worker, name="waf-telemetry", daemon=True)
         self._thread.start()
 
@@ -64,14 +65,18 @@ class AsyncTelemetryDispatcher:
             return False
 
     def _worker(self) -> None:
-        while not self.stop.is_set():
+        while True:
             try:
                 task = self.queue.get(timeout=0.25)
-            except Exception:
+            except Empty:
+                with self._lock:
+                    closed = self._closed
+                if closed and self.queue.empty():
+                    return
                 continue
             if task is None:
                 self.queue.task_done()
-                break
+                return
             try:
                 if task.kind == "decision":
                     self.store.record_decision(**task.payload)
@@ -87,13 +92,24 @@ class AsyncTelemetryDispatcher:
                 self.queue.task_done()
 
     def close(self, timeout: float = 2.0) -> None:
-        self.stop.set()
+        with self._lock:
+            if self._closed:
+                return
+            self._closed = True
         if self._thread is not None and self._thread.is_alive():
             try:
                 self.queue.put_nowait(None)
             except Full:
-                pass
+                # Worker will drain existing tasks and then exit once the queue is empty.
+                self._thread.join(timeout=timeout)
+                return
             self._thread.join(timeout=timeout)
+
+    def flush(self, timeout: float = 2.0) -> bool:
+        deadline = __import__("time").monotonic() + timeout
+        while self.queue.unfinished_tasks and __import__("time").monotonic() < deadline:
+            __import__("time").sleep(0.01)
+        return self.queue.unfinished_tasks == 0
 
     def stats(self) -> dict[str, int | str]:
         with self._lock:
