@@ -7,7 +7,6 @@ request path has no synchronous database dependency.
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import time
 import uuid
@@ -36,17 +35,17 @@ class GatewayConfig:
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "GatewayConfig":
         e = os.environ if env is None else env
-        upstream = e.get("WAF_UPSTREAM_URL", cls.upstream_url).rstrip("/")
+        upstream = e.get("WAF_UPSTREAM_URL", "http://127.0.0.1:9000").rstrip("/")
         if not upstream.startswith(("http://", "https://")):
             raise ValueError("WAF_UPSTREAM_URL must use http:// or https://")
         values = {
             "upstream_url": upstream,
-            "listen_host": e.get("WAF_GATEWAY_HOST", cls.listen_host),
-            "listen_port": int(e.get("WAF_GATEWAY_PORT", str(cls.listen_port))),
-            "request_timeout_seconds": float(e.get("WAF_REQUEST_TIMEOUT_SECONDS", str(cls.request_timeout_seconds))),
-            "max_body_bytes": int(e.get("WAF_MAX_BODY_BYTES", str(cls.max_body_bytes))),
-            "max_response_bytes": int(e.get("WAF_MAX_RESPONSE_BYTES", str(cls.max_response_bytes))),
-            "rate_limit_per_minute": int(e.get("WAF_RATE_LIMIT_PER_MINUTE", str(cls.rate_limit_per_minute))),
+            "listen_host": e.get("WAF_GATEWAY_HOST", "127.0.0.1"),
+            "listen_port": int(e.get("WAF_GATEWAY_PORT", "18081")),
+            "request_timeout_seconds": float(e.get("WAF_REQUEST_TIMEOUT_SECONDS", "10.0")),
+            "max_body_bytes": int(e.get("WAF_MAX_BODY_BYTES", "1048576")),
+            "max_response_bytes": int(e.get("WAF_MAX_RESPONSE_BYTES", "10485760")),
+            "rate_limit_per_minute": int(e.get("WAF_RATE_LIMIT_PER_MINUTE", "120")),
         }
         if not 1 <= values["listen_port"] <= 65535:
             raise ValueError("WAF_GATEWAY_PORT must be in [1, 65535]")
@@ -217,4 +216,5 @@ def create_gateway_app(*, env: dict[str, str] | None = None) -> web.Application:
 
 if __name__ == "__main__":
     app = create_gateway_app()
-    web.run_app(app, host=GatewayConfig.from_env().listen_host, port=GatewayConfig.from_env().listen_port)
+    config = GatewayConfig.from_env()
+    web.run_app(app, host=config.listen_host, port=config.listen_port)
