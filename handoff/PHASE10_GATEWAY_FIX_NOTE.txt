@@ -1,0 +1,1 @@
+gateway fix uses explicit dataclass defaults
