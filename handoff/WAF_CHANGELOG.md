@@ -1,35 +1,51 @@
-# Change Log
+# WAF Change Log
 
 ## Cycle 0
-- Challenge 3 locked after the documented comparison.
+- Challenge 3 locked after documented comparison.
 - Baseline main commit recorded: `1cc4f91dd6828039f834ae4dc2b466191d04f229`.
 - Prototype/production gap and major ML, WAF, security and documentation mismatches recorded.
 
 ## Phase 1
-- Added dependency-light `waf/` security core and tests.
-- Added architecture, state and handoff documentation.
-- Added portable SQLite project ledger.
-- Local validation: compileall PASS, 13/13 tests PASS, static scans PASS, mixed fuzz benchmark PASS.
-- Phase 1 gate: 10.0/10.0.
+- Added dependency-light canonical security core and tests.
+- Added architecture/state/handoff documentation and portable SQLite ledger.
+- Gate: 10.0/10.0.
 
 ## Phase 2
-- Added live HTTP enforcement path and Nginx integration.
-- Added deterministic URL-decoded SQLi, XSS, traversal and command-injection signatures.
-- Added real pre-forwarding block enforcement with HTTP 403.
-- Added bounded request/response sizes, timeout handling, request IDs and WAF decision headers.
-- Phase 2 gate: 10.0/10.0 for its acceptance criteria.
+- Added live HTTP reverse-proxy enforcement and Nginx integration.
+- Added deterministic URL-decoded SQLi/XSS/traversal/command signatures.
+- Added actual pre-forwarding HTTP 403 enforcement, bounds, timeout handling and WAF headers.
+- Gate: 10.0/10.0 for Phase 2 acceptance criteria.
 
 ## Phase 3
-- Added production `http-v2` HTTP feature pipeline with 38 bounded normalized features.
-- Added safe path/query-specific URL decoding, NFKC normalization, query limits, header normalization and body scan limits.
-- Switched edge WAF and compatibility extractor to v2 and updated regression tests.
-- Added comprehensive feature, fuzz, benchmark and live-edge evidence.
-- Initial cycle failed on a list/ratio TypeError and an over-specific Unicode-path expectation; both were diagnosed and fixed.
-- Follow-up header-boundary test exposed unbounded header iteration; normalized header processing was capped at 128 and retested.
-- Final Phase 3 evidence: full regression 34/34 PASS; feature fuzz 20,000 requests/0 exceptions; latest feature benchmark 100,000 extractions at 33,527.0 req/s; latest E2E 5,000 requests at 2,764.7 req/s with 4,500 allow, 500 block and 1,000 bounded events.
-- Phase 3 gate: 10.0/10.0 for its acceptance criteria.
+- Added `http-v2` with 38 bounded normalized HTTP features.
+- Added safe decoding, Unicode normalization and malformed-input handling.
+- Added feature fuzz/performance/live-edge evidence and regression coverage.
+- Gate: 10.0/10.0 for Phase 3 acceptance criteria.
+
+## Phase 4
+- Added supervised `HistGradientBoostingClassifier`.
+- Added benign-only `OneClassSVM` anomaly detection with learned benign threshold.
+- Rebuilt behavioural detector as learned `LogisticRegression` over stateful burst/churn features.
+- Expanded benign training baseline variation to reduce false positives.
+- Persisted all three model components in a versioned artifact.
+- Added artifact completeness validation, immutable-model caching and fresh per-edge behavioural state.
+- Added supervised/unsupervised/behavioural evaluation, artifact round-trip, live-edge and master-exam gates.
+- Added extended 5,000-request E2E evidence.
+- Added artifact/environment tables to the portable project ledger.
+- Preserved all failed cycles and remediation decisions in the phase log and test ledger.
+- Final Phase 4 gate: 10.0/10.0 with 0 critical defects.
+
+## Final verification refresh
+- Regenerated the authoritative Phase 4 model manifest after learned-behaviour hardening.
+- Re-ran full regression: 48/48 PASS.
+- Re-ran master exam: 10.0/10.0, critical defects 0.
+- Latest mandatory direct ML benchmark: 2,000 requests, 531.1 req/s, 1,900 allow, 100 block.
+- Latest bounded E2E: 1,000 requests, 428.6 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors.
+- Latest extended E2E: 5,000 requests, 410.4 req/s, 4,250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms.
+- Handoff smoke test from the final ZIP: 48/48 regression PASS, compileall PASS, master exam PASS and self-test PASS.
 
 ## Important boundary
 - Main branch remains untouched by milestone work.
-- ModSecurity/Coraza installation, TLS, production ML, behavioural learning, production storage/auth, dashboard, complete scenario evidence, demo and final release remain open.
-- Overall Challenge 3 remains in progress.
+- Synthetic metrics are not real-world accuracy claims.
+- ModSecurity/Coraza verification, TLS, optional semi-supervised evidence, explainability, rule lifecycle, controlled retraining, production storage/auth, dashboard, final demo and release remain open.
+- Overall Challenge 3 remains IN_PROGRESS.
