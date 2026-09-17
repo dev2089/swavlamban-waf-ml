@@ -7,7 +7,7 @@
   "cutoff":9.9,
   "critical_defects":0,
   "authoritative_branch":"phase10-final",
-  "release_candidate_commit":"902c0b6d1b2ba265bd1362d2080f6350aad83763",
+  "release_candidate_commit":"983f779f169b62784e180cccfc4586a80b13b47a",
   "overall_status":"PHASE10_COMPLETE_RELEASE_CANDIDATE_EXTERNAL_SUBMISSION_WORK_REMAINS",
   "validation":{
     "phase10_local_full_regression":"78/78 PASS",
@@ -19,8 +19,8 @@
     "live_supabase":"ACTIVE_HEALTHY; complete WAF migration chain and Phase 10 database controls applied and verified",
     "supabase_security_advisors":"0 lints after search_path hardening",
     "supabase_performance_advisors":"only fresh-schema unused-index INFO notices after RLS/FK remediation",
-    "local_demo_benchmark":"500 requests; mean 8.7569 ms; max 35.8317 ms; in-process boundary",
-    "github_actions":"not used as proof; CI status remains separately recorded if unavailable"
+    "local_demo_benchmark":"500 requests; mean 8.7090 ms; max 21.8355 ms; in-process boundary; timing is environment-dependent",
+    "github_actions":"NOT_OBSERVED; no Phase 10 CI pass claimed"
   },
   "live_supabase_project":"smpmvabjafmrutdhbfbl",
   "live_supabase_name":"supabase-pink-village",
@@ -53,7 +53,7 @@
     "final submission checklist/upload"
   ],
   "database":{"portable_sql":"state/phase10_ledger.sql","live_project":"smpmvabjafmrutdhbfbl"},
-  "handoff":{"archive":"WAF_PHASE10_FINAL_HANDOFF.zip","sha256":"","bytes":null,"files":null},
+  "handoff":{"archive":"WAF_PHASE10_FINAL_HANDOFF.zip","sha256":"see external sidecar WAF_PHASE10_FINAL_HANDOFF.sha256","files":"see handoff/PHASE10_ARCHIVE_MANIFEST.json","bytes":"see handoff/PHASE10_ARCHIVE_MANIFEST.json"},
   "honesty_boundary":"Repository/local deterministic verification plus live Supabase schema/RLS/privilege verification are complete. External certificate/public HTTPS operations, ModSecurity/Coraza, Internet-scale distributed testing and venue-specific submission operations remain explicitly unverified/open.",
-  "next_phase_entrypoint":"Read this file, handoff/START_HERE.md, handoff/PHASE10_FINAL_STATUS.md, handoff/WAF_PHASE10_LOG.md, phase10_master_exam_result.json, phase10_demo_evidence.json and state/phase10_ledger.sql before continuing."
+  "next_phase_entrypoint":"Read this file, handoff/START_HERE.md, handoff/PHASE10_FINAL_STATUS.md, handoff/WAF_PHASE10_LOG.md, phase10_master_exam_result.json, phase10_demo_evidence.json, handoff/PHASE10_SUPABASE_LIVE_VERIFICATION.json and state/phase10_ledger.sql before continuing."
 }
