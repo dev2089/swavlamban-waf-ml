@@ -26,4 +26,33 @@
 - Static secret-like scan -> PASS.
 - New Phase 3 TODO/FIXME/pass-only scan -> PASS.
 
-All measurements are local terminal evidence and are not production capacity guarantees.
+## Phase 4
+- Stale model artifact cycle -> FAIL; fixed by artifact regeneration and complete-component validation.
+- Narrow benign baseline cycle -> FAIL; fixed by broadening benign workload variation and retraining.
+- Oversized mandatory self-test -> FAIL by execution-time boundary; fixed by bounded mandatory gate plus separate extended benchmark.
+- Learned-behaviour artifact integration -> FAIL; fixed by persisting the learned behavioural component.
+- Behavioural serialization -> FAIL because thread lock/window runtime state was not pickle-safe; fixed with explicit serialization state.
+- Behavioural state isolation/name regression -> FAIL; fixed by fresh per-edge state and stable `behaviour-v1` name.
+- Master-exam import-path cycle -> FAIL; fixed by repository-root path setup.
+- `python -m pytest -q` -> **48/48 PASS**.
+- `python -m compileall -q waf tests` -> **PASS**.
+- `python scripts/phase4_master_exam.py` -> **PASS, 10.0/10.0, 0 critical defects**.
+- `python phase4_self_test.py` -> **PASS**.
+- Supervised: accuracy 1.0, precision 1.0, recall 1.0, F1 1.0, FPR 0.0, n=1500; synthetic only.
+- Unsupervised: FPR 0.0227, attack detection 0.8980, benign n=750, attack n=3000; synthetic only.
+- Learned behaviour: normal max 0.406313, burst final 0.980486, escalation=true; synthetic workload only.
+- Direct ML final: 2,000 requests, 531.1 req/s, 1,900 allow, 100 block, 0 alert.
+- Mandatory bounded E2E final: 1,000 requests, 428.6 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 59.639 ms, p95 77.706 ms.
+- Extended E2E final: 5,000 requests, 410.4 req/s, 4,250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4,250 protected-upstream hits, 1,000 bounded events.
+- Static secret-like scan -> PASS.
+- TODO/no-op scan -> PASS.
+- Artifact SHA-256 -> `bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571`.
+
+## Final handoff smoke test
+- Final ZIP extracted into an isolated directory.
+- `python -m pytest -q` -> **48/48 PASS**.
+- `python -m compileall -q waf tests` -> **PASS**.
+- `python scripts/phase4_master_exam.py` -> **PASS**.
+- `python phase4_self_test.py` -> **PASS**.
+
+All measurements are local terminal evidence and are not production-capacity guarantees or real-world WAF accuracy claims.
