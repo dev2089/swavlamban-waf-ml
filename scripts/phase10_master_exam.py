@@ -1,41 +1,141 @@
-"""Hard-gated Phase 10 release-candidate exam."""
+"""Strict Phase 10 release gate.
+
+The gate is intentionally binary: every executable acceptance check must pass.
+A score below 100% or any critical failure is a release failure. External limits
+are recorded separately and are never relabeled as measured capabilities.
+"""
 from __future__ import annotations
 
 import json
+import os
+import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
+from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def run(label: str, command: list[str]) -> dict[str, object]:
-    completed = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
-    return {"label": label, "ok": completed.returncode == 0, "returncode": completed.returncode, "stdout_tail": completed.stdout[-3000:], "stderr_tail": completed.stderr[-3000:]}
+
+def run(label: str, command: list[str], env: dict[str, str] | None = None) -> dict[str, object]:
+    proc = subprocess.run(command, cwd=ROOT, env=env, text=True, capture_output=True)
+    return {"id": label, "command": " ".join(command), "result": "PASS" if proc.returncode == 0 else "FAIL", "returncode": proc.returncode, "stdout": proc.stdout[-6000:], "stderr": proc.stderr[-6000:]}
+
+
+def wait(url: str, timeout: float = 15.0) -> None:
+    deadline = time.time() + timeout
+    last = None
+    while time.time() < deadline:
+        try:
+            with urlopen(url, timeout=1) as response:
+                if response.status < 500:
+                    return
+        except Exception as exc:
+            last = exc
+        time.sleep(0.25)
+    raise RuntimeError(f"service not ready: {url}: {last}")
+
+
+def write_runtime_reports() -> None:
+    handoff = ROOT / "handoff"
+    demo = json.loads((ROOT / "phase10_demo_evidence.json").read_text(encoding="utf-8"))
+    load = json.loads((ROOT / "phase10_load_evidence.json").read_text(encoding="utf-8"))
+    tls = json.loads((ROOT / "phase10_tls_evidence.json").read_text(encoding="utf-8"))
+    waf = json.loads((ROOT / "phase10_waf_enforcement_evidence.json").read_text(encoding="utf-8"))
+    replay = json.loads((ROOT / "phase10_rule_replay_evidence.json").read_text(encoding="utf-8"))
+    (handoff / "PHASE10_PERFORMANCE_BENCHMARK.md").write_text(
+        "# Phase 10 Performance Benchmark\n\n"
+        f"The deterministic in-process demo measured 500 requests with mean {demo['benchmark']['mean_ms']} ms and max {demo['benchmark']['max_ms']} ms.\n\n"
+        "The configurable network load harness measured:\n\n"
+        f"- concurrency: {load['concurrency']}\n- requested rate: {load['requested_rate_per_second']} req/s\n"
+        f"- attempted: {load['requests_attempted']}\n- achieved: {load['achieved_requests_per_second']} req/s\n"
+        f"- p50: {load['latency_ms']['p50']} ms\n- p95: {load['latency_ms']['p95']} ms\n- p99: {load['latency_ms']['p99']} ms\n- errors: {load['error_count']} ({load['error_rate']})\n\n"
+        "These are bounded local measurements. No Internet-scale result is claimed.\n",
+        encoding="utf-8",
+    )
+    (handoff / "PHASE10_ML_EVALUATION.md").write_text(
+        "# Phase 10 ML Evaluation\n\n"
+        "The runtime includes supervised, unsupervised and behavioural detectors over a versioned synthetic HTTP dataset.\n\n"
+        f"Rule replay: `{replay['rule_id']}` validated={replay['validation']['valid']}; positive={replay['positive_example']['matched']}; negative={replay['negative_example']['matched']}.\n\n"
+        "Metric generators are executable in `waf/ml/ensemble.py`; synthetic results are explicitly scoped and are not field-accuracy claims.\n",
+        encoding="utf-8",
+    )
+    (handoff / "PHASE10_RELIABILITY_REPORT.md").write_text(
+        "# Phase 10 Reliability Report\n\n"
+        "Executable checks cover malformed/authenticated requests, request-size limits, rate limiting, upstream failure handling, bounded asynchronous telemetry, WebSocket authentication and process startup/cleanup.\n\n"
+        f"HTTPS: allow={tls['https_allow_status']}; SQL block={tls['https_sql_block_status']}; blocked reached upstream={tls['https_block_reached_upstream']}.\n\n"
+        f"ModSecurity: connector={waf['nginx_modsecurity_connector']}; SQL blocked={waf['sql_blocked_at_waf']}; blocked reached upstream={waf['blocked_request_reached_upstream']}.\n",
+        encoding="utf-8",
+    )
+
 
 def main() -> int:
-    checks = [
-        run("full_regression", [sys.executable, "-m", "pytest", "-q"]),
-        run("compile", [sys.executable, "-m", "compileall", "-q", "waf", "tests", "scripts"]),
-        run("phase10_demo", [sys.executable, "scripts/phase10_demo.py"]),
+    checks: list[dict[str, object]] = []
+    checks.append(run("full_regression", [sys.executable, "-m", "pytest", "-q"]))
+    checks.append(run("compile", [sys.executable, "-m", "compileall", "-q", "waf", "tests", "scripts"]))
+    checks.append(run("demo", [sys.executable, "scripts/phase10_demo.py"]))
+    checks.append(run("rule_replay", [sys.executable, "scripts/phase10_rule_replay.py"]))
+    checks.append(run("tls_e2e", [sys.executable, "scripts/phase10_tls_e2e.py"]))
+
+    env = dict(os.environ)
+    env.update({"PYTHONPATH": str(ROOT), "WAF_ENV": "development", "WAF_GATEWAY_HOST": "127.0.0.1", "WAF_GATEWAY_PORT": "18081", "WAF_UPSTREAM_URL": "http://127.0.0.1:19090", "WAF_RATE_LIMIT_PER_MINUTE": "1000"})
+    processes: list[subprocess.Popen[str]] = []
+    handles = []
+    try:
+        upstream_log = (ROOT / "phase10_master_upstream.log").open("w", encoding="utf-8")
+        gateway_log = (ROOT / "phase10_master_gateway.log").open("w", encoding="utf-8")
+        handles = [upstream_log, gateway_log]
+        upstream = subprocess.Popen([sys.executable, "-m", "http.server", "19090", "--bind", "127.0.0.1", "--directory", str(ROOT)], cwd=ROOT, env=env, stdout=upstream_log, stderr=subprocess.STDOUT, text=True)
+        gateway = subprocess.Popen([sys.executable, "-m", "waf.gateway.proxy"], cwd=ROOT, env=env, stdout=gateway_log, stderr=subprocess.STDOUT, text=True)
+        processes.extend([upstream, gateway])
+        wait("http://127.0.0.1:18081/__waf_health")
+        checks.append(run("network_load", [sys.executable, "scripts/phase10_load_harness.py", "--url", "http://127.0.0.1:18081/", "--duration", "2", "--concurrency", "20", "--rate", "100", "--payload-profile", "mixed"]))
+    finally:
+        for process in reversed(processes):
+            if process.poll() is None:
+                process.send_signal(signal.SIGTERM)
+                try: process.wait(timeout=5)
+                except subprocess.TimeoutExpired: process.kill()
+        for handle in handles:
+            handle.close()
+
+    checks.append(run("modsecurity_e2e", [sys.executable, "scripts/phase10_waf_enforcement_e2e.py"]))
+    checks.append(run("audit_manifest", [sys.executable, "scripts/phase10_audit.py"]))
+    write_runtime_reports()
+
+    required_evidence = [
+        "phase10_demo_evidence.json", "phase10_rule_replay_evidence.json", "phase10_load_evidence.json", "phase10_tls_evidence.json", "phase10_waf_enforcement_evidence.json",
+        "handoff/PHASE10_REQUIREMENT_TRACEABILITY.json", "handoff/PHASE10_PRODUCTION_READINESS.json", "handoff/PHASE10_SECURITY_AUDIT.md", "handoff/PHASE10_CLAIM_LEDGER.md", "handoff/PHASE10_NEGATIVE_EVIDENCE.md", "handoff/PHASE10_ML_EVALUATION.md", "handoff/PHASE10_PERFORMANCE_BENCHMARK.md", "handoff/PHASE10_RELIABILITY_REPORT.md",
     ]
-    required = [
-        "dashboard/index.html",
-        "docs/PHASE10_TECHNICAL_REPORT.md",
-        "docs/PHASE10_PRESENTATION.md",
-        "scripts/phase10_demo.py",
-        "scripts/phase10_master_exam.py",
-        "handoff/WAF_PHASE9_LOG.md",
-        "handoff/PHASE9_FINAL_STATUS.md",
-        "WAF_PROJECT_STATE.json",
-    ]
-    checks.append({"label": "required_artifacts", "ok": all((ROOT / p).exists() for p in required), "missing": [p for p in required if not (ROOT / p).exists()]})
-    checks.append({"label": "evidence_boundary", "ok": "Internet-scale" in (ROOT / "docs/PHASE10_TECHNICAL_REPORT.md").read_text(encoding="utf-8") and "ModSecurity/Coraza" in (ROOT / "docs/PHASE10_TECHNICAL_REPORT.md").read_text(encoding="utf-8")})
-    passed = sum(bool(x["ok"]) for x in checks)
-    score = 10.0 if all(bool(x["ok"]) for x in checks) else max(0.0, round(10.0 - (len(checks) - passed), 2))
-    result = {"phase": 10, "score": score, "cutoff": 9.9, "critical_defects": 0 if score >= 9.9 else 1, "checks": checks, "passed": passed, "total": len(checks)}
-    (ROOT / "phase10_master_exam_result.json").write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
+    missing = [p for p in required_evidence if not (ROOT / p).exists()]
+    checks.append({"id":"required_evidence","result":"PASS" if not missing else "FAIL","returncode":0 if not missing else 1,"missing":missing})
+
+    try:
+        waf_evidence = json.loads((ROOT / "phase10_waf_enforcement_evidence.json").read_text(encoding="utf-8"))
+        tls_evidence = json.loads((ROOT / "phase10_tls_evidence.json").read_text(encoding="utf-8"))
+        replay = json.loads((ROOT / "phase10_rule_replay_evidence.json").read_text(encoding="utf-8"))
+        evidence_ok = (waf_evidence.get("sql_blocked_at_waf") is True and waf_evidence.get("blocked_request_reached_upstream") is False and tls_evidence.get("https_allow_status") == 200 and tls_evidence.get("https_sql_block_status") == 403 and tls_evidence.get("https_block_reached_upstream") is False and replay.get("validation", {}).get("valid") is True and replay.get("positive_example", {}).get("matched") is True and replay.get("negative_example", {}).get("matched") is False)
+    except Exception:
+        evidence_ok = False
+    checks.append({"id":"acceptance_evidence","result":"PASS" if evidence_ok else "FAIL","returncode":0 if evidence_ok else 1})
+
+    failures = [c for c in checks if c.get("result") != "PASS"]
+    critical = [c["id"] for c in failures if c.get("id") in {"full_regression","compile","modsecurity_e2e","tls_e2e","acceptance_evidence"}]
+    result = {
+        "phase": 10,
+        "gate": "100% executable acceptance checks",
+        "score": 100.0 if not failures else 0.0,
+        "cutoff": 100.0,
+        "result": "PASS" if not failures else "FAIL",
+        "critical_failures": critical,
+        "checks": checks,
+        "external_boundaries": ["public certificate issuance/rotation not measured", "Internet-scale distributed traffic not physically run; bounded harness is provided", "synthetic ML data is not a field-accuracy substitute"],
+    }
+    (ROOT / "phase10_master_exam_result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if score >= 9.9 and all(bool(x["ok"]) for x in checks) else 1
+    return 0 if not failures else 1
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
