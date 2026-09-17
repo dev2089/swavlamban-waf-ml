@@ -1,0 +1,1 @@
+Phase 5 verification trigger. Do not treat this marker as evidence; the GitHub Actions run is the evidence source.
