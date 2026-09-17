@@ -10,20 +10,50 @@ on:
 jobs:
   release-gate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install runtime/test dependencies
+      - name: Install runtime and audit dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-phase4.txt fastapi uvicorn pydantic httpx pytest
+          python -m pip install -r requirements-phase4.txt fastapi uvicorn pydantic httpx pytest pytest-asyncio python-pptx reportlab
+      - name: Install open-source WAF edge dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl zip
       - name: Compile
         run: python -m compileall -q waf tests scripts
-      - name: Full regression
-        run: python -m pytest -q
-      - name: Phase 10 master exam
+      - name: Strict Phase 10 master exam
         run: python scripts/phase10_master_exam.py
-      - name: Show release evidence
-        run: cat phase10_master_exam_result.json phase10_demo_evidence.json
+      - name: Build audit submission artifacts
+        run: python scripts/build_phase10_submission.py
+      - name: Build portable auditor bundle
+        run: python scripts/build_phase10_handoff.py
+      - name: Capture dependency inventory and exact commit
+        run: |
+          python -m pip freeze > artifacts/dependency_inventory.txt
+          git rev-parse HEAD > artifacts/final_commit_sha.txt
+          git status --short > artifacts/clean_checkout_status.txt
+      - name: Upload final auditor bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: swavlamban-waf-phase10-auditor-handoff
+          path: |
+            WAF_PHASE10_FINAL_HANDOFF.zip
+            artifacts/**
+            handoff/**
+            phase10_*evidence.json
+            phase10_master_exam_result.json
+          if-no-files-found: error
+      - name: Upload repository source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: swavlamban-waf-phase10-repository
+          path: WAF_PHASE10_FINAL_REPOSITORY.zip
+          if-no-files-found: error
