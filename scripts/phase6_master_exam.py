@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json,re,subprocess,sys
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]; RESULT=ROOT/'phase6_master_exam_result.json'; CUTOFF=9.9
+ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT)); RESULT=ROOT/'phase6_master_exam_result.json'; CUTOFF=9.9
 
 def run(name,cmd):
  p=subprocess.run(cmd,cwd=ROOT,text=True,capture_output=True); return {'name':name,'passed':p.returncode==0,'returncode':p.returncode,'tail':(p.stdout+'\n'+p.stderr).strip()[-2500:]}
