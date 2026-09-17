@@ -7,8 +7,8 @@
 | Feature regression | PASS | schema, ranges, decoding, duplicates, cookies, content type, malformed input, determinism, large input, header bound, unknown method |
 | Live edge regression | PASS | Phase 2 enforcement through the v2 feature path |
 | Randomized feature fuzz | PASS | 20,000 randomized HTTP-like requests, 0 exceptions |
-| Feature performance | PASS | 100,000 extractions, 40,134.9 req/s |
-| End-to-end WAF performance | PASS | 5,000 requests, 2,599.5 req/s |
+| Feature performance | PASS | 100,000 extractions, 33,527.0 req/s |
+| End-to-end WAF performance | PASS | 5,000 requests, 2,764.7 req/s |
 | Secret-like scan | PASS | no secret-like values found in Phase 3 code |
 | TODO/no-op scan | PASS | no TODO/FIXME/pass-only stubs in Phase 3 code |
 | Self-test runner | PASS | `scripts/phase3_self_test.py` completes successfully |
