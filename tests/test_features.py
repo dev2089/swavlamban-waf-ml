@@ -17,7 +17,8 @@ class FeatureTests(unittest.TestCase):
 
     def test_schema_and_normalized_ranges(self):
         fv = self.extractor.extract(self.req())
-        self.assertEqual(fv.schema_version, "http-v1")
+        self.assertEqual(fv.schema_version, "http-v2")
+        self.assertGreaterEqual(len(fv.values), 30)
         for value in fv.values.values():
             self.assertGreaterEqual(value, 0.0)
             self.assertLessEqual(value, 1.0)
@@ -30,6 +31,7 @@ class FeatureTests(unittest.TestCase):
     def test_unicode_and_invalid_utf8_are_safe(self):
         fv = self.extractor.extract(self.req(body=b"hello\xff\xfe\xe2\x82\xac"))
         self.assertIn("body_length", fv.values)
+        self.assertGreaterEqual(fv.values["body_utf8_replacement_ratio"], 0.0)
 
 
 if __name__ == "__main__":
