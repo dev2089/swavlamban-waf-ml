@@ -17,7 +17,6 @@
 - Added deterministic URL-decoded SQLi, XSS, traversal and command-injection signatures.
 - Added real pre-forwarding block enforcement with HTTP 403.
 - Added bounded request/response sizes, timeout handling, request IDs and WAF decision headers.
-- Added regression coverage for config default handling and final end-to-end evidence.
 - Phase 2 gate: 10.0/10.0 for its acceptance criteria.
 
 ## Phase 3
@@ -25,8 +24,9 @@
 - Added safe path/query-specific URL decoding, NFKC normalization, query limits, header normalization and body scan limits.
 - Switched edge WAF and compatibility extractor to v2 and updated regression tests.
 - Added comprehensive feature, fuzz, benchmark and live-edge evidence.
-- First feature cycle failed on a list/ratio TypeError and an over-specific Unicode-path expectation; both were diagnosed, fixed and retested.
-- Final Phase 3 suite: 10/10 PASS; reconstructed regression: 20/20 PASS; feature fuzz: 20,000 requests/0 exceptions; feature benchmark: 34,854.5 req/s; E2E: 5,000 requests, 4,500 allow, 500 block, 2,354.3 req/s.
+- Initial cycle failed on a list/ratio TypeError and an over-specific Unicode-path expectation; both were diagnosed and fixed.
+- Follow-up header-boundary test exposed unbounded header iteration; normalized header processing was capped at 128 and retested.
+- Final Phase 3 evidence: full regression 34/34 PASS; feature fuzz 20,000 requests/0 exceptions; latest feature benchmark 100,000 extractions at 33,527.0 req/s; latest E2E 5,000 requests at 2,764.7 req/s with 4,500 allow, 500 block and 1,000 bounded events.
 - Phase 3 gate: 10.0/10.0 for its acceptance criteria.
 
 ## Important boundary
