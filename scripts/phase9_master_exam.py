@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -13,7 +14,13 @@ CUTOFF = 9.9
 
 def run(name: str, args: list[str], timeout: int = 240) -> dict:
     p = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=timeout)
-    return {"name": name, "passed": p.returncode == 0, "returncode": p.returncode, "tail": (p.stdout + p.stderr)[-6000:]}
+    output = p.stdout + p.stderr
+    match = re.search(r"(\d+) passed(?:, (\d+) failed)?", output)
+    result = {"name": name, "passed": p.returncode == 0, "returncode": p.returncode, "tail": output[-6000:]}
+    if match:
+        result["passed_tests"] = int(match.group(1))
+        result["failed_tests"] = int(match.group(2) or 0)
+    return result
 
 
 def static_gate() -> dict:
@@ -59,7 +66,7 @@ def main() -> int:
     checks = [
         run("full-regression", [sys.executable, "-m", "pytest", "-q"], timeout=300),
         run("compileall", [sys.executable, "-m", "compileall", "-q", "waf", "tests", "scripts"], timeout=120),
-        run("phase8-security-continuity", [sys.executable, "-m", "pytest", "-q", "tests/test_phase8_security.py"], timeout=120),
+        run("phase8-security-continuity", [sys.executable, "-m", "pytest", "-q", "tests/test_phase8_security.py", "tests/test_phase8_security_hardening.py"], timeout=120),
         run("phase9-api-tests", [sys.executable, "-m", "pytest", "-q", "tests/test_phase9_production_api.py"], timeout=180),
         scenario_gate(),
         run("tls-nginx-smoke", [sys.executable, "scripts/phase9_tls_smoke.py"], timeout=180),
@@ -86,7 +93,7 @@ def main() -> int:
             "live Supabase migration/application against a real project",
             "external certificate issuance/rotation and public HTTPS verification",
             "ModSecurity/Coraza runtime module integration (module absent in verification environment)",
-            "Internet-scale distributed load/failure testing",
+            "Internet-scale distributed load testing",
             "authenticated dashboard UX and five-minute submission recording",
             "final technical report and presentation",
         ],
