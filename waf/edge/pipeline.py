@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-from dataclasses import replace
 import os
+from dataclasses import replace
 
 from waf.core.config import WAFConfig
-from waf.core.models import DecisionResult, RequestEnvelope
+from waf.core.models import DecisionResult, RequestEnvelope, DetectionSignal
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
 from waf.explainability import build_decision_evidence
 from waf.features.http_v2 import ProductionHTTPFeatureExtractor
 from waf.ml.ensemble import load_runtime
+from waf.ml.outbound import ResponseEnvelope
 from waf.rules.lifecycle import RuleLifecycleManager
 
 
 class EdgeWAF:
-    """Phase 5 live path: signatures + ML + behavioural detection + evidence."""
+    """Phase 10 live path: signatures + four request ML detectors + outbound response ML."""
 
     def __init__(self, config: WAFConfig) -> None:
         self.config = config
@@ -37,8 +38,6 @@ class EdgeWAF:
         ml_signals = self.ml.detect(request, features)
         result = self.policy.decide(request, (signature, *ml_signals), self.config.pipeline_version)
         evidence = build_decision_evidence(request, features, result, self.ml)
-        # Phase 6 provenance is attached at the live seam so direct Phase 5
-        # evidence construction remains backward-compatible.
         versions = dict(evidence.versions)
         runtime_meta = self.ml.metadata()
         versions.update({
@@ -49,9 +48,15 @@ class EdgeWAF:
             "learning_control_schema": "phase7-learning-control-v1",
             "learning_model_version": runtime_meta["model_version"],
             "learning_baseline_version": runtime_meta["baseline_version"],
+            "request_detector_count": len(ml_signals),
+            "outbound_detector": runtime_meta["detectors"][-1],
         })
         evidence = replace(evidence, versions=versions)
         return replace(result, evidence=evidence)
+
+    def inspect_response(self, status: int, headers: dict[str, str], body: bytes) -> DetectionSignal:
+        """Inspect outbound HTTP response content after upstream and before client return."""
+        return self.ml.inspect_response(ResponseEnvelope(status=status, headers=headers, body=body))
 
     def recommend_rules(self, result: DecisionResult):
         if result.evidence is None:
