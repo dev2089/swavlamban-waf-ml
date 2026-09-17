@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swavlamban WAF Control Plane</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#0f172a;background:#f7fafc}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1180px;margin:auto;padding:24px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:20px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#475569}.hero h1{margin:6px 0;font-size:32px}.hero p{margin:0;color:#475569}.badge{padding:8px 12px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;font-weight:700;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,.05)}.kpi{font-size:28px;font-weight:800;margin-top:8px}.muted{color:#64748b;font-size:13px}.wide{grid-column:span 2}.full{grid-column:1/-1}.controls{display:flex;gap:10px;flex-wrap:wrap}.controls input{flex:1;min-width:260px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}.btn{padding:10px 14px;border:0;border-radius:10px;background:#0f172a;color:white;font-weight:700;cursor:pointer}.btn.secondary{background:#e2e8f0;color:#0f172a}.btn:disabled{opacity:.5;cursor:not-allowed}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:left}.status-ok{color:#166534;font-weight:800}.status-bad{color:#b91c1c;font-weight:800}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#f1f5f9}.log{max-height:360px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#0f172a;color:#e2e8f0;padding:14px;border-radius:12px;white-space:pre-wrap}.notice{padding:12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}.success{padding:12px;border-radius:12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}@media(max-width:620px){.grid{grid-template-columns:1fr}.wide{grid-column:span 1}.hero{flex-direction:column}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div><div class="eyebrow">Challenge 3 • ML-integrated open-source WAF</div><h1>Swavlamban WAF Control Plane</h1><p>Authenticated operator console for inspection, evidence and release verification.</p></div>
+    <div id="releaseBadge" class="badge">Checking release…</div>
+  </div>
+  <div class="card full" style="margin-bottom:14px">
+    <div class="controls">
+      <input id="token" type="password" placeholder="Bearer token (viewer/operator/reviewer/admin)">
+      <button class="btn" id="connect">Connect</button>
+      <button class="btn secondary" id="refresh">Refresh</button>
+    </div>
+    <div id="authMsg" class="muted" style="margin-top:10px">No token loaded. Runtime APIs remain protected.</div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="muted">Requests</div><div class="kpi" id="requests">—</div></div>
+    <div class="card"><div class="muted">Threats</div><div class="kpi" id="threats">—</div></div>
+    <div class="card"><div class="muted">Blocked</div><div class="kpi" id="blocked">—</div></div>
+    <div class="card"><div class="muted">Detection rate</div><div class="kpi" id="rate">—</div></div>
+    <div class="card wide"><h3>Release health</h3><div id="release" class="muted">Waiting for connection.</div></div>
+    <div class="card wide"><h3>Recent threats</h3><table class="table"><thead><tr><th>Type</th><th>Severity</th><th>Risk</th><th>Blocked</th></tr></thead><tbody id="threatRows"><tr><td colspan="4" class="muted">No data</td></tr></tbody></table></div>
+    <div class="card full"><h3>Operator test</h3><div class="controls"><input id="method" value="GET" style="max-width:120px"><input id="uri" value="/search"><input id="body" value=""><button class="btn" id="analyze">Analyze</button></div><div id="analysis" class="log" style="margin-top:10px">Ready.</div></div>
+    <div class="card full"><h3>Evidence boundaries</h3><div class="notice">Live Supabase schema/RLS verification is recorded. Public certificates, ModSecurity/Coraza installation and Internet-scale distributed load are intentionally not represented as completed by this console.</div></div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let bearer='';
+function authHeaders(){return bearer?{'Authorization':'Bearer '+bearer}:{} }
+async function api(path,opts={}){const r=await fetch(path,{...opts,headers:{...authHeaders(),...(opts.headers||{})}});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data={raw:text}};if(!r.ok)throw new Error((data&&data.detail)||('HTTP '+r.status));return data}
+async function refresh(){
+  try{$('authMsg').textContent='Loading…';const me=await api('/api/security/me');$('authMsg').textContent=`Connected as ${me.subject} • role=${me.role}`;const [s,t,h]=await Promise.all([api('/api/stats'),api('/api/threats?limit=20'),api('/api/health')]);$('requests').textContent=s.total_requests??'—';$('threats').textContent=s.total_threats??'—';$('blocked').textContent=s.blocked_requests??'—';$('rate').textContent=s.detection_rate!=null?(Number(s.detection_rate)*100).toFixed(2)+'%':'—';$('release').innerHTML=`<div class="success"><b>${h.service}</b> healthy • pipeline ${h.pipeline_version} • security config ${h.security_config_valid?'valid':'review'}</div>`;$('releaseBadge').textContent='Runtime healthy';$('releaseBadge').className='badge';$('threatRows').innerHTML=(t.threats||[]).map(x=>`<tr><td>${x.threat_type||'WAF'}</td><td>${x.severity||'—'}</td><td>${x.confidence!=null?Number(x.confidence).toFixed(3):'—'}</td><td>${x.blocked?'YES':'NO'}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No recent threats</td></tr>'}
+  catch(e){$('authMsg').textContent=e.message;$('releaseBadge').textContent='Authentication required';$('releaseBadge').className='badge';}
+}
+$('connect').onclick=()=>{bearer=$('token').value.trim().replace(/^Bearer\s+/i,'');refresh()};$('refresh').onclick=refresh;$('analyze').onclick=async()=>{try{const d=await api('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-Request-ID':'phase10-dashboard-test'},body:JSON.stringify({method:$('method').value,uri:$('uri').value,body:$('body').value})});$('analysis').textContent=JSON.stringify(d,null,2);await refresh()}catch(e){$('analysis').textContent=e.message}};
+</script>
+</body>
+</html>

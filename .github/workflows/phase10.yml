@@ -1,0 +1,29 @@
+name: phase10-release-candidate
+
+on:
+  push:
+    branches: [phase10-final]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime/test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-phase4.txt fastapi uvicorn pydantic httpx pytest
+      - name: Compile
+        run: python -m compileall -q waf tests scripts
+      - name: Full regression
+        run: python -m pytest -q
+      - name: Phase 10 master exam
+        run: python scripts/phase10_master_exam.py
+      - name: Show release evidence
+        run: cat phase10_master_exam_result.json phase10_demo_evidence.json

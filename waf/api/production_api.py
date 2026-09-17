@@ -4,10 +4,12 @@ from __future__ import annotations
 import os
 import time
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from waf.core.config import WAFConfig
@@ -46,7 +48,7 @@ def create_app(*, env: dict[str, str] | None = None) -> FastAPI:
         raise RuntimeError("production security configuration rejected: " + "; ".join(findings))
 
     cors = list(security.allowed_origins)
-    app = FastAPI(title="Swavlamban WAF ML API", version="9.0.0", docs_url=None if security.environment in {"production", "prod"} else "/docs")
+    app = FastAPI(title="Swavlamban WAF ML API", version="10.0.0", docs_url=None if security.environment in {"production", "prod"} else "/docs")
     if cors:
         app.add_middleware(CORSMiddleware, allow_origins=cors, allow_credentials=False, allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Authorization", "Content-Type", "X-Request-ID"])
 
@@ -59,6 +61,10 @@ def create_app(*, env: dict[str, str] | None = None) -> FastAPI:
     app.state.waf = waf
     app.state.store = store
     app.state.security = security
+
+    dashboard_dir = Path(__file__).resolve().parents[2] / "dashboard"
+    if dashboard_dir.exists():
+        app.mount("/dashboard", StaticFiles(directory=str(dashboard_dir), html=True), name="dashboard")
 
     @app.middleware("http")
     async def harden_response(request: Request, call_next):
@@ -86,7 +92,23 @@ def create_app(*, env: dict[str, str] | None = None) -> FastAPI:
 
     @app.get("/api/health")
     async def health() -> dict[str, Any]:
-        return {"status": "healthy", "service": "swavlamban-waf-api", "pipeline_version": WAFConfig.from_env(source).pipeline_version, "security_config_valid": not findings}
+        return {"status": "healthy", "service": "swavlamban-waf-api", "pipeline_version": WAFConfig.from_env(source).pipeline_version, "security_config_valid": not findings, "phase": 10}
+
+    @app.get("/api/release")
+    async def release(claims: dict[str, Any] = Depends(require("read:stats"))) -> dict[str, Any]:
+        return {
+            "phase": 10,
+            "service": "swavlamban-waf-api",
+            "status": "release-candidate",
+            "evidence": {
+                "full_regression": "82/82 PASS (Phase 9 baseline)",
+                "live_supabase": "schema/RLS/privileges verified",
+                "local_tls": "allow 200; SQL block 403",
+                "public_https": "not claimed",
+                "modsecurity_coraza": "not claimed",
+                "internet_scale": "not claimed",
+            },
+        }
 
     @app.get("/api/security/me")
     async def me(claims: dict[str, Any] = Depends(principal)) -> dict[str, str]:
