@@ -1,0 +1,19 @@
+{
+  "context_prefix":"swavlamban-waf",
+  "project_id":"smpmvabjafmrutdhbfbl",
+  "project_name":"supabase-pink-village",
+  "status":"ACTIVE_HEALTHY",
+  "migration_count":13,
+  "phase10_migrations":[
+    "swavlamban_waf_phase10_function_search_path_hardening",
+    "swavlamban_waf_phase10_rls_performance_hardening",
+    "swavlamban_waf_phase10_release_audit"
+  ],
+  "rls_enabled_tables":["alerts","analytics","decision_evidence","ml_models","phase7_baselines","phase7_drift_reports","phase7_feedback","phase7_model_events","phase7_model_runs","request_logs","security_rules","threats","waf_phase_release_audit","waf_runtime_events","waf_security_audit","waf_user_roles"],
+  "security_advisor":{"status":"clear","lint_count":0},
+  "performance_advisor":{"status":"info_only","remaining":"fresh-schema unused-index notices; RLS init-plan and FK index findings remediated"},
+  "function_search_path":"pinned to public, pg_temp for all six WAF security helper functions",
+  "privilege_boundary":"waf_phase_release_audit SELECT is authenticated-only; service_role retains administrative writes; anon has no grant",
+  "privacy":"release audit stores gate metadata only; no raw request body, raw headers, raw query or secrets",
+  "verification_time_utc":"2026-09-17T17:06:00Z"
+}
