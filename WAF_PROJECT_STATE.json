@@ -1,29 +1,23 @@
 {
   "project": "swavlamban-waf-ml",
   "challenge": "Challenge 3 - ML-integrated open-source WAF",
-  "current_phase": 4,
-  "phase_status": "PASS",
-  "phase_score": 10.0,
+  "current_phase": 5,
+  "phase_status": "IMPLEMENTED_UNVERIFIED",
+  "phase_score": null,
   "cutoff": 9.9,
   "overall_status": "IN_PROGRESS",
-  "authoritative_branch": "phase4-final",
-  "verified_source_head": "7cb161a5b8607af83ba3699eeae529f4696f4710",
+  "authoritative_branch": "phase5-final",
+  "verified_source_head": "e649920c391961b20be616337114300c00d23c19",
   "validation": {
-    "full_regression": "48/48 PASS",
-    "compileall": "PASS",
-    "master_exam": "10/10; critical defects 0",
-    "supervised": "accuracy=1.0 precision=1.0 recall=1.0 f1=1.0 fpr=0.0 n=1500 (synthetic only)",
-    "unsupervised": "attack_detection_rate=0.8980 false_positive_rate=0.0227 benign_n=750 attack_n=3000 (synthetic only)",
-    "behaviour": "normal_max=0.406313 burst_final=0.980486 escalated=True (synthetic only)",
-    "direct_ml_benchmark_latest": "2000 requests, 529.6 req/s, 1900 allow, 100 block, 0 alert",
-    "bounded_e2e_benchmark_latest": "1000 requests, 400.2 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 64.240 ms, p95 81.686 ms",
-    "extended_e2e_benchmark_retained": "5000 requests, 410.4 req/s, 4250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4250 upstream hits, 1000 events",
-    "artifact_roundtrip": "PASS",
-    "secret_scan": "PASS",
-    "todo_scan": "PASS",
-    "self_test": "PASS",
-    "handoff_smoke": "PASS: final workspace rerun 48/48 regression, compileall, master exam and self-test",
-    "artifact_sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571"
+    "phase4_full_regression": "48/48 PASS",
+    "phase4_master_exam": "10/10; critical defects 0",
+    "phase4_artifact_sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571",
+    "phase5_full_regression": "UNVERIFIED",
+    "phase5_compileall": "UNVERIFIED",
+    "phase5_evidence_tests": "UNVERIFIED",
+    "phase5_master_exam": "UNVERIFIED; cutoff 9.9",
+    "phase5_explanation_overhead": "UNVERIFIED",
+    "phase5_workflow_runs_for_head": 0
   },
   "done": [
     "Phase 1 architecture foundation",
@@ -36,13 +30,20 @@
     "live EdgeWAF ML integration",
     "ML evaluation and regression evidence",
     "full failure/remediation history",
-    "portable future-chat handoff package"
+    "portable future-chat handoff package",
+    "Phase 5 structured decision evidence",
+    "Phase 5 detector and feature-group attribution",
+    "Phase 5 privacy tests and telemetry integration",
+    "Phase 5 executable master exam and overhead benchmark",
+    "Phase 5 privacy-safe Supabase evidence migration"
   ],
   "left": [
+    "Execute Phase 5 tests/master exam on a real runner",
+    "Record Phase 5 score and explanation overhead",
+    "Apply Phase 5 Supabase migration to the actual connected runtime database",
     "ModSecurity/Coraza verification",
     "TLS/HTTPS",
     "optional semi-supervised evidence path",
-    "explainability expansion",
     "ML rule recommendation/approval",
     "baseline/feedback/drift/retraining",
     "production storage/auth/RBAC/data minimization",
@@ -53,6 +54,6 @@
     "technical docs/slides",
     "final release gate"
   ],
-  "honesty_boundary": "Phase 4 milestone is complete. All ML metrics are deterministic synthetic benchmark/workload evidence only and are not real-world Internet WAF accuracy claims. Overall Challenge 3 remains IN_PROGRESS.",
-  "last_updated": "2026-09-17T10:10:36.733212+00:00"
+  "honesty_boundary": "Phase 5 implementation is complete on phase5-final, but no Phase 5 execution score is claimed because the available GitHub Actions surface returned no workflow run. All Phase 4 ML metrics remain deterministic synthetic evidence only and are not real-world Internet WAF accuracy claims. Overall Challenge 3 remains IN_PROGRESS.",
+  "last_updated": "2026-09-17T10:18:00Z"
 }
