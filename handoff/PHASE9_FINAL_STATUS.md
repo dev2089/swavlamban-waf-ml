@@ -16,9 +16,9 @@
 ## Live Supabase checkpoint
 Project: `smpmvabjafmrutdhbfbl` (`supabase-pink-village`), `ACTIVE_HEALTHY`.
 
-The WAF baseline, Phase 5 decision evidence, Phase 7 learning control, Phase 8 security, Phase 8 hardening, Phase 9 runtime security and privilege-remediation migrations were applied successfully. Expected WAF tables exist, RLS is enabled, anonymous runtime/control-plane access is closed, and runtime persistence writes are service-role controlled. The temporary audit verification surface used during migration was removed before completion.
+The WAF baseline, Phase 5, Phase 7, Phase 8, Phase 8 hardening, Phase 9 runtime-security and privilege-remediation migrations were applied successfully. Expected WAF tables exist, RLS is enabled, anonymous runtime/control-plane access is closed, and runtime persistence writes are service-role controlled. The temporary audit verification surface was removed before completion. Live migration versions are recorded in `handoff/PHASE9_SUPABASE_LIVE_VERIFICATION.json`.
 
-## Repository/runtime scope completed
+## Completed repository/runtime scope
 - secure production-facing FastAPI runtime adapter
 - signed bearer authentication and explicit RBAC
 - server-only Supabase REST persistence adapter
@@ -27,6 +27,7 @@ The WAF baseline, Phase 5 decision evidence, Phase 7 learning control, Phase 8 s
 - local nginx HTTPS/TLS termination integration
 - deterministic Challenge 3 baseline/attack/API-abuse scenarios
 - executable master exam, portable SQLite/SQL ledger, remediation log and future-chat handoff
+- live Supabase schema/RLS/privilege verification
 
 ## Explicitly open
 - external certificate issuance/rotation and public HTTPS verification
@@ -39,4 +40,4 @@ The WAF baseline, Phase 5 decision evidence, Phase 7 learning control, Phase 8 s
 - GitHub Actions Phase 9 CI is `NOT_OBSERVED`; no CI pass is claimed without an observed run.
 
 ## Reproducibility
-The live privilege remediation is tracked in `supabase/migrations/20260917164110_phase9_privilege_remediation.sql`. Temporary verification cleanup is tracked in `supabase/migrations/20260917164200_remove_temporary_v2_audit_surface.sql`. Future chats should begin with `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md`.
+Live privilege remediation is tracked in `supabase/migrations/20260917164110_phase9_privilege_remediation.sql`; temporary verification cleanup is tracked in `supabase/migrations/20260917164200_remove_temporary_v2_audit_surface.sql`. Future chats should begin with `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md`.
