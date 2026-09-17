@@ -42,6 +42,20 @@ def test_bounded_body_is_enforced():
     assert result.request_id == '5'
 
 
+def test_config_from_env_defaults_are_safe(monkeypatch):
+    for name in (
+        'WAF_PIPELINE_VERSION', 'WAF_BLOCK_THRESHOLD', 'WAF_ALERT_THRESHOLD',
+        'WAF_MAX_BODY_BYTES', 'WAF_FEATURE_SCHEMA', 'WAF_UPSTREAM_URL',
+        'WAF_LISTEN_HOST', 'WAF_LISTEN_PORT', 'WAF_REQUEST_TIMEOUT_SECONDS',
+        'WAF_MAX_RESPONSE_BYTES',
+    ):
+        monkeypatch.delenv(name, raising=False)
+    cfg = WAFConfig.from_env()
+    assert cfg.pipeline_version == 'phase2'
+    assert cfg.listen_port == 8080
+    assert cfg.max_body_bytes == 1_048_576
+
+
 def test_end_to_end_enforcement():
     async def go():
         hit = {'n': 0}
