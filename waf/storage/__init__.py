@@ -1,3 +1,3 @@
 from .memory import InMemoryEventSink
-
-__all__ = ["InMemoryEventSink"]
+from .persistent import RUNTIME_SCHEMA_VERSION, SQLiteSecurityStore, StoragePrivacyError
+__all__=['InMemoryEventSink','SQLiteSecurityStore','StoragePrivacyError','RUNTIME_SCHEMA_VERSION']
