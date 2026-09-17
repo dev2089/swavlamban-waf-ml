@@ -1,32 +1,41 @@
 # Master Execution Plan
 
-0. Freeze + baseline evidence. DONE.
-1. Architecture foundation. DONE.
-2. Real HTTP interception + open-source WAF integration + actual blocking. DONE.
-3. Production HTTP feature pipeline. DONE.
-4. Supervised + unsupervised + behavioural ML. DONE.
-5. Explainability and decision evidence. DONE.
-6. Rule generation, validation, approval and deployment loop. DONE.
-7. **Baseline, feedback, drift and controlled retraining. DONE / VERIFIED.**
-8. Production storage, auth/RBAC, secrets and data minimization. NEXT MILESTONE.
-9. Telemetry, load/performance testing and failure testing. OPEN.
-10. Challenge scenarios and reproducible evidence. OPEN.
-11. Dashboard migration to the single decision/telemetry seam. OPEN.
-12. Deterministic five-minute demo harness. OPEN.
-13. Technical documentation, slides/report and reproducibility package. OPEN.
-14. Final 9.9+/10 gate and release candidate. OPEN.
+## Locked objective
+Challenge 3: ML-integrated open-source WAF. The target is a real, reproducible, production-oriented security path rather than a documentation-only prototype.
 
-## Phase rule
-Build -> execute tests -> inspect results -> score -> remediate if <=9.8 or if any critical defect -> retest. The final project gate is blocked by any critical defect regardless of arithmetic score.
+## Milestones
+0. Freeze + baseline evidence. **DONE**
+1. Architecture foundation. **DONE**
+2. Real HTTP interception + open-source WAF integration + actual blocking. **DONE / VERIFIED**
+3. Production HTTP feature pipeline. **DONE / VERIFIED**
+4. Supervised + unsupervised + behavioural ML. **DONE / VERIFIED**
+5. Explainability and decision evidence. **DONE / VERIFIED**
+6. Rule generation, replay validation, human approval and deployment lifecycle. **DONE / VERIFIED**
+7. Baseline, feedback, drift and controlled retraining. **DONE / VERIFIED**
+8. Production storage, authentication/RBAC, secrets and data minimization. **DONE / LIVE-SUPABASE VERIFIED**
+9. Telemetry, load/performance and reliability/failure testing. **DONE / VERIFIED WITH BOUNDED LOCAL SCOPE**
+10. Challenge scenarios and reproducible evidence. **DONE / VERIFIED**
+11. Dynamic authenticated dashboard. **DONE / VERIFIED**
+12. Five-minute deterministic browser demo. **DONE / VERIFIED**
+13. Technical report, presentation source and audit package. **DONE / VERIFIED**
+14. Final release gate. **DONE / VERIFIED**
 
-## Phase 7 definition
-Phase 7 adds a reproducible learning-control loop over the existing `http-v2` feature contract: a versioned benign baseline, human-reviewed feedback, deterministic drift detection, controlled challenger retraining, frozen champion-versus-challenger evaluation, explicit promotion, and explicit rollback. The known-good runtime artifact is never silently replaced and raw request material is excluded from learning-control records.
+## Phase 10 completion rule
+The repository/CI release gate is 100%. A critical failure or missing required executable evidence fails the gate. Historical failures are preserved in the phase logs; they are not deleted to improve the result.
 
-## Historical continuity
-Phase 5 remains preserved in `phase5-final`, Phase 6 remains preserved in `phase6-final`, and Phase 7 is authoritative on `phase7-final`. Earlier milestone evidence must remain intact and readable from the portable handoff.
+## Current ML contract
+- Request schema: `http-v2`.
+- Request detectors: supervised, unsupervised, semi-supervised and stateful behavioural.
+- Outbound response schema: `http-response-v1`.
+- Outbound detector: benign-baseline one-class anomaly detector.
+- Model artifact schema: `phase10-model-v3`.
+- Scores exposed by the runtime are risk scores, not probability claims.
 
-## Phase 7 verification checkpoint
-Phase 7 local verification: 64/64 regression PASS, 5/5 focused tests PASS, compileall PASS, deterministic learning-control smoke PASS, privacy/static gate PASS, master exam 10.0/10.0 with cutoff 9.9 and zero critical defects. CI verification is recorded in the Phase 7 state/log when the authoritative workflow completes.
+## Current verified release evidence
+The latest clean-checkout Phase 10 GitHub Actions run passed every release-gate step, including repository hygiene, deterministic artifact materialization, compile, full regression, gateway startup, strict master exam, binary submission artifacts, dependency/commit capture, portable handoff, checksums and artifact upload. The exact run, job, commit and artifact IDs are stored in the Phase 10 audit package.
 
-## Next milestone after Phase 7
-**Phase 8: production storage, authentication/RBAC, secrets and data-minimization hardening.**
+## External boundaries
+Public certificate issuance/rotation, public Internet HTTPS, Internet-scale distributed load, venue-specific public deployment and final challenge portal upload remain operational/external boundaries. The project does not fabricate these as locally measured facts.
+
+## Continuation
+Any later work must start from the exact release branch tip, preserve earlier milestones, read the complete handoff package, and repeat the full gate after material changes.
