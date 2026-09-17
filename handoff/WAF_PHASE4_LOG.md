@@ -27,7 +27,7 @@ The detector implementation changed while an older artifact was still present. R
 An overly narrow benign baseline caused ordinary requests to alert. Benign generation was widened across hosts, agents, Accept headers, JSON bodies, content types and query patterns; the models were retrained and retested.
 
 ### Cycle C - oversized mandatory self-test
-A larger one-command benchmark exceeded the terminal execution-time boundary. The mandatory gate was bounded to a deterministic 2,000 direct-request test plus a 1,000-request E2E gate, while the 5,000-request benchmark remained a separate extended evidence run.
+A larger one-command benchmark exceeded the terminal execution-time boundary. The mandatory gate was bounded to deterministic 2,000 direct requests plus a 1,000-request E2E gate, while the 5,000-request benchmark remained a separate extended evidence run.
 
 ### Cycle D - learned behaviour artifact compatibility
 The new learned behaviour component was initially absent from the old persisted artifact. The artifact was rebuilt and artifact presence/type assertions were added.
@@ -49,15 +49,15 @@ The master-exam script initially failed to import the repository package. Reposi
 - Supervised holdout: accuracy `1.0`, precision `1.0`, recall `1.0`, F1 `1.0`, FPR `0.0`, n=`1500`, synthetic only.
 - Unsupervised: FPR `0.0227`, attack detection `0.8980`, benign n=`750`, attack n=`3000`, synthetic only.
 - Learned behaviour: normal max `0.406313`, burst final `0.980486`, escalation `true`, synthetic workload only.
-- Direct ML: `2000 requests, 531.1 req/s, 1900 allow, 100 block, 0 alert`.
-- Mandatory bounded E2E: `1000 requests, 428.6 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 59.639 ms, p95 77.706 ms`.
+- Direct ML final self-test: `2000 requests, 538.0 req/s, 1900 allow, 100 block, 0 alert`.
+- Mandatory bounded E2E final self-test: `1000 requests, 449.4 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 57.310 ms, p95 68.851 ms`.
 - Final extended E2E: `5000 requests, 410.4 req/s, 4250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4250 upstream hits, 1000 events`.
 - Artifact: `199123` bytes, SHA-256 `bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571`.
 - Static secret-like scan -> **PASS**.
 - TODO/no-op scan -> **PASS**.
 
 ## Final handoff verification
-The project state, execution log, change log, command log, master exam, SQLite ledger, model artifact and source challenge PDFs are included in the portable Phase 4 final handoff ZIP. The extracted bundle was smoke-tested with `48/48` regression tests, compileall and the master exam/self-test successfully.
+The final handoff ZIP contains the verified Phase 4 workspace, source challenge PDFs, expanded Phase 3 history, SQLite project ledger, tests, documentation, model artifact and continuation instructions. The archive was extracted into a clean directory and successfully ran 48/48 tests, compileall, master exam and self-test.
 
 ## Honest boundary
 Phase 4 is complete for the defined milestone only. All ML evaluation data/workloads are deterministic synthetic evidence. They are not real-world Internet WAF accuracy claims. Overall Challenge 3 remains IN_PROGRESS.
