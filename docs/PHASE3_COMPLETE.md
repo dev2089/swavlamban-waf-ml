@@ -14,22 +14,20 @@ Build and wire a deterministic, versioned, bounded HTTP feature pipeline suitabl
 - Added 38 normalized numeric HTTP features.
 - Added safe multi-pass URL decoding with path-safe `unquote` and query-safe `unquote_plus`.
 - Added Unicode NFKC normalization.
-- Added safe query parsing and header normalization.
-- Added bounded body/header/target processing.
-- Added entropy and character-shape features plus SQLi/XSS/traversal/command indicators.
+- Added safe query parsing and bounded header/body processing.
+- Added entropy, shape and security-indicator features.
 - Switched compatibility `HTTPFeatureExtractor` to the production extractor.
 - Switched `EdgeWAF` to the v2 feature pipeline.
 - Updated runtime config to `phase3` + `http-v2`.
 - Updated regression tests and added feature/live-edge suites.
-- Added one-command Phase 3 self-test and benchmark evidence.
+- Added one-command Phase 3 self-test and reproducible benchmarks.
 
 ## Verification
 - `python -m compileall -q waf tests` -> PASS.
-- Phase 3 local suite -> 10/10 PASS.
-- Full local reconstructed regression suite -> 20/20 PASS.
+- Full local regression suite -> 34/34 PASS.
 - Randomized feature fuzz -> 20,000 HTTP-like requests, 0 exceptions.
-- Feature benchmark -> 100,000 extractions, 34,854.5 req/s.
-- End-to-end proxy benchmark -> 5,000 requests, 4,500 allowed, 500 blocked, 2,354.3 req/s, 1,000 bounded events.
+- Final feature benchmark -> 100,000 extractions, 40,134.9 req/s.
+- Final end-to-end proxy benchmark -> 5,000 requests, 4,500 allowed, 500 blocked, 2,599.5 req/s, 1,000 bounded events.
 - Static secret scan -> PASS.
 - TODO/FIXME/pass-only scan over Phase 3 code -> PASS.
 
