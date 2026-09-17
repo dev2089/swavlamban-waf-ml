@@ -2,9 +2,9 @@
 
 0. Freeze + baseline evidence. DONE.
 1. Architecture foundation. DONE.
-2. Real HTTP interception + open-source WAF integration + actual blocking.
-3. Production HTTP feature pipeline.
-4. Supervised + unsupervised + behavioural ML.
+2. Real HTTP interception + open-source WAF integration + actual blocking. DONE.
+3. Production HTTP feature pipeline. DONE.
+4. Supervised + unsupervised + behavioural ML. NEXT.
 5. Explainability and decision evidence.
 6. Rule generation, validation, approval and deployment loop.
 7. Baseline, feedback, drift and controlled retraining.
@@ -17,3 +17,9 @@
 14. Final 9.9+/10 gate and release candidate.
 
 Phase rule: build -> execute tests -> inspect results -> score -> remediate if <=9.8 or if any critical defect -> retest.
+
+## Current milestone
+Phase 3 PASS, score 10.0/10.0. Active schema: `http-v2` with 38 normalized numeric features.
+
+## Next milestone
+Phase 4 will add supervised, unsupervised and behavioural ML on the existing canonical request/feature seam. No ML performance numbers may be claimed before reproducible evaluation.
