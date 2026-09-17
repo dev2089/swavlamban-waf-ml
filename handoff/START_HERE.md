@@ -6,7 +6,9 @@ Read this file first in any new ChatGPT conversation.
 - Challenge locked: **Challenge 3 - ML-integrated open-source WAF**.
 - Overall project: **IN_PROGRESS**.
 - Completed milestones: **Phase 1 PASS, Phase 2 PASS, Phase 3 PASS, Phase 4 PASS**.
-- Authoritative branch: `phase4-final`.
+- Current milestone: **Phase 5 implementation complete, acceptance UNVERIFIED**.
+- Authoritative branch: `phase5-final`.
+- Draft PR: **#1**, `Phase 5: explainability and decision evidence`.
 - Main branch remains intentionally untouched by milestone work.
 - Target budget: ₹0.
 - Terminal is the build/test lab; GitHub is the source/control plane.
@@ -27,24 +29,40 @@ Build a real demonstrable ML-augmented WAF: live HTTP(S) inspection, open-source
 - Latest extended local E2E: **5000 requests, 410.4 req/s, 4250 allow, 750 block, 0 errors, p50 123.614 ms, p95 160.959 ms**.
 - ML metrics are deterministic synthetic benchmark/workload evidence only.
 
+## Phase 5 truth
+- Added `DecisionEvidence` schema `evidence-v1`.
+- Added detector-level contributions for signature, supervised, anomaly and behaviour signals.
+- Added supervised/anomaly feature-group attribution plus behavioural-state evidence.
+- Added human-readable explanations and model/feature/dataset/ruleset/pipeline provenance.
+- Evidence stores numeric feature values and metadata only; no raw payload, query, headers, host or source IP.
+- Live `EdgeWAF` attaches evidence after the unchanged Phase 4 enforcement decision.
+- Telemetry now supports evidence under `event-v2`.
+- Added privacy/reproducibility tests, master exam and separate overhead benchmark.
+- Added `.github/workflows/phase5.yml`.
+- Added privacy-safe `decision_evidence` Supabase migration. It is committed but **not claimed applied to a live database**.
+- Phase 5 runtime test score is **not claimed** because the available workflow query returned zero runs.
+
 ## Evidence locations
-- `docs/PHASE4_COMPLETE.md`
-- `docs/PHASE4_TEST_REPORT.md`
-- `docs/PHASE4_MASTER_EXAM.md`
-- `docs/PHASE4_MASTER_EXAM.json`
-- `docs/HTTP_ML_PHASE4.md`
-- `handoff/WAF_PHASE4_LOG.md`
-- `handoff/WAF_STATE_PHASE4.json`
+- `docs/PHASE5_TEST_REPORT.md`
+- `handoff/WAF_PHASE5_LOG.md`
+- `handoff/WAF_STATE_PHASE5.json`
 - `handoff/WAF_CHANGELOG.md`
 - `handoff/WAF_COMMAND_LOG.md`
 - `WAF_PROJECT_STATE.json`
-- `state/project_ledger.db` in the portable handoff bundle
-- `models/phase4_models.joblib`
-- `models/phase4_models.json`
-- `MASTER_9_9_EXAM_PROTOCOL.md`
+- `tests/test_phase5_explainability.py`
+- `scripts/phase5_master_exam.py`
+- `phase5_explainability_benchmark.py`
+- `supabase/migrations/20260917101500_phase5_decision_evidence.sql`
+- `state/project_ledger_schema.sql`
+- `state/phase5_ledger.sql` when present
 
-## Next milestone
-**Phase 5: explainability and decision evidence.**
+## Verification commands
+Run these before claiming Phase 5 PASS:
+- `python -m pytest -q`
+- `python -m compileall -q waf tests`
+- `python -m pytest -q tests/test_phase5_explainability.py`
+- `python scripts/phase5_master_exam.py`
+- `python phase5_explainability_benchmark.py`
 
 ## Do not regress
 Do not reintroduce fake metrics, raw payloads into feature state, narrow benign baselines, shared behavioural state between edge instances, broad browser-side database scans, open public security writes, or hardcoded performance claims.
@@ -53,4 +71,4 @@ Do not reintroduce fake metrics, raw payloads into feature state, narrow benign 
 Read this file first. Then read the project state, master plan, latest phase test report/exam, execution log, changelog, command log and SQLite ledger. Inspect executable code and rerun the gates before changing project state. Never infer completion from documentation alone.
 
 ## Important honesty boundary
-ModSecurity/Coraza is not claimed as separately installed/verified. TLS, optional semi-supervised work, explainability expansion, ML rule recommendation/approval, controlled retraining/drift, production storage/auth/RBAC, full scenario evidence, dashboard, demo and final release remain open.
+ModSecurity/Coraza is not claimed as separately installed/verified. TLS, optional semi-supervised work, ML rule recommendation/approval, controlled retraining/drift, production storage/auth/RBAC, full scenario evidence, dashboard, demo and final release remain open. Phase 5 implementation is complete on `phase5-final`, but acceptance remains UNVERIFIED until an actual runner produces the required 9.9+/10.0 result.
