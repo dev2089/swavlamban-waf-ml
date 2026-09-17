@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 from waf.ml.ensemble import (
     Phase4MLEnsemble,
     evaluate_behaviour,
+    evaluate_outbound,
     evaluate_semi_supervised,
     evaluate_supervised,
     evaluate_unsupervised,
@@ -34,9 +35,11 @@ def main() -> None:
         "unsupervised_evaluation": evaluate_unsupervised(),
         "behaviour_evaluation": evaluate_behaviour(),
         "semi_supervised_evaluation": evaluate_semi_supervised(),
+        "outbound_evaluation": evaluate_outbound(),
         "training_scope": "deterministic synthetic HTTP benchmark only",
         "behaviour_model_scope": "deterministic synthetic behavioural workload",
         "semi_supervised_scope": "deterministic synthetic HTTP benchmark with partial labels",
+        "outbound_scope": "deterministic synthetic HTTP response workload",
     }
     output.with_suffix(".json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(manifest, indent=2))
