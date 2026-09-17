@@ -79,7 +79,8 @@ def write_runtime_reports(checks: list[dict[str, object]]) -> None:
     tls, tls_err = load_json("phase10_tls_evidence.json")
     waf, waf_err = load_json("phase10_waf_enforcement_evidence.json")
     replay, replay_err = load_json("phase10_rule_replay_evidence.json")
-    errors = [x for x in (demo_err, load_err, tls_err, waf_err, replay_err) if x]
+    outbound, outbound_err = load_json("phase10_outbound_evidence.json")
+    errors = [x for x in (demo_err, load_err, tls_err, waf_err, replay_err, outbound_err) if x]
 
     perf_text = ["# Phase 10 Performance Benchmark", ""]
     if demo and load:
@@ -92,24 +93,37 @@ def write_runtime_reports(checks: list[dict[str, object]]) -> None:
         perf_text += ["Evidence incomplete:", *[f"- {x}" for x in errors]]
     (handoff / "PHASE10_PERFORMANCE_BENCHMARK.md").write_text("\n".join(perf_text) + "\n", encoding="utf-8")
 
-    ml_text = ["# Phase 10 ML Evaluation", "", "Runtime protection combines supervised, unsupervised and behavioural signals over versioned synthetic HTTP data. Synthetic metrics are not field-accuracy claims."]
+    ml_text = [
+        "# Phase 10 ML Evaluation",
+        "",
+        "Runtime protection combines supervised, unsupervised, semi-supervised and behavioural request signals over versioned synthetic HTTP data, plus an outbound HTTP response anomaly detector. Synthetic metrics are not field-accuracy claims.",
+    ]
     if replay:
-        ml_text += [f"Rule replay {replay.get('rule_id')}: valid={replay.get('validation', {}).get('valid')}; positive_matched={replay.get('positive_example', {}).get('matched')}; negative_matched={replay.get('negative_example', {}).get('matched')}."]
+        ml_text.append(f"Rule replay {replay.get('rule_id')}: valid={replay.get('validation', {}).get('valid')}; positive_matched={replay.get('positive_example', {}).get('matched')}; negative_matched={replay.get('negative_example', {}).get('matched')}.")
+    if outbound:
+        ml_text.append(f"Outbound response replay: benign FPR={outbound.get('normal', {}).get('outbound_decision')}; anomalous decision={outbound.get('anomalous', {}).get('outbound_decision')}; anomalous risk={outbound.get('anomalous', {}).get('outbound_risk')}.")
     (handoff / "PHASE10_ML_EVALUATION.md").write_text("\n".join(ml_text) + "\n", encoding="utf-8")
 
-    reliability = ["# Phase 10 Reliability Report", "", "Reliability coverage includes request validation, authentication/RBAC, body and response limits, rate limiting, upstream failure handling, TLS termination, ModSecurity enforcement, WebSocket authentication and the deterministic dashboard/demo path."]
+    reliability = [
+        "# Phase 10 Reliability Report",
+        "",
+        "Reliability coverage includes request validation, authentication/RBAC, body and response limits, rate limiting, upstream failure handling, TLS termination, ModSecurity enforcement, outbound response inspection, WebSocket authentication and the deterministic dashboard/demo path.",
+    ]
     if tls and waf:
         reliability += [f"HTTPS allow={tls.get('https_allow_status')}; HTTPS SQL block={tls.get('https_sql_block_status')}; blocked reached upstream={tls.get('https_block_reached_upstream')}.", f"ModSecurity connector={waf.get('nginx_modsecurity_connector')}; SQL blocked at WAF={waf.get('sql_blocked_at_waf')}; blocked reached upstream={waf.get('blocked_request_reached_upstream')}."]
+    if outbound:
+        reliability.append(f"Outbound response detector: normal={outbound.get('normal', {}).get('outbound_decision')}; anomalous={outbound.get('anomalous', {}).get('outbound_decision')}; schema={outbound.get('feature_schema')}.")
     (handoff / "PHASE10_RELIABILITY_REPORT.md").write_text("\n".join(reliability) + "\n", encoding="utf-8")
 
 
 def main() -> int:
     checks: list[dict[str, object]] = []
-    checks.append(run("full_regression", [sys.executable, "-m", "pytest", "-q"], timeout=300))
-    checks.append(run("compile", [sys.executable, "-m", "compileall", "-q", "waf", "tests", "scripts"], timeout=60))
+    checks.append(run("full_regression", [sys.executable, "-m", "pytest", "-q"], timeout=360))
+    checks.append(run("compile", [sys.executable, "-m", "compileall", "-q", "waf", "tests", "scripts"], timeout=90))
     checks.append(run("demo", [sys.executable, "scripts/phase10_demo.py"], timeout=180))
     checks.append(run("rule_replay", [sys.executable, "scripts/phase10_rule_replay.py"], timeout=60))
     checks.append(run("tls_e2e", [sys.executable, "scripts/phase10_tls_e2e.py"], timeout=120))
+    checks.append(run("outbound_e2e", [sys.executable, "scripts/phase10_outbound_e2e.py"], timeout=180))
 
     env = dict(os.environ)
     env.update({
@@ -147,8 +161,9 @@ def main() -> int:
 
     required = [
         "phase10_demo_evidence.json", "phase10_rule_replay_evidence.json", "phase10_load_evidence.json",
-        "phase10_tls_evidence.json", "phase10_waf_enforcement_evidence.json", "handoff/PHASE10_REQUIREMENT_TRACEABILITY.json",
-        "handoff/PHASE10_PRODUCTION_READINESS.json", "handoff/PHASE10_SECURITY_AUDIT.md", "handoff/PHASE10_CLAIM_LEDGER.md",
+        "phase10_tls_evidence.json", "phase10_waf_enforcement_evidence.json", "phase10_outbound_evidence.json",
+        "handoff/PHASE10_REQUIREMENT_TRACEABILITY.json", "handoff/PHASE10_PRODUCTION_READINESS.json",
+        "handoff/PHASE10_SECURITY_AUDIT.md", "handoff/PHASE10_CLAIM_LEDGER.md", "handoff/PHASE10_CLAIM_LEDGER.json",
         "handoff/PHASE10_NEGATIVE_EVIDENCE.md", "handoff/PHASE10_ML_EVALUATION.md", "handoff/PHASE10_PERFORMANCE_BENCHMARK.md",
         "handoff/PHASE10_RELIABILITY_REPORT.md", "artifacts/PHASE10_DEMO_VIDEO.webm",
     ]
@@ -158,15 +173,17 @@ def main() -> int:
     waf, _ = load_json("phase10_waf_enforcement_evidence.json")
     tls, _ = load_json("phase10_tls_evidence.json")
     replay, _ = load_json("phase10_rule_replay_evidence.json")
+    outbound, _ = load_json("phase10_outbound_evidence.json")
     acceptance = bool(
         waf and waf.get("sql_blocked_at_waf") is True and waf.get("blocked_request_reached_upstream") is False
         and tls and tls.get("https_allow_status") == 200 and tls.get("https_sql_block_status") == 403 and tls.get("https_block_reached_upstream") is False
         and replay and replay.get("validation", {}).get("valid") is True and replay.get("positive_example", {}).get("matched") is True and replay.get("negative_example", {}).get("matched") is False
+        and outbound and outbound.get("normal", {}).get("outbound_decision") == "allow" and outbound.get("anomalous", {}).get("outbound_decision") == "alert" and float(outbound.get("anomalous", {}).get("outbound_risk", 0.0)) >= 0.5
     )
     checks.append({"id": "acceptance_evidence", "result": "PASS" if acceptance else "FAIL", "returncode": 0 if acceptance else 1})
 
     failures = [c for c in checks if c.get("result") != "PASS"]
-    critical_ids = {"full_regression", "compile", "tls_e2e", "modsecurity_e2e", "acceptance_evidence"}
+    critical_ids = {"full_regression", "compile", "tls_e2e", "outbound_e2e", "modsecurity_e2e", "acceptance_evidence"}
     critical = [str(c.get("id")) for c in failures if c.get("id") in critical_ids]
     result = {
         "phase": 10,
