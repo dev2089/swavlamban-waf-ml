@@ -1,0 +1,40 @@
+name: phase7-verification
+
+on:
+  push:
+    branches: [phase7-final]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements-phase4.txt pytest
+      - name: Train runtime model artifact
+        run: python scripts/train_phase4_models.py --output models/phase4_models.joblib
+      - name: Full regression
+        run: python -m pytest -q
+      - name: Compile gate
+        run: python -m compileall -q waf tests scripts
+      - name: Phase 7 master exam
+        run: python scripts/phase7_master_exam.py
+      - name: Record project ledger
+        run: python scripts/record_phase7_ledger.py && python - <<'PY'
+import sqlite3
+from pathlib import Path
+con=sqlite3.connect("state/project_ledger.db")
+Path("state/phase7_ledger.sql").write_text("\n".join(con.iterdump())+"\n", encoding="utf-8")
+PY
+      - name: Build portable handoff
+        run: python scripts/build_phase7_handoff.py
+      - name: Upload Phase 7 handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: waf-phase7-handoff
+          path: WAF_PHASE7_FINAL_HANDOFF.zip
+          if-no-files-found: error

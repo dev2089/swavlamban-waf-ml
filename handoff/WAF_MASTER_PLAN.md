@@ -5,29 +5,28 @@
 2. Real HTTP interception + open-source WAF integration + actual blocking. DONE.
 3. Production HTTP feature pipeline. DONE.
 4. Supervised + unsupervised + behavioural ML. DONE.
-5. Explainability and decision evidence.
-6. Rule generation, validation, approval and deployment loop.
-7. Baseline, feedback, drift and controlled retraining.
-8. Production storage, auth/RBAC, secrets and data minimization.
-9. Telemetry, load/performance testing and failure testing.
-10. Challenge scenarios and reproducible evidence.
-11. Dashboard migration to the single decision/telemetry seam.
-12. Deterministic five-minute demo harness.
-13. Technical documentation, slides/report and reproducibility package.
-14. Final 9.9+/10 gate and release candidate.
+5. Explainability and decision evidence. DONE.
+6. Rule generation, validation, approval and deployment loop. DONE.
+7. **Baseline, feedback, drift and controlled retraining. DONE / VERIFIED.**
+8. Production storage, auth/RBAC, secrets and data minimization. NEXT MILESTONE.
+9. Telemetry, load/performance testing and failure testing. OPEN.
+10. Challenge scenarios and reproducible evidence. OPEN.
+11. Dashboard migration to the single decision/telemetry seam. OPEN.
+12. Deterministic five-minute demo harness. OPEN.
+13. Technical documentation, slides/report and reproducibility package. OPEN.
+14. Final 9.9+/10 gate and release candidate. OPEN.
 
 ## Phase rule
 Build -> execute tests -> inspect results -> score -> remediate if <=9.8 or if any critical defect -> retest. The final project gate is blocked by any critical defect regardless of arithmetic score.
 
-## Current milestone
-Phase 4 PASS, score 10.0/10.0. The live edge now consumes signature, supervised, benign-only unsupervised and learned behavioural signals behind the `http-v2` contract.
+## Phase 7 definition
+Phase 7 adds a reproducible learning-control loop over the existing `http-v2` feature contract: a versioned benign baseline, human-reviewed feedback, deterministic drift detection, controlled challenger retraining, frozen champion-versus-challenger evaluation, explicit promotion, and explicit rollback. The known-good runtime artifact is never silently replaced and raw request material is excluded from learning-control records.
 
-## Phase 4 evidence
-- Full regression: 48/48 PASS.
-- Master exam: 10.0/10.0, 0 critical defects.
-- Supervised, unsupervised and behavioural evidence are deterministic synthetic/local workloads only.
-- Versioned artifact: `models/phase4_models.joblib`, schema `http-v2`, SHA-256 `bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571`.
+## Historical continuity
+Phase 5 remains preserved in `phase5-final`, Phase 6 remains preserved in `phase6-final`, and Phase 7 is authoritative on `phase7-final`. Earlier milestone evidence must remain intact and readable from the portable handoff.
 
-## Next milestone
-**Phase 5: explainability and decision evidence.**
-No future milestone may silently overwrite Phase 4 evidence. Keep historical failures, remediation notes and state in the ledger.
+## Phase 7 verification checkpoint
+Phase 7 local verification: 64/64 regression PASS, 5/5 focused tests PASS, compileall PASS, deterministic learning-control smoke PASS, privacy/static gate PASS, master exam 10.0/10.0 with cutoff 9.9 and zero critical defects. CI verification is recorded in the Phase 7 state/log when the authoritative workflow completes.
+
+## Next milestone after Phase 7
+**Phase 8: production storage, authentication/RBAC, secrets and data-minimization hardening.**

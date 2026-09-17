@@ -1,0 +1,41 @@
+{
+  "checks": [
+    {"name":"full-regression","passed":true,"returncode":0,"tail":"64 passed, 5 warnings in 10.85s"},
+    {"name":"compileall","passed":true,"returncode":0,"tail":""},
+    {"name":"phase7-learning-control-tests","passed":true,"returncode":0,"tail":"5 passed, 5 warnings in 7.77s"},
+    {"name":"learning-control-smoke","passed":true,"tail":"{\"baseline_samples\":2200,\"baseline_version\":\"benign-baseline-v4-s2200-seed123-p7\",\"candidate_run_id\":\"RUN-CHALLENGER-267C7C9013363D97\",\"candidate_model_version\":\"phase7-challenger-7cb0a4ba7530\",\"candidate_evaluation\":{\"accuracy\":1.0,\"precision\":1.0,\"recall\":1.0,\"f1\":1.0,\"fpr\":0.0,\"test_samples\":1500},\"drift_report_id\":\"DRIFT-9D8F743279943534\",\"drift_mean_psi\":1.064965,\"drift_max_psi\":39.486115,\"material_drift\":true,\"reviewed_feedback\":44,\"promotion_eligible\":true,\"promoted_model_version\":\"phase7-challenger-7cb0a4ba7530\",\"rolled_back_model_version\":\"phase4-ml-v1\",\"default_runtime_artifact_unchanged\":true,\"raw_feedback_material_recorded\":false}"},
+    {"name":"privacy-static-gate","passed":true,"tail":"{\"checked_file\":\"waf/ml/learning_control.py\",\"passed\":true,\"raw_request_field_access\":[]}"}
+  ],
+  "critical_defects": [],
+  "cutoff": 9.9,
+  "evaluation_scope": "repository regression, compile gate, dedicated Phase 7 tests, deterministic learning-control smoke and privacy/static gate",
+  "notes": [
+    "Baseline uses the versioned http-v2 numeric feature contract and does not persist raw request material.",
+    "Feedback requires explicit human review before a label can enter controlled retraining.",
+    "Drift uses deterministic PSI thresholds: material when mean PSI >= 0.10 or max feature PSI >= 0.25, with at least 32 samples.",
+    "Challenger evaluation is compared with the frozen champion on the same deterministic synthetic validation benchmark.",
+    "Promotion requires explicit human approval and never silently replaces models/phase4_models.joblib.",
+    "Rollback restores the prior champion artifact and metadata; production model storage/auth/RBAC remains a later phase."
+  ],
+  "phase": 7,
+  "score": 10.0,
+  "smoke": {
+    "baseline_samples": 2200,
+    "baseline_version": "benign-baseline-v4-s2200-seed123-p7",
+    "candidate_evaluation": {"accuracy":1.0,"dataset_version":"synthetic-http-v4-s6000-seed777","evaluation_scope":"deterministic synthetic HTTP benchmark only","f1":1.0,"fpr":0.0,"precision":1.0,"recall":1.0,"test_samples":1500},
+    "candidate_model_version":"phase7-challenger-7cb0a4ba7530",
+    "candidate_run_id":"RUN-CHALLENGER-267C7C9013363D97",
+    "default_runtime_artifact_unchanged":true,
+    "drift_max_psi":39.486115,
+    "drift_mean_psi":1.064965,
+    "drift_report_id":"DRIFT-9D8F743279943534",
+    "evidence_provenance":{"learning_baseline_version":"benign-baseline-v4-s2200-seed123","learning_control_schema":"phase7-learning-control-v1","learning_model_version":"phase4-ml-v1"},
+    "material_drift":true,
+    "promoted_model_version":"phase7-challenger-7cb0a4ba7530",
+    "promotion_eligible":true,
+    "raw_feedback_material_recorded":false,
+    "reviewed_feedback":44,
+    "rolled_back_model_version":"phase4-ml-v1"
+  },
+  "status":"PASS"
+}
