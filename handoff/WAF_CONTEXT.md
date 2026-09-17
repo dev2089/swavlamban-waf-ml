@@ -20,7 +20,13 @@ Challenge 3. Do not switch unless the user explicitly reopens it.
 MASTER 9.9+ protocol applies to all deliverables. Final project requires executable evidence; critical defects fail regardless of arithmetic score.
 
 ## Current phase
-Phase 3 is complete on branch `phase3-final`. The live edge now uses the versioned `http-v2` production HTTP feature pipeline with 38 normalized numeric features. Phase 4 is next: supervised + unsupervised + behavioural ML.
+Phase 4 is complete on branch `phase4-final`: supervised `HistGradientBoostingClassifier`, benign-only `OneClassSVM`, learned stateful behavioural `LogisticRegression`, live EdgeWAF ML integration and versioned artifact have passed the Phase 4 gate.
+
+## Verified Phase 4 evidence
+- full regression: 48/48 PASS;
+- master exam: 10.0/10.0, critical defects 0;
+- final extended local E2E: 5,000 requests, 410.4 req/s, 4,250 allow, 750 block, 0 errors;
+- final artifact SHA-256: `bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571`.
 
 ## Important honesty boundary
-Nginx/live edge enforcement is verified. A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified. TLS, production ML, learning, secure production storage/auth, dashboard migration, final scenario evidence and final release remain open.
+Nginx/live edge enforcement is verified. A separately installed ModSecurity/Coraza engine is not claimed as verified. TLS, optional semi-supervised learning, explainability expansion, ML rule lifecycle, baseline/feedback/drift/retraining, production storage/auth, dashboard, complete challenge scenarios, final demo and final release remain open. Synthetic ML metrics are not real-world Internet WAF accuracy claims.
