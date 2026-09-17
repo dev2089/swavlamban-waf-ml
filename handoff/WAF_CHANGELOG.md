@@ -44,8 +44,22 @@
 - Latest extended E2E: 5,000 requests, 410.4 req/s, 4,250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms.
 - Handoff smoke test from the final ZIP: 48/48 regression PASS, compileall PASS, master exam PASS and self-test PASS.
 
+## Phase 5
+- Added `DecisionEvidence` (`evidence-v1`) to the core result model without breaking legacy results.
+- Added deterministic detector-level risk contribution accounting.
+- Added supervised/anomaly feature-group attribution and behavioural-state evidence.
+- Added human-readable explanations and model/feature/dataset/ruleset/pipeline provenance.
+- Added privacy guarantees and leakage tests; evidence contains numeric feature snapshots but no raw payload/query/header/source-IP material.
+- Wired evidence into live `EdgeWAF` after Phase 4 policy enforcement.
+- Extended telemetry to `event-v2` with optional evidence.
+- Added Phase 5 tests, master exam, overhead benchmark and CI workflow.
+- Added privacy-safe `decision_evidence` Supabase migration; the migration is committed but not claimed applied to a live database.
+- Created draft PR #1 from `phase5-final` to `main`; main remains untouched.
+- GitHub Actions query returned zero workflow runs for the Phase 5 head, so no Phase 5 passing score is claimed.
+
 ## Important boundary
 - Main branch remains untouched by milestone work.
 - Synthetic metrics are not real-world accuracy claims.
-- ModSecurity/Coraza verification, TLS, optional semi-supervised evidence, explainability, rule lifecycle, controlled retraining, production storage/auth, dashboard, final demo and release remain open.
+- Phase 5 implementation is complete on `phase5-final`, but acceptance verification is UNVERIFIED until a real runner executes the gates.
+- ModSecurity/Coraza verification, TLS, optional semi-supervised evidence, rule lifecycle, controlled retraining, production storage/auth, dashboard, final demo and release remain open.
 - Overall Challenge 3 remains IN_PROGRESS.
