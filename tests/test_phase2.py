@@ -51,7 +51,8 @@ def test_config_from_env_defaults_are_safe(monkeypatch):
     ):
         monkeypatch.delenv(name, raising=False)
     cfg = WAFConfig.from_env()
-    assert cfg.pipeline_version == 'phase2'
+    assert cfg.pipeline_version == 'phase3'
+    assert cfg.feature_schema_version == 'http-v2'
     assert cfg.listen_port == 8080
     assert cfg.max_body_bytes == 1_048_576
 
