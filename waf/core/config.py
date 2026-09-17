@@ -34,15 +34,21 @@ class WAFConfig:
         max_response = int(os.getenv("WAF_MAX_RESPONSE_BYTES", "10485760"))
         if max_response <= 0:
             raise ValueError("WAF_MAX_RESPONSE_BYTES must be positive")
+        listen_port = int(os.getenv("WAF_LISTEN_PORT", "8080"))
+        if not 1 <= listen_port <= 65535:
+            raise ValueError("WAF_LISTEN_PORT must be in [1, 65535]")
+        timeout = float(os.getenv("WAF_REQUEST_TIMEOUT_SECONDS", "10.0"))
+        if timeout <= 0:
+            raise ValueError("WAF_REQUEST_TIMEOUT_SECONDS must be positive")
         return cls(
-            pipeline_version=os.getenv("WAF_PIPELINE_VERSION", cls.pipeline_version),
-            block_threshold=bounded_float("WAF_BLOCK_THRESHOLD", cls.block_threshold),
-            alert_threshold=bounded_float("WAF_ALERT_THRESHOLD", cls.alert_threshold),
+            pipeline_version=os.getenv("WAF_PIPELINE_VERSION", "phase2"),
+            block_threshold=bounded_float("WAF_BLOCK_THRESHOLD", 0.80),
+            alert_threshold=bounded_float("WAF_ALERT_THRESHOLD", 0.50),
             max_body_bytes=max_body,
-            feature_schema_version=os.getenv("WAF_FEATURE_SCHEMA", cls.feature_schema_version),
-            upstream_url=os.getenv("WAF_UPSTREAM_URL", cls.upstream_url),
-            listen_host=os.getenv("WAF_LISTEN_HOST", cls.listen_host),
-            listen_port=int(os.getenv("WAF_LISTEN_PORT", str(cls.listen_port))),
-            request_timeout_seconds=float(os.getenv("WAF_REQUEST_TIMEOUT_SECONDS", str(cls.request_timeout_seconds))),
+            feature_schema_version=os.getenv("WAF_FEATURE_SCHEMA", "http-v1"),
+            upstream_url=os.getenv("WAF_UPSTREAM_URL", "http://127.0.0.1:9000"),
+            listen_host=os.getenv("WAF_LISTEN_HOST", "127.0.0.1"),
+            listen_port=listen_port,
+            request_timeout_seconds=timeout,
             max_response_bytes=max_response,
         )
