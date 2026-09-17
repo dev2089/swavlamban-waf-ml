@@ -3,6 +3,8 @@ name: phase8-verification
 on:
   push:
     branches: [phase8-final]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
