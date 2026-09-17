@@ -111,9 +111,8 @@ def main() -> int:
             page.wait_for_timeout(10000)
             page.screenshot(path=str(ART / "dashboard-deployed.png"), full_page=True)
 
-            # Keep the final screen visible so the captured session is a real ~5 min
-            # walkthrough rather than a sub-minute click trace.
-            page.wait_for_timeout(50000)
+            # Hold the final state until the recorded walkthrough is >= 5 minutes.
+            page.wait_for_timeout(170000)
             context.close()
             browser.close()
 
@@ -123,10 +122,20 @@ def main() -> int:
         raw = videos[-1]
         final = ART / "PHASE10_DEMO_VIDEO.webm"
         raw.replace(final)
+        duration = None
+        if shutil_which("ffprobe"):
+            probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(final)], capture_output=True, text=True, check=True)
+            duration = float(probe.stdout.strip())
+            if duration < 295.0:
+                raise RuntimeError(f"demo video is only {duration:.2f}s; minimum required duration is 295s")
         if shutil_which("ffmpeg"):
             mp4 = ART / "PHASE10_DEMO_VIDEO.mp4"
             subprocess.run(["ffmpeg", "-y", "-i", str(final), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)], check=True, capture_output=True)
-        print({"video": str(final), "screenshots": 6})
+        (ART / "phase10_demo_video_metadata.json").write_text(
+            '{\n  "video": "PHASE10_DEMO_VIDEO.webm",\n  "minimum_required_seconds": 295,\n  "measured_seconds": ' + (f"{duration:.3f}" if duration is not None else 'null') + ',\n  "screenshots": 6\n}\n',
+            encoding="utf-8",
+        )
+        print({"video": str(final), "screenshots": 6, "duration_seconds": duration})
         return 0
     finally:
         if server.poll() is None:
