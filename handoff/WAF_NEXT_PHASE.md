@@ -1,16 +1,18 @@
-# Next Execution Step: Phase 3
+# Next Execution Step: Phase 4
 
-Build the production HTTP feature pipeline on top of the live Phase 2 edge.
+Attach supervised, unsupervised and behavioural ML to the existing canonical `RequestEnvelope -> http-v2 FeatureVector -> DetectionSignal -> DecisionResult` seam.
 
-## Phase 3 goal
-Replace the small baseline feature set with a versioned, security-focused HTTP feature schema covering request structure, payload characteristics, encodings, headers, methods, content types, URL normalization, and safe bounded body parsing without placing database/network work on the security fast path.
+## Phase 4 goal
+Build real ML detectors using reproducible datasets and actual HTTP-derived features. Keep the security fast path bounded and deterministic. Do not claim accuracy, precision, recall or latency numbers without an executable evaluation run.
 
-## Phase 3 acceptance
-- deterministic feature extraction from real intercepted HTTP requests;
-- explicit schema version and feature manifest;
-- URL/path/query normalization with encoded attack handling;
-- bounded parsing and malformed-input tests;
-- no secrets/PII unnecessarily retained in feature vectors;
-- regression tests against Phase 2 enforcement;
-- measurable extraction latency benchmark;
+## Phase 4 acceptance
+- supervised detector with train/validation/test separation;
+- unsupervised detector for anomaly detection;
+- behavioural detector over request windows;
+- calibrated/explicit risk semantics rather than fake probabilities;
+- model/feature/dataset versioning;
+- explainable detector signals with reasons/features;
+- regression against known SQLi/XSS/traversal/command signatures;
+- reproducible evaluation report with confusion matrix and latency;
+- fuzz/failure tests for model absence, malformed inputs and extreme feature values;
 - 9.9+ self-exam with critical-defect fail rule.
