@@ -1,4 +1,4 @@
-# Target Architecture and Phase 1 Implementation
+# Target Architecture - Phase 3
 
 ## North-star architecture
 
@@ -6,10 +6,10 @@
 Internet / client
       |
       v
-[Reverse proxy + open-source WAF adapter]     <-- Phase 2
+[Reverse proxy + open-source WAF adapter]
       |
       v
-[Request normalization]
+[Request normalization + bounded inspection]   <-- Phase 3
       |
       +--> [Signature/rule detectors]
       +--> [ML detectors]
@@ -35,30 +35,37 @@ Internet / client
         [model registry]
 ```
 
-## Phase 1 boundaries
+## Active fast path
 
-The new `waf/` package implements only the security-core seam. It does not intercept network traffic and it does not claim to be the finished WAF.
+`RequestEnvelope -> http-v2 FeatureVector -> detector signals -> DecisionResult`
 
-### Fast path
+The Phase 3 feature extractor is deterministic, versioned and bounded. It performs NFKC normalization, path/query-safe multi-pass URL decoding, bounded query parsing, normalized header inspection, body decoding and numeric feature generation.
 
-`RequestEnvelope -> FeatureVector -> DetectionSignal[] -> DecisionResult`
+## http-v2 properties
 
-No database writes, network calls, or dashboard work are required to make a decision.
+- 38 numeric features.
+- Every feature is clamped to `[0,1]`.
+- No raw payload is stored in the feature vector.
+- URL decoding is capped at three passes.
+- Query parsing is capped at 256 fields.
+- Header values are capped at 4 KiB for feature extraction.
+- Body scanning is capped at 256 KiB.
+- Path and query use separate decoding semantics to preserve path `+` characters.
 
-### Slow path
+## Phase boundaries
 
-`DecisionResult -> event schema -> sink -> persistent telemetry` will be attached in later phases.
+Phase 1 established security-core contracts.
+Phase 2 established live HTTP interception and real pre-forwarding enforcement.
+Phase 3 establishes the production HTTP feature layer used by the edge WAF.
+
+Later phases add production ML, behaviour windows, continuous learning, production storage/authentication, dashboard migration and final challenge evidence.
 
 ## Design rules
 
-1. Transport adapters may change; security contracts must not.
-2. Every ML feature/model has an explicit version.
-3. Scores are normalized to `[0,1]`; they are risk scores, not probabilities.
-4. A decision is deterministic for fixed request and detector outputs.
-5. Oversized bodies are bounded before feature extraction.
-6. Persistence is an adapter, not a prerequisite of a security decision.
-7. The core package contains no credentials and no browser-facing security policy.
-
-## Migration strategy
-
-The legacy `backend/server.py`, `ml_model.py`, and dashboard remain untouched in Phase 1. Phase 2 will migrate behaviour behind these contracts and then retire duplicate paths after parity tests pass.
+1. Transport adapters may change; security contracts remain stable.
+2. Feature/model schemas are explicitly versioned.
+3. Risk scores are normalized characteristics, not probabilities.
+4. Decisions are deterministic for fixed inputs and detector outputs.
+5. Size and parsing limits are enforced before expensive inspection.
+6. Persistence is asynchronous and outside the decision-critical path.
+7. The core feature vector contains no secrets or raw request content.
