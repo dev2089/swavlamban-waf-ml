@@ -25,9 +25,20 @@ jobs:
         run: python -m compileall -q waf tests scripts
       - name: Phase 8 master exam
         run: python scripts/phase8_master_exam.py
-      - name: Upload Phase 8 exam result
+      - name: Record Phase 8 ledger
+        run: |
+          python scripts/record_phase8_ledger.py
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          con=sqlite3.connect('state/project_ledger.db')
+          Path('state/phase8_ledger.sql').write_text('\n'.join(con.iterdump())+'\n', encoding='utf-8')
+          PY
+      - name: Build portable Phase 8 handoff
+        run: python scripts/build_phase8_handoff.py
+      - name: Upload Phase 8 handoff
         uses: actions/upload-artifact@v4
         with:
-          name: waf-phase8-evidence
-          path: phase8_master_exam_result.json
+          name: waf-phase8-handoff
+          path: WAF_PHASE8_FINAL_HANDOFF.zip
           if-no-files-found: error
