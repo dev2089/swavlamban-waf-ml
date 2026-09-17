@@ -1,34 +1,35 @@
 # GitHub State
 
-## Authoritative repository state
+## Repository
 - Repository: `dev2089/swavlamban-waf-ml`
-- Baseline main commit: `1cc4f91dd6828039f834ae4dc2b466191d04f229`
-- Phase 1 authoritative branch: `phase1-final`
-- Phase 2 authoritative branch: `phase2-final`
-- Phase 3 authoritative branch: `phase3-final`
-- Phase 4 authoritative branch: `phase4-final`
-- Phase 5 authoritative branch: `phase5-final`
-- Phase 6 authoritative branch: `phase6-final`
-- Phase 7 authoritative branch: `phase7-final`
+- Initial inherited main baseline: `1cc4f91dd6828039f834ae4dc2b466191d04f229`
 - Main remains intentionally untouched by milestone work.
+- Current release branch: `phase10-final`
+- Current engineering changes are being validated on `phase10-completeness-fix` before that branch tip is promoted to the release branch.
 
-## Phase 7 repository state
-Phase 7 contains the baseline/feedback/drift learning-control implementation, evidence provenance, deterministic tests and master exam, ledger recording, Supabase migration contract, CI verification workflow and portable future-chat handoff. Phase 7 is based on the verified Phase 6 checkpoint and preserves all earlier milestone evidence.
+## Historical milestone branches
+`phase1-final`, `phase2-final`, `phase3-final`, `phase4-final`, `phase5-final`, `phase6-final`, `phase7-final` preserve prior checkpoints and evidence.
 
-## Phase 7 verification
-- Local Phase 7 master exam: PASS 10.0/10.0, cutoff 9.9, critical defects 0.
-- Local full regression: 64/64 PASS.
-- Local focused Phase 7 suite: 5/5 PASS.
-- Compile gate: PASS.
-- Learning-control smoke: PASS.
-- Privacy/static gate: PASS.
-- CI workflow: `.github/workflows/phase7.yml` records the independent verification path.
+## Phase 10 verified CI checkpoint before completeness delta
+- workflow: `phase10-release-candidate`
+- run: `35269148465` (run 93)
+- job: `105363774420`
+- tested head: `8c0209b9620f989db280a24985458ad986bc21ec`
+- conclusion: **SUCCESS**
+- all release-gate steps passed, including clean checkout, repository hygiene, compile, gateway startup, master exam, binary artifacts, dependency/commit capture, handoff packaging and uploads.
 
-## Phase 7 branch checkpoint
-The Phase 7 branch is built from the verified Phase 6 head and must be treated as the authoritative source for this milestone. The exact final CI commit/run/artifact identifiers are recorded in `WAF_PROJECT_STATE.json` and `handoff/PHASE7_FINAL_STATUS.json` after the workflow completes.
+## Phase 10 completeness delta now under validation
+The post-run audit identified two official Challenge 3 fidelity gaps that were not safe to classify as complete merely from architecture:
+1. semi-supervised learning was not present in the live ensemble;
+2. outbound HTTP response content was not inspected by the live gateway.
 
-## Important honesty boundary
-Phase 7 evidence is deterministic repository/local learning-control verification plus CI reproduction. Synthetic model metrics are reproducibility evidence, not Internet-scale WAF accuracy. Live Supabase application, production storage/auth/RBAC, ModSecurity/Coraza, TLS deployment, full external load/failure evidence and final challenge completion remain open.
+The completeness branch adds a deterministic `SelfTrainingClassifier`-based semi-supervised detector and a real outbound response anomaly detector with a gateway E2E script. The master exam has been strengthened so these are required executable checks rather than prose claims.
 
-## Continuation rule
-A future ChatGPT conversation should read `handoff/START_HERE.md`, `WAF_PROJECT_STATE.json`, the Phase 7 status/log and `state/project_ledger.db` or `state/phase7_ledger.sql` before modifying the project.
+## Final release rule
+Do not move `phase10-final` to the completeness branch until the updated code passes a fresh clean-checkout CI release gate and the resulting auditor bundle is inspected.
+
+## Live Supabase
+Phase 10 live Supabase project: `smpmvabjafmrutdhbfbl` (`supabase-pink-village`). Schema/RLS/privilege verification and security-hardening evidence are preserved in the handoff. Secrets are not stored in the repository.
+
+## Honesty boundary
+The CI environment can verify local TLS termination, nginx + ModSecurity enforcement, deterministic challenge scenarios, local bounded load, dashboard behavior and model/runtime integration. It cannot honestly claim public certificate issuance/rotation or Internet-scale distributed capacity.
