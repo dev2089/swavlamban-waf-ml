@@ -1,377 +1,79 @@
-# WAF ML - Next Level Integration
+# WAF ML Setup and Verification
 
-Advanced Web Application Firewall powered by Machine Learning with real-time threat detection, beautiful dashboard, and comprehensive analytics.
+## Scope
 
-## Features
+This repository implements the Swavlamban 2025 Hackathon Challenge 3 candidate. The active implementation lives under `waf/`. It combines an open-source WAF edge, HTTP feature extraction, deterministic rules, supervised/unsupervised/behavioural signals, explainable decisions, managed-rule lifecycle controls, an authenticated operator dashboard, and bounded asynchronous telemetry.
 
-### Real-Time Threat Detection
-- ML-powered anomaly detection using Isolation Forest and Autoencoder
-- Hybrid ensemble model for maximum accuracy
-- Real-time WebSocket updates for instant threat notifications
-- Automatic rule generation and management
-
-### Beautiful Dashboard
-- Modern, responsive UI built with React and Tailwind CSS
-- Real-time metrics and statistics
-- Interactive charts and visualizations with Recharts
-- Live threat monitoring with filtering and search
-- Comprehensive analytics dashboard
-- Security rules management interface
-
-### Advanced Analytics
-- Threat distribution by type and severity
-- Hourly threat patterns
-- Top attacker identification
-- Geographic attack analysis
-- Performance metrics and trends
-
-### API-First Architecture
-- RESTful API with FastAPI
-- WebSocket support for real-time updates
-- Comprehensive threat analysis endpoints
-- Rule management APIs
-- Health monitoring and statistics
-
-### Database Integration
-- Supabase for scalable data persistence
-- Real-time database subscriptions
-- Comprehensive threat logging
-- Analytics and metrics storage
-- Alert management system
-
-## Tech Stack
-
-### Frontend
-- React 18
-- Vite (Build tool)
-- Tailwind CSS (Styling)
-- Recharts (Data visualization)
-- Lucide React (Icons)
-- Supabase Client
-
-### Backend
-- FastAPI (Python web framework)
-- TensorFlow/Keras (ML models)
-- Scikit-learn (ML algorithms)
-- Supabase (Database)
-- WebSockets (Real-time communication)
-- Uvicorn (ASGI server)
-
-### Database
-- Supabase (PostgreSQL)
-- Row Level Security enabled
-- Real-time subscriptions
-- Comprehensive indexing
-
-## Installation
-
-### Prerequisites
-- Node.js 18+ and npm
-- Python 3.9+
-- Supabase account (free tier works)
-
-### Step 1: Clone and Install Dependencies
+## Install
 
 ```bash
-# Install frontend dependencies
-npm install
-
-# Install backend dependencies
-cd backend
-pip install -r requirements.txt
-cd ..
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-### Step 2: Configure Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-Get these values from your Supabase project settings.
-
-### Step 3: Database Setup
-
-The database tables are already created via Supabase migrations:
-- threats
-- security_rules
-- request_logs
-- analytics
-- alerts
-- ml_models
-
-### Step 4: Generate Security Rules
+For the process-level WAF evidence harness on Ubuntu/Debian-like systems:
 
 ```bash
-# Start the backend server first
-python backend/server.py
-
-# In another terminal, generate rules via API
-curl -X POST http://localhost:8000/api/rules/generate
+sudo apt-get update
+sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl
 ```
 
-## Running the Application
+## Run
 
-### Development Mode
+API and dashboard compatibility entry point:
 
-Terminal 1 - Backend:
 ```bash
 python backend/server.py
 ```
 
-Terminal 2 - Frontend:
-```bash
-npm run dev
-```
-
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-
-### Production Build
+Canonical WAF gateway:
 
 ```bash
-# Build frontend
-npm run build
-
-# Run backend in production
-uvicorn backend.server:app --host 0.0.0.0 --port 8000
+python -m waf.gateway.proxy
 ```
 
-## Using the Demo Data Generator
+The gateway inspects requests before forwarding allowed traffic to its configured upstream. A blocked request receives HTTP 403 and is not forwarded to the protected upstream.
 
-Generate realistic threat data for testing:
+## Test
 
 ```bash
-python backend/demo_data_generator.py
+python -m pytest -q
+python -m compileall -q waf tests scripts
+python scripts/phase10_demo.py
+python scripts/phase10_rule_replay.py
+python scripts/phase10_tls_e2e.py
+python scripts/phase10_waf_enforcement_e2e.py
+python scripts/phase10_master_exam.py
 ```
-
-Options:
-1. Continuous traffic generation (customizable rate and threat ratio)
-2. Burst of requests (quick test)
-3. Targeted attack simulation (specific attack types)
-4. Quick demo (10 sample requests)
-
-Example continuous traffic:
-```bash
-# This will generate 30 requests per minute with 30% threats
-# Press Ctrl+C to stop
-python backend/demo_data_generator.py
-# Select option 1
-# Enter 30 for requests per minute
-# Enter 0.3 for threat ratio
-```
-
-## API Endpoints
-
-### Threat Analysis
-```bash
-POST /api/analyze
-Content-Type: application/json
-
-{
-  "method": "GET",
-  "uri": "/api/users?id=' OR 1=1--",
-  "source_ip": "192.168.1.100",
-  "headers": {...},
-  "query_params": {...},
-  "body": null
-}
-```
-
-### Get Threats
-```bash
-GET /api/threats?limit=100
-```
-
-### Get Statistics
-```bash
-GET /api/stats
-```
-
-### Generate Rules
-```bash
-POST /api/rules/generate
-```
-
-### Get Rules
-```bash
-GET /api/rules
-```
-
-### WebSocket Connection
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws');
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Real-time update:', data);
-};
-```
-
-## Dashboard Features
-
-### Main Dashboard
-- Total threats detected
-- Blocked requests count
-- Active security rules
-- Detection rate percentage
-- Threat trend chart (24h)
-- Recent threats list
-
-### Threat Monitor
-- Real-time threat feed
-- Filter by severity (critical, high, medium, low)
-- Search by IP, endpoint, or threat type
-- Detailed threat information
-- Confidence scores
-- Payload inspection
-
-### Analytics
-- Threat distribution by type (bar chart)
-- Severity distribution (pie chart)
-- Hourly threat patterns (line chart)
-- Top attacker IPs
-- Geographic analysis
-
-### Rules Manager
-- View all security rules
-- Enable/disable rules
-- Delete rules
-- Create custom rules
-- Rule confidence scores
-- Pattern visualization
-
-## ML Models
-
-### Isolation Forest
-- Unsupervised anomaly detection
-- 100 estimators
-- 10% contamination rate
-- Fast inference (~10ms)
-
-### Autoencoder
-- Deep learning anomaly detection
-- Encoding dimension: 8
-- Hidden layers: [32, 16]
-- Reconstruction error-based detection
-
-### Hybrid Ensemble
-- Combines both models
-- Weighted voting mechanism
-- 96.5% accuracy
-- 95.2% precision
-- 97.8% recall
-
-## Security Features
-
-### Row Level Security (RLS)
-All database tables have RLS enabled with appropriate policies for secure data access.
-
-### Threat Detection
-- SQL Injection
-- Cross-Site Scripting (XSS)
-- Path Traversal
-- Command Injection
-- Anomaly Detection
-
-### Real-Time Alerts
-- Critical and high severity threats trigger automatic alerts
-- WebSocket notifications
-- Alert acknowledgment system
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    React Frontend (Vite)                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │Dashboard │  │ Threats  │  │Analytics │  │  Rules   │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
-└─────────────────────────┬───────────────────────────────────┘
-                          │ HTTP/WebSocket
-┌─────────────────────────▼───────────────────────────────────┐
-│                  FastAPI Backend                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
-│  │ Threat Analysis │  │ ML Engine       │  │ Rules Engine│ │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                  Supabase Database                           │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
-│  │ Threats │ │  Rules  │ │  Logs   │ │Analytics│          │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │
-└──────────────────────────────────────────────────────────────┘
+```text
+Client
+  -> nginx + ModSecurity
+  -> Swavlamban WAF gateway
+  -> normalization / feature extraction
+  -> rules + supervised ML + anomaly + behaviour signals
+  -> ALLOW/BLOCK decision
+  -> protected upstream when allowed
+
+Decision events
+  -> bounded async telemetry
+  -> server-side persistence/metrics
+  -> authenticated operator dashboard
+
+Reviewed feedback
+  -> baseline/drift/challenger learning controls
+  -> explicit model promotion/rollback
 ```
 
-## Performance
+## Evidence policy
 
-- API Response Time: < 100ms
-- ML Inference Time: < 50ms
-- WebSocket Latency: < 10ms
-- Database Queries: < 20ms
-- Frontend Load Time: < 2s
+Every release metric must be generated by an executable test. The deterministic CI ML corpus is synthetic and is not field-traffic accuracy. The load harness is a bounded local benchmark and does not prove Internet-scale capacity. Local HTTPS evidence uses an intentionally self-signed certificate for reproducible TLS termination testing.
 
-## Troubleshooting
+## Release evidence
 
-### Frontend won't start
-```bash
-# Clear node modules and reinstall
-rm -rf node_modules
-npm install
-npm run dev
-```
+The Phase 10 workflow produces deterministic evidence JSON, security/reliability/performance reports, requirement traceability, a claim ledger, a negative-evidence register, a 5-minute demo recording, a technical PDF, a 10-slide presentation and a portable auditor package.
 
-### Backend connection issues
-```bash
-# Check environment variables
-cat .env
-
-# Verify Supabase connection
-python -c "from supabase import create_client; print('OK')"
-```
-
-### ML models not loading
-```bash
-# The models train automatically on startup
-# Check backend logs for errors
-python backend/server.py
-```
-
-### No data in dashboard
-```bash
-# Generate demo data
-python backend/demo_data_generator.py
-# Select option 4 for quick demo
-```
-
-## Contributing
-
-This is a demonstration project showcasing:
-- Modern web application architecture
-- Real-time data visualization
-- Machine learning integration
-- Security best practices
-- Comprehensive API design
-
-## License
-
-MIT License
-
-## Support
-
-For issues or questions:
-- Check the API documentation at http://localhost:8000/docs
-- Review the source code documentation
-- Test with the demo data generator
-
----
-
-Built with modern technologies for next-level WAF protection.
+Historical phase documents remain in the repository for traceability. They are not automatically current implementation claims.
