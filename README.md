@@ -1,34 +1,28 @@
 # Swavlamban WAF ML
 
-ML-augmented Web Application Firewall prototype for **Challenge 3**.
+ML-integrated open-source WAF for Challenge 3.
 
-## Verified milestones
-- Phase 1: PASS, 10.0/10.0
-- Phase 2: PASS, 10.0/10.0
-- Phase 3: PASS, 10.0/10.0
-- Phase 4: PASS, 10.0/10.0, critical defects 0
-- Phase 5: PASS, 10.0/10.0, 54/54 regression
-- Phase 6: PASS, 10.0/10.0, 59/59 regression
-- Phase 7: PASS, 10.0/10.0, 64/64 regression
-- Phase 8: PASS locally, 10.0/10.0, 70/70 regression, 6/6 security tests, 0 critical defects
-- Phase 9: PASS locally, 10.0/10.0, 82/82 regression, 13/13 Phase 8 continuity, 5/5 Phase 9 API tests, 0 failed critical checks
+## Current milestone
+**Phase 9 complete under the 9.9 hard gate:** 10.0/10.0, 82/82 full regression PASS, 13/13 Phase 8 continuity PASS, 5/5 Phase 9 API tests PASS, compile/static/TLS/scenario gates PASS, zero critical failures.
 
-## Phase 9
-Production-facing FastAPI integration now enforces the Phase 8 signed bearer-token/RBAC model at runtime. Runtime persistence has a server-only Supabase REST adapter, sanitized telemetry and SHA-256 source identity hashing. A Phase 9 SQL migration locks legacy runtime tables behind authenticated roles, removes permissive anonymous access and scrubs raw request material.
+Authoritative branch: `phase9-final`.
 
-Controlled evidence includes local nginx TLS termination, known SQL/XSS and command-variant scenarios, API-burst behavioural detection, and a 500-request in-process performance benchmark. The executable Phase 9 master exam applies a hard 9.9 cutoff and zero-critical-failure rule.
+Phase 9 also verified the live Supabase project `supabase-pink-village` (`smpmvabjafmrutdhbfbl`): the WAF schema and security migration chain is applied, expected tables exist, RLS is enabled, anonymous runtime access is closed, and runtime writes are service-role controlled.
 
-Run the Phase 9 gate:
-```bash
-python -m pytest -q
-python -m compileall -q waf tests scripts
-python scripts/phase9_master_exam.py
-python scripts/record_phase9_ledger.py
-python scripts/build_phase9_handoff.py
-```
+## Read-first continuation
+See `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md`. Then read `handoff/PHASE9_FINAL_STATUS.md`, `handoff/WAF_PHASE9_LOG.md`, `phase9_master_exam_result.json`, `phase9_scenario_evidence.json`, and the portable ledger under `state/`.
 
-## Evidence and continuation
-Read `handoff/START_HERE.md` first. The portable project ledger is `state/project_ledger.db`; the Phase 9 SQL checkpoint is `state/phase9_ledger.sql`; executable evidence is in `phase9_master_exam_result.json`, `phase9_scenario_evidence.json` and `phase9_tls_evidence.json`.
+## Phase 9 completed
+- secure production-facing FastAPI runtime adapter
+- signed bearer authentication and explicit RBAC
+- server-only Supabase REST persistence
+- privacy-safe telemetry and SHA-256 source identity hashing
+- legacy runtime-table lockdown and raw-request cleanup
+- local nginx HTTPS/TLS integration
+- deterministic Challenge 3 attack/scenario evidence
+- 500-request in-process performance measurement
+- executable master exam, ledger, remediation history and future-chat handoff
+- live Supabase schema/RLS/privilege verification
 
-## Honesty boundary
-Phase 9 is a repository/local integration milestone. It does not claim live Supabase migration/application, external public certificate operations, ModSecurity/Coraza installation, Internet-scale load/failure testing, authenticated dashboard completion, final demo/report/slides or final Challenge 3 submission. Local TLS and performance measurements are not external-deployment proof.
+## Still open for final submission
+External certificate/public HTTPS operations, ModSecurity/Coraza runtime integration, Internet-scale distributed load/failure validation, authenticated dashboard UX, five-minute demo, technical report, presentation slides and final release/submission gate. GitHub Actions Phase 9 CI remains `NOT_OBSERVED` until a real PR-triggered run is returned.
