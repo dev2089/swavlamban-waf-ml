@@ -21,6 +21,8 @@ def sha(path: Path) -> str:
 
 
 def setup(conn: sqlite3.Connection) -> None:
+    base_schema = (ROOT / "state/project_ledger_schema.sql").read_text(encoding="utf-8")
+    conn.executescript(base_schema)
     conn.executescript(
         """
         CREATE TABLE IF NOT EXISTS phase7_baselines (
