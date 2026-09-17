@@ -33,7 +33,8 @@ The authoritative Phase 9 checkpoint remains preserved at **10.0/10.0**, **82/82
 - SQL pattern: BLOCK
 - XSS pattern: BLOCK
 - command-injection variant: BLOCK
-- latest 500-request in-process benchmark: mean **8.9474 ms**, max **56.9699 ms**
+- latest 500-request in-process benchmark: mean **8.7090 ms**, max **21.8355 ms**
+- benchmark is environment-dependent and excludes network/TLS/upstream distributed-load time
 - raw payload/header/query retention: **false**
 
 ## Model-runtime note
