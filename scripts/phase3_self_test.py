@@ -28,11 +28,26 @@ def benchmark() -> None:
     for request in requests:
         extractor.extract(request)
     elapsed = time.perf_counter() - started
-    print(f"benchmark: {len(requests)} extractions in {elapsed:.4f}s ({len(requests)/elapsed:.1f} req/s), features={len(extractor.extract(requests[0]).values)}")
+    print(
+        f"benchmark: {len(requests)} extractions in {elapsed:.4f}s "
+        f"({len(requests)/elapsed:.1f} req/s), features={len(extractor.extract(requests[0]).values)}"
+    )
 
 
 if __name__ == "__main__":
     run(sys.executable, "-m", "compileall", "-q", "waf", "tests")
-    run(sys.executable, "-m", "pytest", "-q", "tests/test_features.py", "tests/test_pipeline.py", "tests/test_phase2.py", "tests/test_phase3_features.py", "tests/test_phase3_edge.py")
+    run(
+        sys.executable,
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_config.py",
+        "tests/test_features.py",
+        "tests/test_pipeline.py",
+        "tests/test_phase2.py",
+        "tests/test_phase3_features.py",
+        "tests/test_phase3_edge.py",
+        "tests/test_regression.py",
+    )
     benchmark()
     print("PHASE3 SELF-TEST: PASS")
