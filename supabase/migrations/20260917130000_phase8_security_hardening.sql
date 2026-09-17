@@ -1,0 +1,65 @@
+/* Phase 8: production storage, authentication/RBAC, secrets and data minimization.
+   This migration is the production Postgres/Supabase contract. It is safe to review
+   and apply through the project's normal migration pipeline; it is NOT claimed live-applied
+   by this milestone.
+*/
+CREATE OR REPLACE FUNCTION public.waf_actor_role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT COALESCE(auth.jwt() -> 'app_metadata' ->> 'role', '') $$;
+CREATE OR REPLACE FUNCTION public.waf_is_operator() RETURNS boolean LANGUAGE sql STABLE AS $$ SELECT auth.role() = 'service_role' OR public.waf_actor_role() IN ('analyst','rule_approver','model_approver','admin') $$;
+CREATE TABLE IF NOT EXISTS public.waf_runtime_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),request_id text NOT NULL,event_type text NOT NULL,schema_version text NOT NULL,decision text NOT NULL CHECK (decision IN ('allow','alert','block')),risk_score numeric NOT NULL CHECK (risk_score BETWEEN 0 AND 1),event_json jsonb NOT NULL,occurred_at timestamptz NOT NULL,expires_at timestamptz NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),CHECK (NOT (event_json ?| ARRAY['body','payload','query','raw_query','headers','raw_headers','source_ip','client_ip','uri'])));
+CREATE INDEX IF NOT EXISTS idx_waf_runtime_events_expiry ON public.waf_runtime_events(expires_at);
+CREATE INDEX IF NOT EXISTS idx_waf_runtime_events_request ON public.waf_runtime_events(request_id);
+CREATE TABLE IF NOT EXISTS public.waf_security_audit (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),actor_id text NOT NULL,role text NOT NULL,action text NOT NULL,target_type text NOT NULL,target_id text NOT NULL,status text NOT NULL,reason text NOT NULL,metadata jsonb NOT NULL DEFAULT '{}'::jsonb,occurred_at timestamptz NOT NULL DEFAULT now(),expires_at timestamptz NOT NULL,CHECK (NOT (metadata ?| ARRAY['body','payload','query','raw_query','headers','raw_headers','source_ip','client_ip','uri','secret','token','password'])));
+CREATE INDEX IF NOT EXISTS idx_waf_security_audit_expiry ON public.waf_security_audit(expires_at);
+ALTER TABLE public.waf_runtime_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.waf_security_audit ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS waf_runtime_events_select ON public.waf_runtime_events;
+CREATE POLICY waf_runtime_events_select ON public.waf_runtime_events FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS waf_runtime_events_insert ON public.waf_runtime_events;
+CREATE POLICY waf_runtime_events_insert ON public.waf_runtime_events FOR INSERT TO authenticated WITH CHECK (public.waf_is_operator());
+DROP POLICY IF EXISTS waf_runtime_events_delete ON public.waf_runtime_events;
+CREATE POLICY waf_runtime_events_delete ON public.waf_runtime_events FOR DELETE TO authenticated USING (public.waf_actor_role() = 'admin');
+DROP POLICY IF EXISTS waf_security_audit_select ON public.waf_security_audit;
+CREATE POLICY waf_security_audit_select ON public.waf_security_audit FOR SELECT TO authenticated USING (public.waf_actor_role() IN ('rule_approver','model_approver','admin'));
+DROP POLICY IF EXISTS waf_security_audit_insert ON public.waf_security_audit;
+CREATE POLICY waf_security_audit_insert ON public.waf_security_audit FOR INSERT TO authenticated WITH CHECK (public.waf_is_operator() AND actor_id = coalesce(auth.jwt() ->> 'sub', actor_id));
+DROP POLICY IF EXISTS waf_security_audit_delete ON public.waf_security_audit;
+CREATE POLICY waf_security_audit_delete ON public.waf_security_audit FOR DELETE TO authenticated USING (public.waf_actor_role() = 'admin');
+ALTER TABLE IF EXISTS public.decision_evidence ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow authenticated read access to decision evidence" ON public.decision_evidence;
+DROP POLICY IF EXISTS "Allow authenticated insert of decision evidence" ON public.decision_evidence;
+CREATE POLICY "waf decision evidence read" ON public.decision_evidence FOR SELECT TO authenticated USING (true);
+CREATE POLICY "waf decision evidence insert" ON public.decision_evidence FOR INSERT TO authenticated WITH CHECK (public.waf_is_operator() AND (privacy->>'raw_payload_retained')::boolean = false AND (privacy->>'raw_headers_retained')::boolean = false AND (privacy->>'raw_query_retained')::boolean = false);
+DO $$ DECLARE t text; BEGIN FOREACH t IN ARRAY ARRAY['threats','request_logs','analytics','alerts','ml_models','security_rules'] LOOP IF to_regclass('public.' || t) IS NOT NULL THEN EXECUTE format('REVOKE ALL ON TABLE public.%I FROM anon, authenticated', t); END IF; END LOOP; END $$;
+DROP POLICY IF EXISTS "Allow public read access to threats" ON public.threats;
+DROP POLICY IF EXISTS "Allow public insert to threats" ON public.threats;
+DROP POLICY IF EXISTS "Allow public read access to request_logs" ON public.request_logs;
+DROP POLICY IF EXISTS "Allow public insert to request_logs" ON public.request_logs;
+DROP POLICY IF EXISTS "Allow public read access to analytics" ON public.analytics;
+DROP POLICY IF EXISTS "Allow public insert to analytics" ON public.analytics;
+DROP POLICY IF EXISTS "Allow public read access to alerts" ON public.alerts;
+DROP POLICY IF EXISTS "Allow public insert to alerts" ON public.alerts;
+DROP POLICY IF EXISTS "Allow public update to alerts" ON public.alerts;
+DROP POLICY IF EXISTS "Allow public read access to ml_models" ON public.ml_models;
+DROP POLICY IF EXISTS "Allow public insert to ml_models" ON public.ml_models;
+DROP POLICY IF EXISTS "Allow public read access to security_rules" ON public.security_rules;
+DROP POLICY IF EXISTS "Allow public insert to security_rules" ON public.security_rules;
+DO $$ DECLARE t text; BEGIN FOREACH t IN ARRAY ARRAY['phase7_baselines','phase7_feedback','phase7_drift_reports','phase7_model_runs','phase7_model_events'] LOOP IF to_regclass('public.' || t) IS NOT NULL THEN EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t); EXECUTE format('REVOKE ALL ON TABLE public.%I FROM anon', t); END IF; END LOOP; END $$;
+DROP POLICY IF EXISTS phase7_feedback_read ON public.phase7_feedback;
+CREATE POLICY phase7_feedback_read ON public.phase7_feedback FOR SELECT TO authenticated USING (public.waf_is_operator());
+DROP POLICY IF EXISTS phase7_feedback_write ON public.phase7_feedback;
+CREATE POLICY phase7_feedback_write ON public.phase7_feedback FOR INSERT TO authenticated WITH CHECK (public.waf_is_operator());
+DROP POLICY IF EXISTS phase7_feedback_review ON public.phase7_feedback;
+CREATE POLICY phase7_feedback_review ON public.phase7_feedback FOR UPDATE TO authenticated USING (public.waf_actor_role() IN ('analyst','rule_approver','model_approver','admin')) WITH CHECK (public.waf_actor_role() IN ('analyst','rule_approver','model_approver','admin'));
+DROP POLICY IF EXISTS phase7_control_read ON public.phase7_baselines;
+CREATE POLICY phase7_control_read ON public.phase7_baselines FOR SELECT TO authenticated USING (public.waf_is_operator());
+DROP POLICY IF EXISTS phase7_control_read ON public.phase7_drift_reports;
+CREATE POLICY phase7_control_read ON public.phase7_drift_reports FOR SELECT TO authenticated USING (public.waf_is_operator());
+DROP POLICY IF EXISTS phase7_model_runs_read ON public.phase7_model_runs;
+CREATE POLICY phase7_model_runs_read ON public.phase7_model_runs FOR SELECT TO authenticated USING (public.waf_is_operator());
+DROP POLICY IF EXISTS phase7_model_events_read ON public.phase7_model_events;
+CREATE POLICY phase7_model_events_read ON public.phase7_model_events FOR SELECT TO authenticated USING (public.waf_actor_role() IN ('model_approver','admin'));
+DROP POLICY IF EXISTS phase7_model_events_insert ON public.phase7_model_events;
+CREATE POLICY phase7_model_events_insert ON public.phase7_model_events FOR INSERT TO authenticated WITH CHECK (public.waf_actor_role() IN ('model_approver','admin'));
+CREATE OR REPLACE FUNCTION public.waf_purge_expired_runtime_events(p_before timestamptz) RETURNS integer LANGUAGE plpgsql SECURITY INVOKER AS $$ DECLARE deleted_count integer; BEGIN IF auth.role() <> 'service_role' AND public.waf_actor_role() <> 'admin' THEN RAISE EXCEPTION 'admin authorization required'; END IF; DELETE FROM public.waf_runtime_events WHERE expires_at <= p_before; GET DIAGNOSTICS deleted_count = ROW_COUNT; RETURN deleted_count; END; $$;
+REVOKE ALL ON FUNCTION public.waf_purge_expired_runtime_events(timestamptz) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.waf_purge_expired_runtime_events(timestamptz) TO authenticated;
