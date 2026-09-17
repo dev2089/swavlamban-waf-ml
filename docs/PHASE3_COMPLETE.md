@@ -26,10 +26,11 @@ Build and wire a deterministic, versioned, bounded HTTP feature pipeline suitabl
 - `python -m compileall -q waf tests` -> PASS.
 - Full local regression suite -> 34/34 PASS.
 - Randomized feature fuzz -> 20,000 HTTP-like requests, 0 exceptions.
-- Final feature benchmark -> 100,000 extractions, 40,134.9 req/s.
-- Final end-to-end proxy benchmark -> 5,000 requests, 4,500 allowed, 500 blocked, 2,599.5 req/s, 1,000 bounded events.
+- Latest feature benchmark -> 100,000 extractions, 33,527.0 req/s.
+- Latest end-to-end proxy benchmark -> 5,000 requests, 4,500 allowed, 500 blocked, 2,764.7 req/s, 1,000 bounded events.
 - Static secret scan -> PASS.
 - TODO/FIXME/pass-only scan over Phase 3 code -> PASS.
+- Self-test runner -> PASS.
 
 ## Acceptance gates
 1. Explicit versioned schema -> PASS.
