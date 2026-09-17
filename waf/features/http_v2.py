@@ -23,6 +23,7 @@ class ProductionHTTPFeatureExtractor:
     """Deterministic, bounded HTTP feature pipeline for the WAF fast path."""
 
     schema_version = SCHEMA_VERSION
+    max_headers = 128
     max_header_bytes = 16_384
     max_body_scan_bytes = 262_144
 
@@ -48,7 +49,7 @@ class ProductionHTTPFeatureExtractor:
             "normalized_path_length": min(len(normalized_target.split("?", 1)[0]), 8192) / 8192.0,
             "query_length": min(len(query), 16_384) / 16_384.0,
             "body_length": min(len(request.body), 1_048_576) / 1_048_576.0,
-            "header_count": min(len(headers), 128) / 128.0,
+            "header_count": min(len(headers), self.max_headers) / self.max_headers,
             "header_bytes": min(header_bytes, self.max_header_bytes) / self.max_header_bytes,
             "query_param_count": min(len(query_pairs), 128) / 128.0,
             "unique_query_key_count": min(len(set(query_keys)), 128) / 128.0,
@@ -93,6 +94,8 @@ class ProductionHTTPFeatureExtractor:
     def _normalized_headers(headers) -> dict[str, str]:
         normalized: dict[str, str] = {}
         for key, value in headers.items():
+            if len(normalized) >= ProductionHTTPFeatureExtractor.max_headers:
+                break
             name = unicodedata.normalize("NFKC", str(key)).strip().lower()
             if name and name not in normalized:
                 normalized[name] = unicodedata.normalize("NFKC", str(value))[:4096]
