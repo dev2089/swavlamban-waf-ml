@@ -43,7 +43,13 @@ def main() -> int:
         "WAF_CLOCK_SKEW_SECONDS": "30",
         "PYTHONPATH": str(ROOT),
     })
-    server = subprocess.Popen([sys.executable, "-m", "uvicorn", "waf.api.production_api:app", "--host", "127.0.0.1", "--port", "18000"], cwd=ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    server = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "waf.api.production_api:app", "--host", "127.0.0.1", "--port", "18000"],
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
     video_dir = ART / "demo_video_raw"
     video_dir.mkdir(exist_ok=True)
     try:
@@ -60,7 +66,11 @@ def main() -> int:
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
-            context = browser.new_context(record_video_dir=str(video_dir), viewport={"width": 1440, "height": 900}, device_scale_factor=1)
+            context = browser.new_context(
+                record_video_dir=str(video_dir),
+                viewport={"width": 1440, "height": 900},
+                device_scale_factor=1,
+            )
             page = context.new_page()
             page.goto("http://127.0.0.1:18000/dashboard", wait_until="networkidle")
             page.screenshot(path=str(ART / "dashboard-initial.png"), full_page=True)
@@ -111,8 +121,9 @@ def main() -> int:
             page.wait_for_timeout(10000)
             page.screenshot(path=str(ART / "dashboard-deployed.png"), full_page=True)
 
-            # Hold the final state until the recorded walkthrough is >= 5 minutes.
-            page.wait_for_timeout(170000)
+            # Hold the final state so the encoded walkthrough remains comfortably
+            # over five minutes even when the recorder trims browser tail frames.
+            page.wait_for_timeout(185000)
             context.close()
             browser.close()
 
@@ -124,15 +135,29 @@ def main() -> int:
         raw.replace(final)
         duration = None
         if shutil_which("ffprobe"):
-            probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(final)], capture_output=True, text=True, check=True)
+            probe = subprocess.run(
+                [
+                    "ffprobe", "-v", "error", "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1", str(final),
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
             duration = float(probe.stdout.strip())
             if duration < 295.0:
                 raise RuntimeError(f"demo video is only {duration:.2f}s; minimum required duration is 295s")
         if shutil_which("ffmpeg"):
             mp4 = ART / "PHASE10_DEMO_VIDEO.mp4"
-            subprocess.run(["ffmpeg", "-y", "-i", str(final), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)], check=True, capture_output=True)
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", str(final), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)],
+                check=True,
+                capture_output=True,
+            )
         (ART / "phase10_demo_video_metadata.json").write_text(
-            '{\n  "video": "PHASE10_DEMO_VIDEO.webm",\n  "minimum_required_seconds": 295,\n  "measured_seconds": ' + (f"{duration:.3f}" if duration is not None else 'null') + ',\n  "screenshots": 6\n}\n',
+            '{\n  "video": "PHASE10_DEMO_VIDEO.webm",\n  "minimum_required_seconds": 295,\n  "measured_seconds": '
+            + (f"{duration:.3f}" if duration is not None else "null")
+            + ',\n  "target_recording_seconds": 300,\n  "screenshots": 6\n}\n',
             encoding="utf-8",
         )
         print({"video": str(final), "screenshots": 6, "duration_seconds": duration})
@@ -140,8 +165,10 @@ def main() -> int:
     finally:
         if server.poll() is None:
             server.terminate()
-            try: server.wait(timeout=5)
-            except subprocess.TimeoutExpired: server.kill()
+            try:
+                server.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                server.kill()
 
 
 def shutil_which(name: str) -> str | None:
