@@ -1,0 +1,24 @@
+name: phase5-verification
+
+on:
+  push:
+    branches: [phase5-final]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Full regression
+        run: python -m pytest -q
+      - name: Compile gate
+        run: python -m compileall -q waf tests
+      - name: Phase 5 master exam
+        run: python scripts/phase5_master_exam.py
+      - name: Explanation overhead benchmark
+        run: python phase5_explainability_benchmark.py
