@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from queue import Full, Empty, Queue
+from queue import Empty, Full, Queue
 from threading import Lock, Thread
+from time import monotonic, sleep
 from typing import Any, Mapping
 
 
@@ -37,13 +38,23 @@ class AsyncTelemetryDispatcher:
         self._thread.start()
 
     def enqueue_decision(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> bool:
-        return self._enqueue(_Task("decision", {
+        task = _Task("decision", {
             "request_id": request_id,
             "source_ip": source_ip,
             "method": method,
             "uri": uri,
             "result": dict(result),
-        }))
+        })
+        self._ensure_started()
+        preview = getattr(self.store, "record_decision_view", None)
+        if preview is not None:
+            try:
+                preview(**task.payload)
+            except Exception as exc:  # local metrics must never break enforcement
+                with self._lock:
+                    self._failed += 1
+                    self._last_error = type(exc).__name__
+        return self._enqueue(task, started=True)
 
     def enqueue_audit(self, *, actor: str, action: str, target: str, outcome: str, request_id: str) -> bool:
         return self._enqueue(_Task("audit", {
@@ -54,8 +65,9 @@ class AsyncTelemetryDispatcher:
             "request_id": request_id,
         }))
 
-    def _enqueue(self, task: _Task) -> bool:
-        self._ensure_started()
+    def _enqueue(self, task: _Task, *, started: bool = False) -> bool:
+        if not started:
+            self._ensure_started()
         try:
             self.queue.put_nowait(task)
             return True
@@ -82,14 +94,20 @@ class AsyncTelemetryDispatcher:
                     self.store.record_decision(**task.payload)
                 elif task.kind == "audit":
                     self.store.record_audit(**task.payload)
-                else:  # pragma: no cover - internal invariant guard
+                else:  # pragma: no cover
                     raise RuntimeError("unknown telemetry task")
-            except Exception as exc:  # store outage must not break WAF enforcement
+            except Exception as exc:
                 with self._lock:
                     self._failed += 1
                     self._last_error = type(exc).__name__
             finally:
                 self.queue.task_done()
+
+    def flush(self, timeout: float = 2.0) -> bool:
+        deadline = monotonic() + timeout
+        while self.queue.unfinished_tasks and monotonic() < deadline:
+            sleep(0.01)
+        return self.queue.unfinished_tasks == 0
 
     def close(self, timeout: float = 2.0) -> None:
         with self._lock:
@@ -97,19 +115,14 @@ class AsyncTelemetryDispatcher:
                 return
             self._closed = True
         if self._thread is not None and self._thread.is_alive():
+            deadline = monotonic() + timeout
+            remaining = max(0.0, deadline - monotonic())
+            self.flush(remaining)
             try:
                 self.queue.put_nowait(None)
             except Full:
-                # Worker will drain existing tasks and then exit once the queue is empty.
-                self._thread.join(timeout=timeout)
-                return
-            self._thread.join(timeout=timeout)
-
-    def flush(self, timeout: float = 2.0) -> bool:
-        deadline = __import__("time").monotonic() + timeout
-        while self.queue.unfinished_tasks and __import__("time").monotonic() < deadline:
-            __import__("time").sleep(0.01)
-        return self.queue.unfinished_tasks == 0
+                pass
+            self._thread.join(timeout=max(0.0, deadline - monotonic()))
 
     def stats(self) -> dict[str, int | str]:
         with self._lock:
