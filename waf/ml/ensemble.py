@@ -15,6 +15,7 @@ from waf.ml.anomaly import UnsupervisedAnomalyDetector
 from waf.ml.behaviour import BehaviouralDetector
 from waf.ml.dataset import build_training_dataset
 from waf.ml.factory import trained_models
+from waf.ml.outbound import OutboundAnomalyDetector, ResponseEnvelope
 from waf.ml.semisupervised import SemiSupervisedDetector
 from waf.ml.supervised import SupervisedDetector
 
@@ -25,24 +26,26 @@ class Phase4MLEnsemble:
     anomaly: UnsupervisedAnomalyDetector
     behaviour: BehaviouralDetector
     semi_supervised: SemiSupervisedDetector
+    outbound: OutboundAnomalyDetector
     feature_names: tuple[str, ...]
     dataset_version: str
     baseline_version: str
-    model_version: str = "phase10-ml-v2"
+    model_version: str = "phase10-ml-v3"
 
     @classmethod
     def train_default(cls) -> "Phase4MLEnsemble":
         supervised, anomaly, behaviour, semi_supervised, feature_names, dataset_version, baseline_version = trained_models()
-        return cls(supervised, anomaly, behaviour, semi_supervised, feature_names, dataset_version, baseline_version)
+        outbound = OutboundAnomalyDetector.train_default(samples=1600, seed=42)
+        return cls(supervised, anomaly, behaviour, semi_supervised, outbound, feature_names, dataset_version, baseline_version)
 
     @classmethod
     def load(cls, path: str | Path) -> "Phase4MLEnsemble":
         payload = joblib.load(path)
-        if payload.get("artifact_version") != "phase10-model-v2":
+        if payload.get("artifact_version") != "phase10-model-v3":
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        required = {"supervised", "anomaly", "behaviour", "semi_supervised"}
+        required = {"supervised", "anomaly", "behaviour", "semi_supervised", "outbound"}
         if not required.issubset(payload):
             raise ValueError("model artifact missing one or more required detector components")
         if not payload.get("feature_names"):
@@ -52,10 +55,11 @@ class Phase4MLEnsemble:
             payload["anomaly"],
             payload["behaviour"],
             payload["semi_supervised"],
+            payload["outbound"],
             tuple(payload["feature_names"]),
             payload["dataset_version"],
             payload["baseline_version"],
-            payload.get("model_version", "phase10-ml-v2"),
+            payload.get("model_version", "phase10-ml-v3"),
         )
 
     @classmethod
@@ -65,10 +69,11 @@ class Phase4MLEnsemble:
         anomaly: UnsupervisedAnomalyDetector,
         behaviour: BehaviouralDetector,
         semi_supervised: SemiSupervisedDetector,
+        outbound: OutboundAnomalyDetector,
         feature_names: tuple[str, ...],
         dataset_version: str,
         baseline_version: str,
-        model_version: str = "phase10-ml-v2",
+        model_version: str = "phase10-ml-v3",
     ) -> "Phase4MLEnsemble":
         isolated_behaviour = BehaviouralDetector(
             model=behaviour.model,
@@ -81,6 +86,7 @@ class Phase4MLEnsemble:
             anomaly,
             isolated_behaviour,
             semi_supervised,
+            outbound,
             feature_names,
             dataset_version,
             baseline_version,
@@ -91,7 +97,7 @@ class Phase4MLEnsemble:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(
             {
-                "artifact_version": "phase10-model-v2",
+                "artifact_version": "phase10-model-v3",
                 "feature_schema": "http-v2",
                 "feature_names": self.feature_names,
                 "dataset_version": self.dataset_version,
@@ -101,6 +107,7 @@ class Phase4MLEnsemble:
                 "anomaly": self.anomaly,
                 "behaviour": self.behaviour,
                 "semi_supervised": self.semi_supervised,
+                "outbound": self.outbound,
             },
             path,
         )
@@ -113,6 +120,9 @@ class Phase4MLEnsemble:
             self.semi_supervised.detect(request, features),
         )
 
+    def inspect_response(self, response: ResponseEnvelope) -> DetectionSignal:
+        return self.outbound.detect(response)
+
     def metadata(self) -> dict[str, Any]:
         return {
             "model_version": self.model_version,
@@ -120,9 +130,11 @@ class Phase4MLEnsemble:
             "feature_count": len(self.feature_names),
             "dataset_version": self.dataset_version,
             "baseline_version": self.baseline_version,
-            "detectors": [self.supervised.name, self.anomaly.name, self.behaviour.name, self.semi_supervised.name],
+            "detectors": [self.supervised.name, self.anomaly.name, self.behaviour.name, self.semi_supervised.name, self.outbound.name],
             "scores_are_risk_not_probability": True,
             "semi_supervised_labeled_fraction": self.semi_supervised.labeled_fraction,
+            "outbound_feature_schema": "http-response-v1",
+            "outbound_direction": "response",
         }
 
 
@@ -219,18 +231,42 @@ def evaluate_semi_supervised(seed: int = 42) -> dict[str, float | str | int]:
     }
 
 
+def evaluate_outbound() -> dict[str, float | int | str]:
+    detector = OutboundAnomalyDetector.train_default(samples=1600, seed=42)
+    benign = [
+        ResponseEnvelope(200, {"Content-Type": "application/json"}, b'{"ok":true,"items":[1,2,3]}'),
+        ResponseEnvelope(200, {"Content-Type": "text/html"}, b"<html><body>OK</body></html>"),
+        ResponseEnvelope(204, {"Content-Type": "text/plain"}, b""),
+    ] * 40
+    anomalous = [
+        ResponseEnvelope(500, {"Content-Type": "text/plain"}, b"Traceback (most recent call last): Exception secret password=admin"),
+        ResponseEnvelope(200, {"Content-Type": "text/html"}, b"<html><script>steal()</script><body>debug secret</body></html>"),
+        ResponseEnvelope(200, {"Content-Type": "text/plain"}, b"internal server error " + b"X" * 1_500_000),
+    ] * 20
+    benign_scores = [detector.detect(x).score for x in benign]
+    anomaly_scores = [detector.detect(x).score for x in anomalous]
+    return {
+        "detector": detector.name,
+        "benign_samples": len(benign_scores),
+        "anomalous_samples": len(anomaly_scores),
+        "false_positive_rate": float(np.mean(np.asarray(benign_scores) >= 0.5)),
+        "anomaly_detection_rate": float(np.mean(np.asarray(anomaly_scores) >= 0.5)),
+        "evaluation_scope": "deterministic synthetic HTTP response workload",
+    }
+
+
 @lru_cache(maxsize=2)
 def _cached_stateless_components(
     path: str,
-) -> tuple[SupervisedDetector, UnsupervisedAnomalyDetector, BehaviouralDetector, SemiSupervisedDetector, tuple[str, ...], str, str, str]:
+) -> tuple[SupervisedDetector, UnsupervisedAnomalyDetector, BehaviouralDetector, SemiSupervisedDetector, OutboundAnomalyDetector, tuple[str, ...], str, str, str]:
     artifact_path = Path(path)
     if artifact_path.exists():
         payload = joblib.load(artifact_path)
-        if payload.get("artifact_version") != "phase10-model-v2":
+        if payload.get("artifact_version") != "phase10-model-v3":
             raise ValueError("unsupported model artifact version")
         if payload.get("feature_schema") != "http-v2":
             raise ValueError("model artifact feature schema mismatch")
-        required = {"supervised", "anomaly", "behaviour", "semi_supervised"}
+        required = {"supervised", "anomaly", "behaviour", "semi_supervised", "outbound"}
         if not required.issubset(payload):
             raise ValueError("model artifact missing one or more required detector components")
         if not payload.get("feature_names"):
@@ -240,10 +276,11 @@ def _cached_stateless_components(
             payload["anomaly"],
             payload["behaviour"],
             payload["semi_supervised"],
+            payload["outbound"],
             tuple(payload["feature_names"]),
             payload["dataset_version"],
             payload["baseline_version"],
-            payload.get("model_version", "phase10-ml-v2"),
+            payload.get("model_version", "phase10-ml-v3"),
         )
     trained = Phase4MLEnsemble.train_default()
     return (
@@ -251,6 +288,7 @@ def _cached_stateless_components(
         trained.anomaly,
         trained.behaviour,
         trained.semi_supervised,
+        trained.outbound,
         trained.feature_names,
         trained.dataset_version,
         trained.baseline_version,
