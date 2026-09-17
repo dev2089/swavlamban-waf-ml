@@ -1,4 +1,4 @@
-# Target Architecture - Phase 3
+# Target Architecture - Phase 4
 
 ## North-star architecture
 
@@ -9,63 +9,62 @@ Internet / client
 [Reverse proxy + open-source WAF adapter]
       |
       v
-[Request normalization + bounded inspection]   <-- Phase 3
+[Request normalization + bounded inspection]
       |
-      +--> [Signature/rule detectors]
-      +--> [ML detectors]
-      +--> [Behaviour detector]
-              |
-              v
-        [Decision Policy]
-              |
-        +-----+-----+
-        |           |
-      ALLOW       BLOCK/ALERT
-        |           |
-        +-----+-----+
-              v
-       [Async telemetry]
-          /        \\
-      storage    dashboard
-              |
-         [feedback]
-              |
-        [training/eval]
-              |
-        [model registry]
+      +--> [Signature/rule detector]
+      +--> [Supervised ML]
+      +--> [Unsupervised anomaly ML]
+      +--> [Learned behaviour ML]
+                    |
+                    v
+             [Decision Policy]
+                    |
+             +------+------+
+             |             |
+           ALLOW       BLOCK/ALERT
+             |             |
+             +------+------+
+                    v
+             [Decision Event]
+                    |
+             +------+------+----------------+
+             |             |                |
+          telemetry    dashboard       feedback
+             |                              |
+         storage                   training/eval
+                                            |
+                                      model registry
 ```
 
 ## Active fast path
 
-`RequestEnvelope -> http-v2 FeatureVector -> detector signals -> DecisionResult`
+`RequestEnvelope -> http-v2 FeatureVector -> signature + supervised + unsupervised + behaviour -> DecisionResult`
 
-The Phase 3 feature extractor is deterministic, versioned and bounded. It performs NFKC normalization, path/query-safe multi-pass URL decoding, bounded query parsing, normalized header inspection, body decoding and numeric feature generation.
+The Phase 4 ML layer is connected to the same canonical request/feature contracts used by the live Phase 2/3 edge. The deterministic signature detector remains authoritative for known attack signatures.
 
-## http-v2 properties
+## Phase 4 ML components
 
-- 38 numeric features.
-- Every feature is clamped to `[0,1]`.
-- No raw payload is stored in the feature vector.
-- URL decoding is capped at three passes.
-- Query parsing is capped at 256 fields.
-- Header values are capped at 4 KiB for feature extraction.
-- Body scanning is capped at 256 KiB.
-- Path and query use separate decoding semantics to preserve path `+` characters.
+- Supervised `HistGradientBoostingClassifier`.
+- Benign-only `OneClassSVM` anomaly detector with threshold learned from a benign baseline.
+- Learned stateful `LogisticRegression` behavioural detector over per-source sliding-window features.
+- Versioned artifact `phase4-model-v1` with schema `http-v2` and model version `phase4-ml-v1`.
+
+## Runtime isolation
+
+Supervised/anomaly model objects can be safely shared because they are immutable during request scoring. Behavioural request-window state is created fresh per `EdgeWAF` runtime and is not serialized into the model artifact.
+
+## Risk semantics
+
+Scores are risk scores, not calibrated probabilities. Known signature hits force risk to `1.0`. Non-signature risk combines detector scores using explicit Phase 4 weights: supervised `0.55`, unsupervised `0.30`, behaviour `0.15`, with the strongest signal also contributing to the final risk.
 
 ## Phase boundaries
 
-Phase 1 established security-core contracts.
-Phase 2 established live HTTP interception and real pre-forwarding enforcement.
-Phase 3 establishes the production HTTP feature layer used by the edge WAF.
+Phase 1 established contracts.
+Phase 2 established live HTTP interception and enforcement.
+Phase 3 established bounded `http-v2` HTTP representation.
+Phase 4 established supervised, unsupervised and learned behavioural ML on that representation.
 
-Later phases add production ML, behaviour windows, continuous learning, production storage/authentication, dashboard migration and final challenge evidence.
+Later phases add expanded explainability, ML-generated rule lifecycle, baseline/feedback/drift/retraining, production telemetry/storage/auth, complete scenario evidence, dashboard migration, demo and final submission.
 
-## Design rules
-
-1. Transport adapters may change; security contracts remain stable.
-2. Feature/model schemas are explicitly versioned.
-3. Risk scores are normalized characteristics, not probabilities.
-4. Decisions are deterministic for fixed inputs and detector outputs.
-5. Size and parsing limits are enforced before expensive inspection.
-6. Persistence is asynchronous and outside the decision-critical path.
-7. The core feature vector contains no secrets or raw request content.
+## Critical honesty boundary
+The Phase 4 ML metrics were produced from deterministic synthetic data/workloads and are reproducibility evidence only. They are not real-world Internet WAF accuracy or production capacity claims.
