@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,7 +32,6 @@ def main() -> int:
         failures.append("app.py does not delegate to the canonical FastAPI application")
 
     main_py = (ROOT / "main.py").read_text(encoding="utf-8")
-    forbidden_main = ["WAFMLOrchestrator", "TODO:", "predictions": None]
     if "WAFMLOrchestrator" in main_py or "TODO:" in main_py or '"predictions": None' in main_py:
         failures.append("main.py still contains obsolete orchestration stubs")
     if "waf.gateway.proxy" not in main_py:
@@ -50,7 +48,7 @@ def main() -> int:
             failures.append(f"backend/requirements.txt contains obsolete dependency: {package}")
 
     setup = (ROOT / "setup.sh").read_text(encoding="utf-8")
-    for fragment in ("notebooks", 'directories=("data"', 'requirements-dev.txt'):
+    for fragment in ("notebooks", 'directories=("data"', "requirements-dev.txt"):
         if fragment in setup:
             failures.append(f"setup.sh contains obsolete setup behavior: {fragment}")
     if "pip install -r requirements.txt" not in setup:
@@ -74,8 +72,6 @@ def main() -> int:
             if claim in text:
                 failures.append(f"legacy/unverified claim '{claim}' remains in {path.relative_to(ROOT)}")
 
-    # Current runtime source may not carry TODO placeholders. Historical phase
-    # documents are intentionally excluded because they preserve remediation history.
     runtime_files = list((ROOT / "waf").rglob("*.py")) + [ROOT / "app.py", ROOT / "main.py", ROOT / "backend" / "server.py", ROOT / "run_proxy.py"]
     for path in runtime_files:
         text = path.read_text(encoding="utf-8", errors="replace")
