@@ -1,0 +1,31 @@
+name: phase8-verification
+
+on:
+  push:
+    branches: [phase8-final]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements-phase4.txt pytest
+      - name: Train runtime model artifact
+        run: python scripts/train_phase4_models.py --output models/phase4_models.joblib
+      - name: Full regression
+        run: python -m pytest -q
+      - name: Compile gate
+        run: python -m compileall -q waf tests scripts
+      - name: Phase 8 master exam
+        run: python scripts/phase8_master_exam.py
+      - name: Upload Phase 8 exam result
+        uses: actions/upload-artifact@v4
+        with:
+          name: waf-phase8-evidence
+          path: phase8_master_exam_result.json
+          if-no-files-found: error
