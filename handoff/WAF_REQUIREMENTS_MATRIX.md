@@ -1,29 +1,31 @@
 # Challenge Requirement Mapping
 
-| Need | Current status after Phase 3 | Planned completion |
+| Need | Current status after Phase 4 | Planned completion |
 |---|---|---|
-| ML integrated with open-source WAF | PARTIAL: live WAF edge + ML seam; real ML still pending | 4+ |
-| HTTP(S) analysis | HTTP live path + `http-v2` feature pipeline; TLS pending | 4/9 |
-| traffic baselining | NOT YET | 7 |
-| behavioural analysis | NOT YET | 4/7 |
-| anomaly detection | SIGNATURE FOUNDATION ONLY | 4 |
+| ML integrated with open-source WAF | PASS for Phase 4 seam: live edge consumes signature + supervised + unsupervised + behavioural ML | final validation later |
+| HTTP(S) analysis | PASS for live HTTP + `http-v2`; TLS termination remains open | later |
+| traffic baselining | PARTIAL: benign-only ML baseline exists; production traffic baseline lifecycle remains open | 7 |
+| behavioural analysis | PASS for learned synthetic behavioural workload; production distributed state remains open | 7/9 |
+| anomaly detection | PASS: benign-only `OneClassSVM` is live in the ML ensemble | later validation |
 | dashboard | LEGACY/DEFERRED | 11 |
-| supervised/unsupervised/semi-supervised ML | NOT YET | 4 |
-| explainability | reasons/rule IDs foundation | 5 |
+| supervised/unsupervised/semi-supervised ML | SUPERVISED + UNSUPERVISED PASS; semi-supervised not introduced in Phase 4 | optional later |
+| explainability | FOUNDATION reasons/rule IDs + detector metadata; full attribution/evidence expansion remains open | 5 |
 | rule recommendation | foundation only | 6 |
-| low latency/high throughput | MEASURED local fast-path/E2E evidence | 9 |
+| low latency/high throughput | Measured local evidence; full load matrix remains open | 9 |
 | continuous learning/retraining | NOT YET | 7 |
-| logs/metrics/reports | event schema + bounded edge events | 9-13 |
+| logs/metrics/reports | event schema + bounded edge events; production telemetry pipeline remains open | 9-13 |
 | demo | NOT YET | 12 |
+| technical docs/slides | milestone docs exist; final submission package remains open | 13 |
 
-## Phase 3 additions
+## Phase 4 additions
 
-- 38-feature `http-v2` schema.
-- Versioned normalization and decoding.
-- Bounded query/header/body processing.
-- Deterministic feature outputs in `[0,1]`.
-- Live edge regression retained.
-- Reproducible feature/fuzz/performance evidence recorded.
+- Supervised `HistGradientBoostingClassifier` over the `http-v2` representation.
+- Benign-only `OneClassSVM` with threshold learned from benign baseline data.
+- Learned stateful behavioural `LogisticRegression` over per-source sliding-window features.
+- Versioned model artifact with all three components.
+- Live `EdgeWAF` integration consuming signature + all three ML signals.
+- Reproducible supervised, unsupervised and behavioural evaluation evidence.
+- Artifact round-trip, live-edge, regression, fuzz, performance and master-exam gates.
 
 ## Critical honesty boundary
-This matrix describes implementation status, not marketing claims. A requirement is not marked complete until executable evidence exists for the relevant final capability.
+A requirement is not marked final-complete merely because code exists. Final challenge status requires executable evidence for the final integrated capability. Synthetic ML metrics are milestone reproducibility evidence only, not real-world Internet WAF accuracy claims.
