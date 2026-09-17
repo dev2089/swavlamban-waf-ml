@@ -10,7 +10,6 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from urllib.error import HTTPError, URLError
 from urllib.request import Request as URLRequest, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,16 +28,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, *_args):
         return
-
-
-def request(url: str) -> tuple[int, bytes]:
-    try:
-        with urlopen(URLRequest(url, method="GET"), timeout=5) as response:
-            return response.status, response.read()
-    except HTTPError as exc:
-        return exc.code, exc.read()
-    except URLError as exc:
-        raise RuntimeError(f"HTTPS probe failed: {exc}") from exc
 
 
 def wait_port(host: str, port: int, timeout: float = 12.0):
@@ -61,6 +50,8 @@ def main() -> int:
         tmp = Path(td)
         cert_dir = tmp / "certs"
         cert_dir.mkdir()
+        logs_dir = tmp / "logs"
+        logs_dir.mkdir()
         subprocess.run([
             "openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
             "-keyout", str(cert_dir / "privkey.pem"),
@@ -87,8 +78,11 @@ def main() -> int:
         gateway = subprocess.Popen(["python", "-m", "waf.gateway.proxy"], cwd=str(ROOT), env=env, stdout=gateway_handle, stderr=subprocess.STDOUT)
 
         nginx_conf = tmp / "nginx.conf"
-        nginx_conf.write_text(f"""events {{ worker_connections 64; }}
+        nginx_conf.write_text(f"""pid {tmp / 'nginx.pid'};
+events {{ worker_connections 64; }}
 http {{
+  access_log {logs_dir / 'access.log'};
+  error_log {logs_dir / 'error.log'} notice;
   server {{
     listen 18445 ssl;
     server_name swavlamban.local;
@@ -105,8 +99,13 @@ http {{
   }}
 }}
 """, encoding="utf-8")
-        subprocess.run(["nginx", "-t", "-c", str(nginx_conf), "-p", str(tmp)], check=True, capture_output=True, text=True)
-        nginx = subprocess.Popen(["nginx", "-c", str(nginx_conf), "-p", str(tmp), "-g", f"pid {tmp / 'nginx.pid'}; daemon off;"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        config_check = subprocess.run(["nginx", "-t", "-c", str(nginx_conf), "-p", str(tmp)], capture_output=True, text=True)
+        if config_check.returncode != 0:
+            print(json.dumps({"nginx_tls_config_test": "FAIL", "stderr": config_check.stderr[-5000:], "stdout": config_check.stdout[-2000:]}, indent=2, sort_keys=True))
+            gateway.terminate(); gateway.wait(timeout=4)
+            gateway_handle.close(); upstream.shutdown(); upstream.server_close(); thread.join(timeout=2)
+            return 1
+        nginx = subprocess.Popen(["nginx", "-c", str(nginx_conf), "-p", str(tmp), "-g", "daemon off;"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             wait_port("127.0.0.1", 19092)
             wait_port("127.0.0.1", 18082)
@@ -117,7 +116,6 @@ http {{
             before = Handler.hits
             block = subprocess.run(["curl", "-sk", "-o", str(tmp / "block.body"), "-w", "%{http_code}", "https://swavlamban.local:18445/search?q=%27%20OR%201%3D1--", "--resolve", "swavlamban.local:18445:127.0.0.1"], capture_output=True, text=True, check=True)
             block_code = int(block.stdout)
-            block_body = (tmp / "block.body").read_bytes()
             after = Handler.hits
             summary = {
                 "nginx_tls_config_test": "PASS",

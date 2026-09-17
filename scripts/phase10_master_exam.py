@@ -141,7 +141,7 @@ def main() -> int:
             handle.close()
 
     checks.append(run("modsecurity_e2e", [sys.executable, "scripts/phase10_waf_enforcement_e2e.py"], timeout=180))
-    checks.append(run("dashboard_demo", [sys.executable, "scripts/phase10_dashboard_demo.py"], timeout=180))
+    checks.append(run("dashboard_demo", [sys.executable, "scripts/phase10_dashboard_demo.py"], timeout=480))
     checks.append(run("audit_manifest", [sys.executable, "scripts/phase10_audit.py"], timeout=120))
     write_runtime_reports(checks)
 

@@ -12,7 +12,6 @@ from waf.core.config import WAFConfig
 from waf.edge.pipeline import EdgeWAF
 from waf.gateway.proxy import GatewayConfig, WAFGateway
 
-
 SECRET = "phase10-gateway-secret-" + "x" * 32
 
 
@@ -32,6 +31,7 @@ async def test_gateway_forwards_benign_and_blocks_sql():
     upstream_app.router.add_route("*", "/{path:.*}", protected)
     upstream = TestServer(upstream_app)
     await upstream.start_server()
+    gateway_server = None
     try:
         config = GatewayConfig(upstream_url=str(upstream.make_url("/")).rstrip("/"), rate_limit_per_minute=100)
         gateway = WAFGateway(_waf(), config)
@@ -40,7 +40,9 @@ async def test_gateway_forwards_benign_and_blocks_sql():
         app.router.add_route("*", "/{path_info:.*}", gateway.handle)
         app.on_startup.append(gateway.startup)
         app.on_cleanup.append(gateway.cleanup)
-        async with AiohttpTestClient(app) as client:
+        gateway_server = TestServer(app)
+        await gateway_server.start_server()
+        async with AiohttpTestClient(gateway_server) as client:
             benign = await client.get("/health")
             assert benign.status == 200
             assert "SWAVLAMBAN_UPSTREAM_REACHED" in await benign.text()
@@ -51,6 +53,8 @@ async def test_gateway_forwards_benign_and_blocks_sql():
             assert "block" in (await sql.text()).lower()
             assert calls == ["/health"]
     finally:
+        if gateway_server is not None:
+            await gateway_server.close()
         await upstream.close()
 
 
@@ -63,6 +67,7 @@ async def test_gateway_rejects_oversized_and_rate_limited_requests():
     upstream_app.router.add_route("*", "/{path:.*}", protected)
     upstream = TestServer(upstream_app)
     await upstream.start_server()
+    gateway_server = None
     try:
         config = GatewayConfig(upstream_url=str(upstream.make_url("/")).rstrip("/"), max_body_bytes=8, rate_limit_per_minute=2)
         gateway = WAFGateway(_waf(), config)
@@ -70,7 +75,9 @@ async def test_gateway_rejects_oversized_and_rate_limited_requests():
         app.router.add_route("*", "/{path_info:.*}", gateway.handle)
         app.on_startup.append(gateway.startup)
         app.on_cleanup.append(gateway.cleanup)
-        async with AiohttpTestClient(app) as client:
+        gateway_server = TestServer(app)
+        await gateway_server.start_server()
+        async with AiohttpTestClient(gateway_server) as client:
             too_big = await client.post("/upload", data="123456789")
             assert too_big.status == 413
             first = await client.get("/one")
@@ -78,4 +85,6 @@ async def test_gateway_rejects_oversized_and_rate_limited_requests():
             assert first.status == 200
             assert second.status == 429
     finally:
+        if gateway_server is not None:
+            await gateway_server.close()
         await upstream.close()
