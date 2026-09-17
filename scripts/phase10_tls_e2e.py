@@ -1,8 +1,4 @@
-"""Process-level HTTPS termination test for the WAF gateway.
-
-A local self-signed certificate terminates TLS at nginx. The decrypted request is
-then inspected by the Swavlamban gateway before reaching the protected upstream.
-"""
+"""Process-level HTTPS termination test for the WAF gateway."""
 from __future__ import annotations
 
 import json
@@ -11,12 +7,11 @@ import shutil
 import subprocess
 import tempfile
 import time
-from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import urlopen
-
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
+from urllib.error import HTTPError, URLError
+from urllib.request import Request as URLRequest, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKER = b"SWAVLAMBAN_TLS_UPSTREAM_REACHED"
@@ -32,16 +27,18 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(MARKER)
 
-    def log_message(self, *args):
+    def log_message(self, *_args):
         return
 
 
 def request(url: str) -> tuple[int, bytes]:
     try:
-        with urlopen(url, timeout=5) as response:
+        with urlopen(URLRequest(url, method="GET"), timeout=5) as response:
             return response.status, response.read()
     except HTTPError as exc:
         return exc.code, exc.read()
+    except URLError as exc:
+        raise RuntimeError(f"HTTPS probe failed: {exc}") from exc
 
 
 def wait_port(host: str, port: int, timeout: float = 12.0):
@@ -86,7 +83,8 @@ def main() -> int:
             "WAF_RATE_LIMIT_PER_MINUTE": "1000",
         })
         gateway_log = tmp / "gateway.log"
-        gateway = subprocess.Popen(["python", "-m", "waf.gateway.proxy"], cwd=str(ROOT), env=env, stdout=gateway_log.open("w"), stderr=subprocess.STDOUT)
+        gateway_handle = gateway_log.open("w", encoding="utf-8")
+        gateway = subprocess.Popen(["python", "-m", "waf.gateway.proxy"], cwd=str(ROOT), env=env, stdout=gateway_handle, stderr=subprocess.STDOUT)
 
         nginx_conf = tmp / "nginx.conf"
         nginx_conf.write_text(f"""events {{ worker_connections 64; }}
@@ -113,8 +111,6 @@ http {{
             wait_port("127.0.0.1", 19092)
             wait_port("127.0.0.1", 18082)
             wait_port("127.0.0.1", 18445)
-            allow_code, allow_body = request("https://127.0.0.1:18445/health")
-            # urllib does not trust self-signed certs by default, so use curl for the secure requests.
             allow = subprocess.run(["curl", "-sk", "-o", str(tmp / "allow.body"), "-w", "%{http_code}", "https://swavlamban.local:18445/health", "--resolve", "swavlamban.local:18445:127.0.0.1"], capture_output=True, text=True, check=True)
             allow_code = int(allow.stdout)
             allow_body = (tmp / "allow.body").read_bytes()
@@ -132,6 +128,7 @@ http {{
                 "certificate_scope": "local self-signed",
                 "tls_termination_point": "nginx",
                 "decrypted_request_path": "nginx -> Swavlamban WAF gateway -> protected upstream",
+                "probe_note": "curl -k used because certificate is intentionally self-signed for local integration testing",
             }
             print(json.dumps(summary, indent=2, sort_keys=True))
             (ROOT / "phase10_tls_evidence.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -140,8 +137,11 @@ http {{
             for proc in (nginx, gateway):
                 if proc.poll() is None:
                     proc.terminate()
-                    try: proc.wait(timeout=4)
-                    except subprocess.TimeoutExpired: proc.kill()
+                    try:
+                        proc.wait(timeout=4)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+            gateway_handle.close()
             upstream.shutdown(); upstream.server_close(); thread.join(timeout=2)
 
 
