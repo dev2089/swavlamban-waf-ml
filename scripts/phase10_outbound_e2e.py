@@ -7,9 +7,11 @@ import os
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
 from aiohttp import ClientSession, ClientTimeout, web
 
-ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "phase10_outbound_evidence.json"
 
 
@@ -33,7 +35,6 @@ async def build_upstream() -> tuple[web.AppRunner, int]:
 
 async def main_async() -> dict[str, object]:
     upstream, _ = await build_upstream()
-    gateway = None
     gateway_runner = None
     try:
         from waf.gateway.proxy import create_gateway_app
@@ -63,7 +64,7 @@ async def main_async() -> dict[str, object]:
                 "outbound_decision": normal.headers.get("X-Swavalamban-WAF-Outbound-Decision"),
                 "outbound_detector": normal.headers.get("X-Swavalamban-WAF-Outbound-Detector"),
                 "outbound_risk": float(normal.headers.get("X-Swavalamban-WAF-Outbound-Risk", "0")),
-                "body_preserved": "\"ok\":true" in normal_body,
+                "body_preserved": '"ok":true' in normal_body,
             },
             "anomalous": {
                 "status": anomalous.status,
