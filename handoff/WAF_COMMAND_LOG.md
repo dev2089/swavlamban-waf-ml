@@ -41,18 +41,14 @@
 - Supervised: accuracy 1.0, precision 1.0, recall 1.0, F1 1.0, FPR 0.0, n=1500; synthetic only.
 - Unsupervised: FPR 0.0227, attack detection 0.8980, benign n=750, attack n=3000; synthetic only.
 - Learned behaviour: normal max 0.406313, burst final 0.980486, escalation=true; synthetic workload only.
-- Direct ML final: 2,000 requests, 531.1 req/s, 1,900 allow, 100 block, 0 alert.
-- Mandatory bounded E2E final: 1,000 requests, 428.6 req/s, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 59.639 ms, p95 77.706 ms.
-- Extended E2E final: 5,000 requests, 410.4 req/s, 4,250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4,250 protected-upstream hits, 1,000 bounded events.
+- Final direct ML rerun: 2,000 requests, **529.6 req/s**, 1,900 allow, 100 block, 0 alert.
+- Final bounded E2E rerun: 1,000 requests, **400.2 req/s**, 850 HTTP 200, 150 HTTP 403, 0 errors, p50 64.240 ms, p95 81.686 ms.
+- Retained extended E2E evidence: 5,000 requests, 410.4 req/s, 4,250 HTTP 200, 750 HTTP 403, 0 errors, p50 123.614 ms, p95 160.959 ms, 4,250 upstream hits, 1,000 bounded events.
 - Static secret-like scan -> PASS.
 - TODO/no-op scan -> PASS.
 - Artifact SHA-256 -> `bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571`.
 
-## Final handoff smoke test
-- Final ZIP extracted into an isolated directory.
-- `python -m pytest -q` -> **48/48 PASS**.
-- `python -m compileall -q waf tests` -> **PASS**.
-- `python scripts/phase4_master_exam.py` -> **PASS**.
-- `python phase4_self_test.py` -> **PASS**.
-
-All measurements are local terminal evidence and are not production-capacity guarantees or real-world WAF accuracy claims.
+## Final handoff verification
+- Final workspace rerun after all documentation synchronization: `48/48 PASS`, compileall PASS, master exam PASS, self-test PASS.
+- Final workspace and handoff DB preserve prior failed cycles and remediation history.
+- All metrics are local terminal evidence. They are not production-capacity guarantees or real-world Internet WAF accuracy claims.
