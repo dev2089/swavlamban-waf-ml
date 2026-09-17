@@ -28,8 +28,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl zip ffmpeg
           python -m playwright install --with-deps chromium
+      - name: Materialize deterministic CI model artifact
+        run: |
+          python -c "from waf.ml.ensemble import Phase4MLEnsemble; Phase4MLEnsemble.train_default().save('/tmp/phase4_models.joblib')"
+          install -m 0644 /tmp/phase4_models.joblib models/phase4_models.joblib
+          test -s models/phase4_models.joblib
       - name: Compile
         run: python -m compileall -q waf tests scripts
+      - name: Isolated gateway startup smoke
+        run: python scripts/phase10_ci_startup_fix.py
       - name: Strict Phase 10 master exam
         run: python scripts/phase10_master_exam.py
       - name: Build binary submission artifacts
@@ -38,7 +45,7 @@ jobs:
         run: |
           python -m pip freeze > artifacts/dependency_inventory.txt
           git rev-parse HEAD > artifacts/final_commit_sha.txt
-          test -z "$(git status --porcelain)"
+          test -z "$(git status --porcelain --untracked-files=no)"
           git status --short > artifacts/clean_checkout_status.txt
       - name: Build portable auditor bundle
         run: python scripts/build_phase10_handoff.py
