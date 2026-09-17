@@ -2,7 +2,7 @@ from waf.core.models import Decision, DecisionResult, DetectionSignal, RequestEn
 
 
 class EdgeDecisionPolicy:
-    """Phase 4 deterministic multi-signal edge policy."""
+    """Phase 10 deterministic multi-signal edge policy."""
 
     def __init__(self, block_threshold: float = 0.80, alert_threshold: float = 0.50) -> None:
         if not 0.0 <= alert_threshold <= block_threshold <= 1.0:
@@ -16,9 +16,10 @@ class EdgeDecisionPolicy:
             risk = 1.0
         else:
             weights = {
-                "supervised-v1": 0.55,
-                "unsupervised-oneclasssvm-v1": 0.30,
-                "behaviour-v1": 0.15,
+                "supervised-v1": 0.50,
+                "semi-supervised-v1": 0.15,
+                "unsupervised-oneclasssvm-v1": 0.25,
+                "behaviour-v1": 0.10,
             }
             weighted = sum(weights.get(s.detector, 0.0) * s.score for s in signals)
             risk = max((s.score for s in signals), default=0.0) * 0.35 + weighted * 0.65
