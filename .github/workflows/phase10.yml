@@ -19,14 +19,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install runtime and audit dependencies
+      - name: Install runtime, test, audit and browser dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-phase4.txt fastapi uvicorn pydantic httpx pytest pytest-asyncio python-pptx reportlab
-      - name: Install open-source WAF edge dependencies
+          python -m pip install -r requirements-phase4.txt fastapi uvicorn pydantic httpx pytest pytest-asyncio python-pptx reportlab playwright
+      - name: Install open-source WAF edge and browser tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl zip
+          sudo apt-get install -y nginx libnginx-mod-http-modsecurity openssl curl zip ffmpeg
+          python -m playwright install --with-deps chromium
+      - name: Compile
+        run: python -m compileall -q waf tests scripts
       - name: Strict Phase 10 master exam
         run: python scripts/phase10_master_exam.py
       - name: Build binary submission artifacts
