@@ -2,7 +2,7 @@
   "project": "swavlamban-waf-ml",
   "challenge": "Challenge 3 - ML-integrated open-source WAF",
   "current_phase": 9,
-  "phase_status": "COMPLETE_VERIFIED_LOCAL",
+  "phase_status": "COMPLETE_VERIFIED_LOCAL_AND_LIVE_DB",
   "phase_score": 10.0,
   "cutoff": 9.9,
   "critical_defects": 0,
@@ -19,7 +19,8 @@
     "phase9_scenarios": "baseline allow; HTTPS inspected; known SQL/XSS/command variant blocked; API-burst behavioural anomaly observed",
     "phase9_performance": "500 in-process decisions measured; excludes network/TLS/upstream",
     "phase9_ci": "NOT_OBSERVED until PR-triggered GitHub Actions run is observed",
-    "phase9_first_failures_and_remediation": "API fixture initially used expired fixed-time tokens and was corrected; TLS smoke initially probed /health against a basic upstream and was corrected to /. Branch-local Phase 8 hardening surfaces were restored before final regression."
+    "phase9_live_supabase": "ACTIVE_HEALTHY project smpmvabjafmrutdhbfbl; 8 tracked WAF migrations applied and verified; RLS enabled across WAF tables; anonymous runtime access closed; runtime writes reserved for service_role",
+    "phase9_first_failures_and_remediation": "API fixture initially used expired fixed-time tokens and was corrected; TLS smoke initially probed /health against a basic upstream and was corrected to /. Live DB hardening initially required a temporary audit verification surface because Phase 8 audit schemas differ; the temporary surface was dropped and privilege remediation was recorded as a tracked migration."
   },
   "implemented": [
     "secure production-facing FastAPI runtime adapter",
@@ -31,10 +32,10 @@
     "deterministic Challenge 3 baseline, known attack, command-variant and API abuse evidence",
     "deterministic 500-request in-process performance measurement",
     "Phase 9 executable master exam, SQLite/SQL ledger, failure/remediation log and future-chat archive",
-    "preserved branch-existing Phase 8 hardening auth/RBAC/secrets/storage surfaces in the portable checkpoint"
+    "preserved branch-existing Phase 8 hardening auth/RBAC/secrets/storage surfaces in the portable checkpoint",
+    "live Supabase WAF schema/security application and post-migration privilege verification"
   ],
   "left": [
-    "live Supabase migration/application against a real project",
     "external certificate issuance/rotation and public HTTPS verification",
     "ModSecurity/Coraza runtime module integration",
     "Internet-scale distributed load/failure validation",
@@ -43,8 +44,8 @@
     "2-3 page technical document and 8-10 slide presentation",
     "final release-candidate/submission gate"
   ],
-  "database": {"sqlite":"state/project_ledger.db","portable_sql":"state/phase9_ledger.sql"},
+  "database": {"sqlite":"state/project_ledger.db","portable_sql":"state/phase9_ledger.sql","live_supabase_project":"smpmvabjafmrutdhbfbl","live_supabase_status":"ACTIVE_HEALTHY"},
   "handoff": {"archive":"WAF_PHASE9_FINAL_HANDOFF.zip","sha256":"","files":null,"bytes":null},
-  "honesty_boundary": "Phase 9 is verified on repository-local deterministic workloads and controlled local HTTPS/TLS termination. It does not claim live Supabase deployment, external certificate management, ModSecurity/Coraza installation, Internet-scale performance, or final Challenge 3 submission completion.",
-  "next_phase_entrypoint": "Read handoff/START_HERE.md, this file, handoff/PHASE9_FINAL_STATUS.json, handoff/WAF_PHASE9_LOG.md, phase9_master_exam_result.json and state/project_ledger.db before continuing."
+  "honesty_boundary": "Phase 9 is verified on repository-local deterministic workloads and controlled local HTTPS/TLS termination, plus live Supabase schema/RLS/privilege verification. It does not claim external certificate management, ModSecurity/Coraza installation, Internet-scale performance, or final Challenge 3 submission completion.",
+  "next_phase_entrypoint": "Read WAF_PROJECT_STATE.json, handoff/START_HERE.md, handoff/PHASE9_FINAL_STATUS.md, handoff/WAF_PHASE9_LOG.md, phase9_master_exam_result.json and state/project_ledger.db before continuing."
 }
