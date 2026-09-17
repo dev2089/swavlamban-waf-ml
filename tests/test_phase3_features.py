@@ -80,6 +80,12 @@ def test_large_input_is_bounded_without_error():
     assert all(0.0 <= v <= 1.0 for v in fv.values.values())
 
 
+def test_header_processing_is_bounded():
+    headers = {f"X-{i}": "v" for i in range(1000)}
+    fv = ProductionHTTPFeatureExtractor().extract(req(headers=headers))
+    assert fv.values["header_count"] == 1.0
+
+
 def test_unknown_method_is_safe():
     fv = ProductionHTTPFeatureExtractor().extract(req(method="UNKNOWN"))
     assert fv.values["method_known"] == 0.0
