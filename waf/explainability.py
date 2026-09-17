@@ -49,39 +49,57 @@ def _group_snapshot(features: FeatureVector) -> dict[str, dict[str, Any]]:
     return out
 
 
+def _group_indices(names: tuple[str, ...]) -> list[tuple[str, list[int]]]:
+    name_set = {name: index for index, name in enumerate(names)}
+    return [(group, [name_set[name] for name in group_names if name in name_set]) for group, group_names in FEATURE_GROUPS.items()]
+
+
 def _supervised_group_deltas(detector, features: FeatureVector) -> dict[str, float]:
+    """Compute all group ablations in one model call instead of one call per group."""
     names = tuple(detector.feature_names)
     base = np.asarray([[features.values.get(name, 0.0) for name in names]], dtype=float)
     original = float(detector.model.predict_proba(base)[0, 1])
-    deltas: dict[str, float] = {}
-    for group, group_names in FEATURE_GROUPS.items():
-        perturbed = base.copy()
-        indices = [i for i, name in enumerate(names) if name in group_names]
+    rows: list[np.ndarray] = []
+    groups: list[str] = []
+    for group, indices in _group_indices(names):
         if indices:
+            perturbed = base.copy()
             perturbed[0, indices] = 0.0
-        altered = float(detector.model.predict_proba(perturbed)[0, 1])
-        deltas[group] = round(original - altered, 6)
+            rows.append(perturbed[0])
+            groups.append(group)
+    if not rows:
+        return {group: 0.0 for group in FEATURE_GROUPS}
+    altered = detector.model.predict_proba(np.asarray(rows, dtype=float))[:, 1]
+    deltas = {group: 0.0 for group in FEATURE_GROUPS}
+    for group, score in zip(groups, altered):
+        deltas[group] = round(original - float(score), 6)
     return deltas
 
 
 def _anomaly_group_deltas(detector, features: FeatureVector) -> dict[str, float]:
+    """Compute all anomaly group ablations in one decision-function call."""
     names = tuple(detector.feature_names)
     base = np.asarray([[features.values.get(name, 0.0) for name in names]], dtype=float)
-    original_decision = float(detector.model.decision_function(base)[0])
 
-    def risk(decision: float) -> float:
-        value = 1.0 / (1.0 + np.exp(8.0 * (decision - detector.decision_threshold)))
-        return float(max(0.0, min(1.0, value)))
+    def risk(decisions: np.ndarray) -> np.ndarray:
+        values = 1.0 / (1.0 + np.exp(8.0 * (decisions - detector.decision_threshold)))
+        return np.clip(values, 0.0, 1.0)
 
-    original = risk(original_decision)
-    deltas: dict[str, float] = {}
-    for group, group_names in FEATURE_GROUPS.items():
-        perturbed = base.copy()
-        indices = [i for i, name in enumerate(names) if name in group_names]
+    original = float(risk(detector.model.decision_function(base))[0])
+    rows: list[np.ndarray] = []
+    groups: list[str] = []
+    for group, indices in _group_indices(names):
         if indices:
+            perturbed = base.copy()
             perturbed[0, indices] = 0.0
-        altered = risk(float(detector.model.decision_function(perturbed)[0]))
-        deltas[group] = round(original - altered, 6)
+            rows.append(perturbed[0])
+            groups.append(group)
+    if not rows:
+        return {group: 0.0 for group in FEATURE_GROUPS}
+    altered = risk(detector.model.decision_function(np.asarray(rows, dtype=float)))
+    deltas = {group: 0.0 for group in FEATURE_GROUPS}
+    for group, score in zip(groups, altered):
+        deltas[group] = round(original - float(score), 6)
     return deltas
 
 
@@ -135,9 +153,13 @@ def build_decision_evidence(
     attribution: dict[str, dict[str, float]] = {}
     attribution["supervised-v1"] = _supervised_group_deltas(ml_runtime.supervised, features)
     attribution["unsupervised-oneclasssvm-v1"] = _anomaly_group_deltas(ml_runtime.anomaly, features)
-    attribution["behaviour-v1"] = {"behaviour_state": round(float(next((s.score for s in result.signals if s.detector == "behaviour-v1"), 0.0)), 6)}
+    attribution["behaviour-v1"] = {
+        "behaviour_state": round(float(next((s.score for s in result.signals if s.detector == "behaviour-v1"), 0.0)), 6)
+    }
     attribution["open-source-waf-rules"] = {
-        "attack_signatures": 1.0 if any(s.detector == "open-source-waf-rules" and s.rule_ids for s in result.signals) else 0.0
+        "attack_signatures": 1.0 if any(
+            s.detector == "open-source-waf-rules" and s.rule_ids for s in result.signals
+        ) else 0.0
     }
 
     model_metadata = ml_runtime.metadata()
