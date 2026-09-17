@@ -17,7 +17,7 @@
 
 ## Benchmark
 
-100,000 mixed randomized HTTP-like requests completed in approximately 4.19 seconds on the terminal test environment, about 23,882 decisions/sec. This is **not** an end-to-end WAF throughput claim.
+100,000 mixed randomized HTTP-like requests completed in approximately 4.2403 seconds on the terminal test environment, about 23,583 decisions/sec. This is **not** an end-to-end WAF throughput claim.
 
 ## Score
 
