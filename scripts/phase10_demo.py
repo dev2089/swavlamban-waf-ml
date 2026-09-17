@@ -2,17 +2,19 @@
 from __future__ import annotations
 
 import json
-import os
+import sys
 from pathlib import Path
 from statistics import mean
 from time import perf_counter
 
 from fastapi.testclient import TestClient
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
 from waf.api.production_api import create_app
 from waf.security.production_security import issue_token
 
-ROOT = Path(__file__).resolve().parents[1]
 SECRET = "phase10-demo-secret-" + "x" * 32
 
 
