@@ -51,6 +51,35 @@ class DetectionSignal:
 
 
 @dataclass(frozen=True, slots=True)
+class DecisionEvidence:
+    schema_version: str
+    decision: str
+    risk_score: float
+    detector_contributions: tuple[Mapping[str, Any], ...]
+    feature_groups: Mapping[str, Mapping[str, Any]]
+    feature_attribution: Mapping[str, Mapping[str, float]]
+    reasons: tuple[str, ...]
+    rule_ids: tuple[str, ...]
+    versions: Mapping[str, Any]
+    explanation: str
+    privacy: Mapping[str, Any]
+    request_id: str
+    feature_snapshot: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.risk_score <= 1.0:
+            raise ValueError("risk_score must be in [0, 1]")
+        if self.schema_version != "evidence-v1":
+            raise ValueError("unsupported evidence schema")
+        if self.privacy.get("raw_payload_retained") is not False:
+            raise ValueError("decision evidence must not retain raw payload")
+        if self.privacy.get("raw_query_retained") is not False:
+            raise ValueError("decision evidence must not retain raw query")
+        if self.privacy.get("raw_headers_retained") is not False:
+            raise ValueError("decision evidence must not retain raw headers")
+
+
+@dataclass(frozen=True, slots=True)
 class DecisionResult:
     decision: Decision
     risk_score: float
@@ -59,6 +88,7 @@ class DecisionResult:
     signals: tuple[DetectionSignal, ...]
     request_id: str
     pipeline_version: str
+    evidence: DecisionEvidence | None = None
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.risk_score <= 1.0:
