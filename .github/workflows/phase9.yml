@@ -30,6 +30,19 @@ jobs:
         run: python -m pytest -q tests/test_phase8_security.py tests/test_phase8_security_hardening.py
       - name: Phase 9 master exam
         run: python scripts/phase9_master_exam.py
+      - name: Seed portable ledger from Phase 8 checkpoint
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db=Path('state/project_ledger.db')
+          sql=Path('state/phase8_ledger.sql')
+          db.unlink(missing_ok=True)
+          con=sqlite3.connect(db)
+          con.executescript(sql.read_text(encoding='utf-8'))
+          con.commit()
+          con.close()
+          PY
       - name: Record Phase 9 ledger
         run: python scripts/record_phase9_ledger.py
       - name: Build portable Phase 9 handoff
