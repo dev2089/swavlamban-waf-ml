@@ -1,36 +1,29 @@
 # WAF Phase 8 Execution Log
 
-## Starting checkpoint
-Phase 8 started from the verified Phase 7 branch `phase7-final`. Phase 7 remained intact and was not rewritten.
+## Objective
+Close the Phase 7 open item for production storage/authentication/RBAC/secrets/data minimization while preserving Phase 5 decision evidence and Phase 7 human-gated learning control.
 
-## Execution sequence
-1. Added the production security package with signed bearer authentication, explicit RBAC and security response controls.
-2. Added dedicated security tests covering authentication failure modes, authorization, production configuration and privacy-safe auditing.
-3. Hardened `.env.example` so server-only service-role credentials and signing secrets are explicit and never represented as real values.
-4. Added Supabase security migration with user-role mapping, immutable audit storage, RLS, role helper functions and anonymous-access revocation.
-5. Added an executable Phase 8 master exam with the project 9.9 cutoff and critical-defect gate.
-6. Added Phase 8 completion/test documentation and carried all external verification work forward explicitly.
+## Actions completed
+1. Inspected Phase 7 authoritative state, master plan, requirements matrix and handoff.
+2. Created authoritative branch `phase8-final` from Phase 7 commit `6694c0554d5aa879492509da8d16822fa71dd554`.
+3. Implemented `auth-v1` signed actor tokens with expiry and tamper resistance.
+4. Implemented role/action authorization boundaries for rule and model lifecycle operations.
+5. Implemented environment-only secret loading, weak/placeholder rejection and log redaction.
+6. Extended runtime configuration so production cannot run with volatile memory storage or disabled authentication.
+7. Implemented executable durable SQLite reference storage with raw-request field rejection and retention cleanup.
+8. Added Supabase/Postgres migration with structured runtime storage, security audit, RLS/RBAC, legacy raw-table sealing and retention purge function.
+9. Removed the legacy Flask hard-coded secret and made the development fallback process-random.
+10. Added 7 focused Phase 8 tests and the executable Phase 8 master exam.
+11. Ran full regression, compile gate and Phase 7 focused regression.
+12. Fixed Phase 8 test/migration gate issues found during execution and reran all gates.
+13. Recorded Phase 8 controls, tests, actions, open work and artifact hashes into the portable SQLite project ledger.
+14. Built and verified a portable handoff archive containing the current repo state, historical logs and database.
 
-## Remediation/history
-No Phase 8 defect is declared closed without executable evidence. The phase deliberately separates repository-local security proof from live Supabase/TLS/ModSecurity deployment proof.
+## Verification result
+Master exam **10.0/10.0**, 9.9 cutoff, zero critical defects, **71/71 full regression**, **7/7 Phase 8 focused tests**, **5/5 Phase 7 focused tests**, compile gate PASS.
 
-## Verification
-The Phase 8 CI workflow is the authoritative independent execution path. Its final run, commit, test counts and handoff checksum are recorded in `handoff/PHASE8_FINAL_STATUS.json` after completion.
-
-## Database/state
-Phase 8 security persistence is represented by `supabase/migrations/20260917120000_phase8_security.sql`. The portable project-execution ledger records the Phase 8 gate and remaining work. The ledger is evidence/state, not the runtime traffic database.
-
-## Still open after Phase 8
-- live Supabase migration/application wiring;
-- full FastAPI endpoint authentication wiring and deployment verification;
-- ModSecurity/Coraza verification;
-- TLS/HTTPS external deployment verification;
-- full load/performance/failure testing;
-- challenge-specific scenario evidence;
-- dashboard migration;
-- five-minute deterministic demo;
-- technical documentation/slides/report;
-- final release-candidate gate.
+## Explicit remaining work
+Cloud migration application, hosted identity integration, ModSecurity/Coraza, TLS, production load/failure testing, challenge-specific evidence, dashboard, demo, final docs/report and the final release gate remain open and are carried forward in the ledger. They are not hidden behind the Phase 8 score.
 
 ## Honesty boundary
-Phase 8 does not claim live external infrastructure was changed or verified. Documentation and migration SQL are not substitutes for deployment evidence.
+Phase 8 evidence is local executable security/storage verification plus static migration-contract verification. It does not claim live cloud deployment, hosted IdP integration or final Challenge 3 completion.
