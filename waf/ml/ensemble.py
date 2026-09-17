@@ -157,7 +157,9 @@ def _cached_stateless_components(path: str) -> tuple[SupervisedDetector, Unsuper
 
 
 def load_runtime(path: str | Path) -> Phase4MLEnsemble:
-    return Phase4MLEnsemble.from_stateless_components(*_cached_stateless_components(str(Path(path))))
+    components = _cached_stateless_components(str(Path(path)))
+    supervised, anomaly, behaviour, semi_supervised, outbound, feature_names, dataset_version, baseline_version, model_version = components
+    return Phase4MLEnsemble.from_stateless_components(supervised, anomaly, behaviour, feature_names, dataset_version, baseline_version, model_version=model_version, semi_supervised=semi_supervised, outbound=outbound)
 
 
 def evaluate_supervised(seed: int = 42) -> dict[str, float | str | int]:
