@@ -24,12 +24,14 @@ jobs:
       - name: Phase 7 master exam
         run: python scripts/phase7_master_exam.py
       - name: Record project ledger
-        run: python scripts/record_phase7_ledger.py && python - <<'PY'
-import sqlite3
-from pathlib import Path
-con=sqlite3.connect("state/project_ledger.db")
-Path("state/phase7_ledger.sql").write_text("\n".join(con.iterdump())+"\n", encoding="utf-8")
-PY
+        run: |
+          python scripts/record_phase7_ledger.py
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          con=sqlite3.connect("state/project_ledger.db")
+          Path("state/phase7_ledger.sql").write_text("\n".join(con.iterdump())+"\n", encoding="utf-8")
+          PY
       - name: Build portable handoff
         run: python scripts/build_phase7_handoff.py
       - name: Upload Phase 7 handoff
