@@ -2,22 +2,44 @@
   "project": "swavlamban-waf-ml",
   "challenge": "Challenge 3 - ML-integrated open-source WAF",
   "current_phase": 5,
-  "phase_status": "IMPLEMENTED_UNVERIFIED",
-  "phase_score": null,
+  "phase_status": "COMPLETE_VERIFIED",
+  "phase_score": 10.0,
   "cutoff": 9.9,
-  "overall_status": "IN_PROGRESS",
+  "overall_status": "PHASE5_COMPLETE_NEXT_RELEASE_WORK_REMAINS",
   "authoritative_branch": "phase5-final",
-  "verified_source_head": "e649920c391961b20be616337114300c00d23c19",
+  "verified_commit": "51fe08e1ec3421ee1d00fc48a4080013d43b46fd",
+  "verification_run": {
+    "workflow": "phase5-verification",
+    "run_id": 35210837101,
+    "run_number": 19,
+    "conclusion": "success",
+    "verified_at": "2026-09-17T10:31:07Z"
+  },
   "validation": {
     "phase4_full_regression": "48/48 PASS",
     "phase4_master_exam": "10/10; critical defects 0",
-    "phase4_artifact_sha256": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571",
-    "phase5_full_regression": "UNVERIFIED",
-    "phase5_compileall": "UNVERIFIED",
-    "phase5_evidence_tests": "UNVERIFIED",
-    "phase5_master_exam": "UNVERIFIED; cutoff 9.9",
-    "phase5_explanation_overhead": "UNVERIFIED",
-    "phase5_workflow_runs_for_head": 0
+    "phase4_artifact_sha256_previous": "bc54790f8f79daf3dc2fdc0a0a34290478e016e5d297ba8e795692435f17b571",
+    "phase4_runtime_artifact_rebuilt_for_handoff_sha256": "b1c2e447fd95d57eb5b3751e1da12793f2f3b59814fef123249cc7767c004587",
+    "phase5_full_regression": "54/54 PASS",
+    "phase5_compileall": "PASS",
+    "phase5_evidence_tests": "8/8 PASS",
+    "phase5_master_exam": "10.0/10.0; cutoff 9.9; critical defects 0",
+    "phase5_explanation_overhead": {
+      "samples": 100,
+      "core_mean_ms": 1.742,
+      "explanation_mean_ms": 9.778,
+      "explanation_overhead_percent_of_core": 561.4,
+      "scope": "local deterministic benchmark; not a production latency claim"
+    },
+    "phase5_privacy_static_gate": "PASS",
+    "portable_handoff_archive": {
+      "artifact_name": "waf-phase5-handoff",
+      "artifact_id": 10490889663,
+      "zip_size_uploaded_bytes": 232051,
+      "zip_sha256": "3491f7624e96ebacb88f539ebb5bb1634bbf2d9aeb9a819ecc00fbde09d46734",
+      "source_handoff_bytes_before_upload": 241237,
+      "source_commit": "51fe08e1ec3421ee1d00fc48a4080013d43b46fd"
+    }
   },
   "done": [
     "Phase 1 architecture foundation",
@@ -32,28 +54,31 @@
     "full failure/remediation history",
     "portable future-chat handoff package",
     "Phase 5 structured decision evidence",
-    "Phase 5 detector and feature-group attribution",
+    "Phase 5 detector-level contributions",
+    "Phase 5 feature-group attribution",
     "Phase 5 privacy tests and telemetry integration",
-    "Phase 5 executable master exam and overhead benchmark",
-    "Phase 5 privacy-safe Supabase evidence migration"
+    "Phase 5 executable master exam with 9.9 cutoff",
+    "Phase 5 explanation-overhead benchmark",
+    "Phase 5 privacy-safe Supabase evidence migration",
+    "real GitHub Actions verification executed successfully",
+    "reproducible Phase 5 final handoff archive built and uploaded"
   ],
   "left": [
-    "Execute Phase 5 tests/master exam on a real runner",
-    "Record Phase 5 score and explanation overhead",
-    "Apply Phase 5 Supabase migration to the actual connected runtime database",
+    "Apply the Phase 5 Supabase migration to the actual connected runtime database; migration is committed but was not executed against a live database in this run",
     "ModSecurity/Coraza verification",
-    "TLS/HTTPS",
+    "TLS/HTTPS deployment verification",
     "optional semi-supervised evidence path",
     "ML rule recommendation/approval",
     "baseline/feedback/drift/retraining",
-    "production storage/auth/RBAC/data minimization",
+    "production storage/auth/RBAC/data minimization hardening",
     "full load/failure testing beyond milestone benchmarks",
-    "challenge scenarios/evidence",
+    "challenge-specific scenario evidence",
     "dashboard migration",
     "five-minute demo",
     "technical docs/slides",
     "final release gate"
   ],
-  "honesty_boundary": "Phase 5 implementation is complete on phase5-final, but no Phase 5 execution score is claimed because the available GitHub Actions surface returned no workflow run. All Phase 4 ML metrics remain deterministic synthetic evidence only and are not real-world Internet WAF accuracy claims. Overall Challenge 3 remains IN_PROGRESS.",
-  "last_updated": "2026-09-17T10:18:00Z"
+  "honesty_boundary": "Phase 5 implementation and milestone verification are complete and verified at 10.0/10.0 on GitHub Actions run 35210837101. The explanation-overhead number is explicitly a local deterministic benchmark, not a production latency claim. ML evaluation metrics remain deterministic synthetic benchmark evidence and are not real-world Internet WAF accuracy claims. The database migration is prepared in-repository but has not been claimed as applied to a live Supabase database because no live database execution result is available in this workflow.",
+  "next_phase_entrypoint": "Use the portable WAF_PHASE5_FINAL_HANDOFF.zip, read handoff/START_HERE.md first, then handoff/WAF_PHASE5_LOG.md and handoff/PHASE5_FINAL_STATUS.json. Preserve phase5-final as the authoritative branch until release decisions are made.",
+  "last_updated": "2026-09-17T10:36:00Z"
 }
