@@ -11,14 +11,7 @@ from waf.ml.ensemble import Phase4MLEnsemble, evaluate_supervised
 
 
 def request(**kwargs):
-    data = dict(
-        request_id="ml-1",
-        method="GET",
-        scheme="https",
-        host="example.test",
-        path="/health",
-        source_ip="127.0.0.1",
-    )
+    data = dict(request_id="ml-1", method="GET", scheme="https", host="example.test", path="/health", source_ip="127.0.0.1")
     data.update(kwargs)
     return RequestEnvelope(**data)
 
@@ -57,7 +50,7 @@ def test_ensemble_has_all_ml_signals_and_preserves_signature_block():
     benign = waf.analyze(request())
     assert benign.decision is Decision.ALLOW
     assert {s.detector for s in benign.signals} == {
-        "open-source-waf-rules", "supervised-v1", "unsupervised-oneclasssvm-v1", "behaviour-v1"
+        "open-source-waf-rules", "supervised-v1", "unsupervised-oneclasssvm-v1", "behaviour-v1", "semi-supervised-v1"
     }
     bad = waf.analyze(request(query="q=1%20UNION%20SELECT%20password%20FROM%20users"))
     assert bad.decision is Decision.BLOCK
@@ -74,6 +67,8 @@ def test_ml_stateless_components_are_cached_but_behaviour_state_is_isolated():
     second = time.perf_counter() - start
     assert a.ml.supervised.model is b.ml.supervised.model
     assert a.ml.anomaly.model is b.ml.anomaly.model
+    assert a.ml.semi_supervised.model is b.ml.semi_supervised.model
+    assert a.ml.outbound.model is b.ml.outbound.model
     assert a.ml.behaviour is not b.ml.behaviour
     assert a.ml.behaviour.model is b.ml.behaviour.model
     assert second < max(1.0, first * 0.5)
