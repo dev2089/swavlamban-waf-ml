@@ -76,10 +76,14 @@ class MemorySecurityStore:
         self.audit: list[dict[str, Any]] = []
         self._view = _RuntimeView()
 
+    def record_decision_view(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
+        self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
+
     def record_decision(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
         source_hash = hash_identifier(source_ip)
         path = _safe_path(uri)
-        self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
+        if not self._already_previewed(request_id):
+            self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
         if result.get("threat_detected"):
             self.threats.append({
                 "threat_type": result["threat_type"],
@@ -108,6 +112,11 @@ class MemorySecurityStore:
         if result.get("threat_detected"):
             self.analytics.append({"metric_name": "threats_total", "metric_value": 1})
 
+    def _already_previewed(self, request_id: str) -> bool:
+        # Preview deduplication is only used by async local telemetry. The view is
+        # bounded and the request id is already stored in threat metadata when relevant.
+        return any(row.get("metadata", {}).get("request_id") == request_id for row in self._view.recent_threats(500)) or any(row.get("request_id") == request_id for row in self.request_logs[-1:])
+
     def record_audit(self, *, actor: str, action: str, target: str, outcome: str, request_id: str) -> None:
         self.audit.append(audit_record(actor=actor, action=action, target=target, outcome=outcome, request_id=request_id))
 
@@ -130,6 +139,8 @@ class SupabaseRESTStore:
         self.key = service_role_key
         self.timeout = timeout
         self._view = _RuntimeView()
+        self._previewed: set[str] = set()
+        self._preview_lock = Lock()
 
     def _post(self, table: str, payload: Mapping[str, Any]) -> None:
         encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
@@ -153,10 +164,18 @@ class SupabaseRESTStore:
         except error.URLError as exc:
             raise RuntimeError("Supabase storage unavailable") from exc
 
+    def record_decision_view(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
+        with self._preview_lock:
+            first = request_id not in self._previewed
+            if first:
+                self._previewed.add(request_id)
+        if first:
+            self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
+
     def record_decision(self, *, request_id: str, source_ip: str | None, method: str, uri: str, result: Mapping[str, Any]) -> None:
-        source_hash = hash_identifier(source_ip) or "unknown"
         path = _safe_path(uri)
-        self._view.record(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
+        self.record_decision_view(request_id=request_id, source_ip=source_ip, method=method, uri=uri, result=result)
+        source_hash = hash_identifier(source_ip) or "unknown"
         if result.get("threat_detected"):
             self._post("threats", {
                 "threat_type": result["threat_type"],
