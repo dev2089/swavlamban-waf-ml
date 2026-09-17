@@ -1,52 +1,12 @@
 {
-  "phase": 8,
-  "status": "COMPLETE_VERIFIED",
-  "score": 10.0,
-  "cutoff": 9.9,
-  "critical_defects": [],
-  "authoritative_branch": "phase8-final",
-  "verification": {
-    "phase8_security_assertions": "6/6 PASS",
-    "phase7_inherited_full_regression": "64/64 PASS",
-    "compile_contract": "PASS",
-    "static_security_contract": "PASS",
-    "master_exam": "10.0/10.0; cutoff 9.9; zero critical defects"
-  },
-  "implementation": {
-    "security_package": "waf/security/production_security.py",
-    "roles": ["viewer", "operator", "reviewer", "admin"],
-    "authentication": "signed short-lived bearer token with issuer/audience/expiry/signature validation",
-    "rbac": "explicit permission map with reviewer approval and admin management boundaries",
-    "secrets": "server-only Supabase service-role credential and WAF signing secret configuration; no real secrets committed",
-    "privacy_audit": "identifier-only audit contract; no request body/raw headers/secrets",
-    "supabase_migration": "supabase/migrations/20260917120000_phase8_security.sql",
-    "rls": true,
-    "ci_workflow": ".github/workflows/phase8.yml",
-    "portable_ledger": "state/phase8_ledger.sql"
-  },
-  "done": [
-    "production security primitives",
-    "authentication failure-closed tests",
-    "explicit RBAC and approval permissions",
-    "production secret/configuration contract",
-    "privacy-safe audit contract",
-    "Supabase RBAC/audit RLS migration path",
-    "Phase 8 master exam",
-    "Phase 8 logs/test report/future-chat entrypoint",
-    "portable ledger checkpoint"
-  ],
-  "left": [
-    "live Supabase migration/application execution",
-    "full FastAPI endpoint authentication wiring and deployment verification",
-    "ModSecurity/Coraza verification",
-    "TLS/HTTPS external deployment verification",
-    "full external load/performance/failure testing",
-    "challenge-specific scenario evidence",
-    "dashboard migration",
-    "five-minute deterministic demo",
-    "technical documentation/slides/report",
-    "final release-candidate gate"
-  ],
-  "honesty_boundary": "Phase 8 security controls are verified at repository level. Live external infrastructure is not claimed as deployed. The remaining items are explicitly carried into the next milestone rather than hidden behind the phase score.",
-  "future_chat_entrypoint": "handoff/START_HERE.md"
+  "phase":8,
+  "status":"COMPLETE_VERIFIED",
+  "master_exam":{"score":10.0,"cutoff":9.9,"critical_defects":[]},
+  "regression":{"full":"71/71 PASS","phase8_focused":"7/7 PASS","phase7_focused":"5/5 PASS","compileall":"PASS"},
+  "authoritative_branch":"phase8-final",
+  "controls":{"storage":"storage-v1 SQLite reference adapter + Postgres/Supabase migration","authentication":"auth-v1 HMAC-signed short-lived actor tokens","rbac":"viewer, analyst, rule_approver, model_approver, admin","secrets":"environment-only; minimum length and placeholder checks","data_minimization":"raw HTTP material rejected by persistence; legacy raw PostgREST access sealed","retention":"expiry on runtime evidence and audit records; admin/service-role purge path","phase7_boundary":"human approval remains mandatory; runtime model replacement is never automatic"},
+  "files":["waf/security/auth.py","waf/security/rbac.py","waf/security/secrets.py","waf/storage/persistent.py","supabase/migrations/20260917130000_phase8_security_hardening.sql","tests/test_phase8_security_hardening.py","scripts/phase8_master_exam.py","scripts/record_phase8_ledger.py"],
+  "open_after_phase8":["live Supabase application/migration","hosted identity-provider wiring","ModSecurity/Coraza verification","TLS/HTTPS deployment verification","telemetry/load/performance/failure testing","challenge scenario evidence","dashboard migration","five-minute deterministic demo","technical documentation/slides/report","final release-candidate gate"],
+  "honesty_boundary":"Phase 8 is verified on local executable controls plus a statically contract-tested production SQL migration. It does not claim live cloud deployment, hosted IdP integration or final challenge completion.",
+  "future_chat_entrypoint":"handoff/START_HERE.md"
 }
