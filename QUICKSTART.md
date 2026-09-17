@@ -1,504 +1,88 @@
-# Quick Start Guide - WAF ML
+# Quick Start
 
-Welcome to the WAF Machine Learning project! This guide will help you get up and running quickly.
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Setup Steps](#setup-steps)
-3. [Command Reference](#command-reference)
-4. [Directory Structure](#directory-structure)
-5. [Feature Demonstrations](#feature-demonstrations)
-6. [Troubleshooting](#troubleshooting)
-
----
+This guide covers the current Phase 10 WAF implementation. Historical phase experiments remain under `docs/` and `handoff/` for audit continuity.
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
+- Python 3.11+
+- Git
+- Linux for the verified process-level nginx/ModSecurity evidence path
+- For local WAF enforcement evidence: nginx, ModSecurity nginx connector, curl and OpenSSL
 
-- **Python**: 3.8 or higher
-  - Verify: `python --version`
-- **Git**: For version control
-  - Verify: `git --version`
-- **pip**: Python package manager (comes with Python)
-  - Verify: `pip --version`
-- **Virtual Environment**: Python's venv module (usually included)
-  - Test: `python -m venv --help`
-- **Required System Libraries** (Linux/Ubuntu):
-  ```bash
-  sudo apt-get install python3-dev build-essential
-  ```
-- **Disk Space**: At least 2GB free for dependencies and models
-- **RAM**: Minimum 4GB recommended
-- **Internet Connection**: For downloading packages and pre-trained models
-
----
-
-## Setup Steps
-
-### 1. Clone the Repository
+## Install
 
 ```bash
-git clone https://github.com/dev2089/swavlamban-waf-ml.git
-cd swavlamban-waf-ml
+./setup.sh
 ```
 
-### 2. Create a Virtual Environment
+Or manually:
 
 ```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-### 3. Install Dependencies
+## Run the API/dashboard
 
 ```bash
-# Upgrade pip
-pip install --upgrade pip
-
-# Install required packages
-pip install -r requirements.txt
-
-# Optional: Install development dependencies
-pip install -r requirements-dev.txt
+python backend/server.py
 ```
 
-### 4. Verify Installation
+Open `/dashboard` after configuring authentication/environment variables.
+
+## Run the canonical gateway
 
 ```bash
-python -c "import tensorflow; import sklearn; print('✓ Installation successful')"
+python -m waf.gateway.proxy
 ```
 
-### 5. Configure Environment Variables (Optional)
+Allowed requests are forwarded to the configured upstream. Blocked requests terminate at the WAF gateway with HTTP 403.
 
-Create a `.env` file in the project root:
+## Test
 
 ```bash
-# .env file example
-MODEL_PATH=./models
-DATA_PATH=./data
-LOG_LEVEL=INFO
+python -m pytest -q
+python -m compileall -q waf tests scripts
 ```
 
-Load environment variables:
-```bash
-source .env  # On macOS/Linux
-# or
-set -a; source .env; set +a  # Bash alternative
-```
-
----
-
-## Command Reference
-
-### Training Commands
-
-**Train a new model:**
-```bash
-python train.py --config configs/default.yaml --epochs 50 --batch-size 32
-```
-
-**Train with specific parameters:**
-```bash
-python train.py \
-  --model-type transformer \
-  --learning-rate 0.001 \
-  --validation-split 0.2 \
-  --save-checkpoint
-```
-
-**Resume training from checkpoint:**
-```bash
-python train.py --checkpoint models/latest_checkpoint.pth --continue-training
-```
-
-### Evaluation Commands
-
-**Evaluate model performance:**
-```bash
-python evaluate.py --model models/trained_model.h5 --test-data data/test_set.csv
-```
-
-**Generate evaluation report:**
-```bash
-python evaluate.py --model models/trained_model.h5 --generate-report --output reports/
-```
-
-### Inference Commands
-
-**Run inference on single sample:**
-```bash
-python predict.py --model models/trained_model.h5 --input sample.json
-```
-
-**Batch inference:**
-```bash
-python predict.py --model models/trained_model.h5 --batch-input data/samples.csv --output predictions.json
-```
-
-### Data Processing Commands
-
-**Prepare dataset:**
-```bash
-python scripts/prepare_data.py --input raw_data/ --output processed_data/ --split 0.8
-```
-
-**Generate synthetic data:**
-```bash
-python scripts/generate_synthetic_data.py --samples 10000 --output synthetic_data/
-```
-
-### Utility Commands
-
-**View model architecture:**
-```bash
-python -m utils.model_inspect --model models/trained_model.h5
-```
-
-**Check system compatibility:**
-```bash
-python scripts/check_env.py
-```
-
-**Run tests:**
-```bash
-pytest tests/ -v --cov=src/
-```
-
----
-
-## Directory Structure
-
-```
-swavlamban-waf-ml/
-├── README.md                 # Project overview
-├── QUICKSTART.md            # This file
-├── requirements.txt         # Python dependencies
-├── requirements-dev.txt     # Development dependencies
-├── setup.py                 # Package setup configuration
-├── .gitignore              # Git ignore rules
-├── .env.example            # Environment variables template
-│
-├── src/                     # Source code
-│   ├── __init__.py
-│   ├── models/             # Model architectures
-│   │   ├── __init__.py
-│   │   ├── transformer.py
-│   │   ├── lstm.py
-│   │   └── hybrid.py
-│   ├── data/               # Data processing modules
-│   │   ├── __init__.py
-│   │   ├── loader.py
-│   │   ├── preprocessor.py
-│   │   └── augmentation.py
-│   ├── utils/              # Utility functions
-│   │   ├── __init__.py
-│   │   ├── metrics.py
-│   │   ├── visualization.py
-│   │   └── helpers.py
-│   └── config/             # Configuration handling
-│       ├── __init__.py
-│       └── settings.py
-│
-├── configs/                # Configuration files
-│   ├── default.yaml
-│   ├── production.yaml
-│   └── experiments.yaml
-│
-├── data/                   # Data directory (git-ignored)
-│   ├── raw/               # Raw data
-│   ├── processed/         # Processed data
-│   ├── train/             # Training data
-│   ├── validation/        # Validation data
-│   └── test/              # Test data
-│
-├── models/                # Trained models (git-ignored)
-│   ├── checkpoints/       # Training checkpoints
-│   └── final/             # Final trained models
-│
-├── notebooks/             # Jupyter notebooks
-│   ├── exploration.ipynb
-│   ├── training.ipynb
-│   └── evaluation.ipynb
-│
-├── scripts/               # Standalone scripts
-│   ├── train.py
-│   ├── evaluate.py
-│   ├── predict.py
-│   ├── prepare_data.py
-│   ├── generate_synthetic_data.py
-│   └── check_env.py
-│
-├── tests/                 # Unit and integration tests
-│   ├── __init__.py
-│   ├── test_models.py
-│   ├── test_data.py
-│   ├── test_utils.py
-│   └── fixtures/
-│
-├── reports/              # Generated reports (git-ignored)
-│   ├── metrics/
-│   ├── visualizations/
-│   └── logs/
-│
-└── docs/                 # Documentation
-    ├── API.md
-    ├── CONTRIBUTING.md
-    └── ARCHITECTURE.md
-```
-
----
-
-## Feature Demonstrations
-
-### 1. Quick Model Training
-
-Get a model trained in minutes:
+## Produce challenge evidence
 
 ```bash
-# Prepare sample data
-python scripts/prepare_data.py --input data/raw --output data/processed --split 0.8
-
-# Train a basic model
-python train.py --epochs 10 --batch-size 32 --quick-mode
-
-# Expected output: Model trained and saved to models/quick_model.h5
+python scripts/phase10_demo.py
+python scripts/phase10_rule_replay.py
+python scripts/phase10_tls_e2e.py
+python scripts/phase10_waf_enforcement_e2e.py
+python scripts/phase10_load_harness.py --url http://127.0.0.1:18081/ --duration 2 --concurrency 20 --rate 100 --payload-profile mixed
+python scripts/phase10_master_exam.py
 ```
 
-### 2. Running Inference
+## Repository layout
 
-Use a trained model to make predictions:
+```text
+waf/                    canonical runtime
+  api/                  authenticated API/dashboard adapter
+  core/                 configuration and domain models
+  detection/            decision/risk components
+  edge/                 WAF pipeline and reverse proxy
+  gateway/              request gateway
+  ml/                   anomaly/classification/learning controls
+  rules/                managed-rule lifecycle
+  security/             auth/RBAC/secrets controls
+  storage/              bounded telemetry and persistence
 
-```bash
-# Single prediction
-python predict.py --model models/quick_model.h5 --input '{"features": [1, 2, 3, 4, 5]}'
-
-# Batch predictions
-python predict.py --model models/quick_model.h5 --batch-input data/samples.csv --output results.json
+deploy/nginx/            process-level nginx + ModSecurity configuration
+dashboard/               authenticated operator dashboard
+scripts/                 deterministic demos, E2E tests, load harness, release gates
+tests/                   regression and integration tests
+handoff/                 audit history, claim ledger, negative evidence, manifests
+docs/                    current and historical technical documentation
 ```
 
-### 3. Model Evaluation
+## Evidence boundary
 
-Comprehensive model evaluation:
+Do not treat a local bounded benchmark as proof of Internet-scale capacity. Do not treat the synthetic CI ML corpus as field accuracy. Public certificate issuance/rotation and public Internet HTTPS verification remain outside the demonstrated free CI boundary.
 
-```bash
-# Evaluate model
-python evaluate.py --model models/quick_model.h5 --test-data data/test --generate-report
+## Future continuation
 
-# Check outputs in reports/ directory
-ls -la reports/
-```
-
-### 4. Jupyter Notebook Exploration
-
-Interactive exploration and experimentation:
-
-```bash
-# Start Jupyter
-jupyter notebook notebooks/
-
-# Open exploration.ipynb to:
-# - Load and visualize data
-# - Experiment with models
-# - Analyze results
-```
-
-### 5. Running Tests
-
-Verify everything is working:
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run specific test file
-pytest tests/test_models.py -v
-
-# Run with coverage
-pytest tests/ --cov=src/ --cov-report=html
-```
-
----
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-#### 1. Virtual Environment Not Activating
-
-**Problem:** `source venv/bin/activate` command not found
-
-**Solution:**
-```bash
-# Recreate virtual environment
-rm -rf venv/
-python -m venv venv
-source venv/bin/activate
-```
-
-#### 2. Package Installation Fails
-
-**Problem:** `pip install` command fails with permission errors
-
-**Solution:**
-```bash
-# Upgrade pip first
-pip install --upgrade pip setuptools wheel
-
-# Try installing with --user flag
-pip install --user -r requirements.txt
-
-# Or use cache-dir
-pip install --no-cache-dir -r requirements.txt
-```
-
-#### 3. Out of Memory During Training
-
-**Problem:** `MemoryError` or `CUDA out of memory`
-
-**Solution:**
-```bash
-# Reduce batch size
-python train.py --batch-size 8  # Instead of 32
-
-# Enable gradient checkpointing
-python train.py --gradient-checkpointing
-
-# Use mixed precision training
-python train.py --mixed-precision
-```
-
-#### 4. GPU Not Detected
-
-**Problem:** TensorFlow/PyTorch not using GPU
-
-**Solution:**
-```bash
-# Check GPU availability
-python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
-
-# For PyTorch
-python -c "import torch; print(torch.cuda.is_available())"
-
-# Install GPU-specific packages
-pip install tensorflow-gpu  # or torch with CUDA
-```
-
-#### 5. Data Loading Issues
-
-**Problem:** `FileNotFoundError` when loading data
-
-**Solution:**
-```bash
-# Verify data directory exists
-ls -la data/raw/
-ls -la data/processed/
-
-# Check file permissions
-chmod 644 data/raw/*
-
-# Prepare data properly
-python scripts/prepare_data.py --input data/raw --output data/processed
-```
-
-#### 6. Import Errors
-
-**Problem:** `ModuleNotFoundError` for custom modules
-
-**Solution:**
-```bash
-# Add project to Python path
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-
-# Or install in development mode
-pip install -e .
-```
-
-#### 7. Port Already in Use (Jupyter)
-
-**Problem:** `Address already in use` when starting Jupyter
-
-**Solution:**
-```bash
-# Specify different port
-jupyter notebook --port 8889
-
-# Or kill existing process
-lsof -i :8888
-kill -9 <PID>
-```
-
-### Diagnostic Commands
-
-```bash
-# Check Python version
-python --version
-
-# Verify all dependencies
-pip list
-
-# Check GPU/CUDA availability
-nvidia-smi
-
-# View system information
-python scripts/check_env.py
-
-# Run tests with verbose output
-pytest tests/ -vv -s
-```
-
-### Getting Help
-
-- **Documentation**: Check `docs/` directory
-- **Issues**: Review GitHub issues for similar problems
-- **Logs**: Check `reports/logs/` for error details
-- **Community**: Open a new GitHub issue with:
-  - Python version
-  - OS and version
-  - Full error message
-  - Steps to reproduce
-
----
-
-## Next Steps
-
-1. ✅ Complete the setup steps above
-2. 📚 Read the [README.md](README.md) for project overview
-3. 🚀 Try the [Feature Demonstrations](#feature-demonstrations)
-4. 📖 Explore [API Documentation](docs/API.md)
-5. 🧪 Run tests with `pytest tests/`
-6. 📓 Check out example [Jupyter notebooks](notebooks/)
-7. 🔧 Customize configurations in [configs/](configs/)
-
----
-
-## Quick Troubleshooting Checklist
-
-- [ ] Python 3.8+ installed
-- [ ] Virtual environment created and activated
-- [ ] Dependencies installed (`pip install -r requirements.txt`)
-- [ ] `python scripts/check_env.py` runs successfully
-- [ ] Sample training completes without errors
-- [ ] Tests pass with `pytest tests/`
-
----
-
-## Version Information
-
-- **Project Version**: 1.0.0
-- **Last Updated**: 2025-12-25
-- **Maintained By**: dev2089
-
-For the latest updates, visit the [GitHub repository](https://github.com/dev2089/swavlamban-waf-ml).
-
----
-
-**Happy Machine Learning! 🚀**
+Read `WAF_PROJECT_STATE.json` and `handoff/START_HERE.md` first, then the Phase 10 result/evidence files and requirement traceability before changing the system.
