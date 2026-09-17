@@ -8,26 +8,28 @@
 ## Phase 1
 - Added dependency-light `waf/` security core and tests.
 - Added architecture, state and handoff documentation.
-- Added portable SQLite project ledger in the handoff bundle.
+- Added portable SQLite project ledger.
 - Local validation: compileall PASS, 13/13 tests PASS, static scans PASS, mixed fuzz benchmark PASS.
 - Phase 1 gate: 10.0/10.0.
-- Legacy runtime intentionally remained beside the new core pending migration.
 
 ## Phase 2
-- Added `waf/edge/` live HTTP enforcement path.
-- Added deterministic URL-decoded SQLi, XSS, path traversal and command-injection WAF signatures.
+- Added live HTTP enforcement path and Nginx integration.
+- Added deterministic URL-decoded SQLi, XSS, traversal and command-injection signatures.
 - Added real pre-forwarding block enforcement with HTTP 403.
 - Added bounded request/response sizes, timeout handling, request IDs and WAF decision headers.
-- Added Nginx integration configuration and automated Nginx gate.
-- Added regression coverage for `WAFConfig.from_env()` under `dataclass(slots=True)`.
-- Fixed and retested encoded XSS, initial proxy startup/502 behaviour, response headers and configuration-default handling.
-- Final local validation: 6/6 Phase 2 tests PASS; Nginx integration PASS; compileall PASS; security/static scans PASS; one-command self-test PASS.
-- Final end-to-end local benchmark: 5,000 requests, 3,477.8 req/s, 4,500 allow, 500 block; event buffer bounded to 1,000.
-- Intermediate failed attempts and fixes are preserved in the Phase 2 SQLite ledger.
-- Phase 2 gate: 10.0/10.0 for the defined Phase 2 acceptance criteria.
+- Added regression coverage for config default handling and final end-to-end evidence.
+- Phase 2 gate: 10.0/10.0 for its acceptance criteria.
+
+## Phase 3
+- Added production `http-v2` HTTP feature pipeline with 38 bounded normalized features.
+- Added safe path/query-specific URL decoding, NFKC normalization, query limits, header normalization and body scan limits.
+- Switched edge WAF and compatibility extractor to v2 and updated regression tests.
+- Added comprehensive feature, fuzz, benchmark and live-edge evidence.
+- First feature cycle failed on a list/ratio TypeError and an over-specific Unicode-path expectation; both were diagnosed, fixed and retested.
+- Final Phase 3 suite: 10/10 PASS; reconstructed regression: 20/20 PASS; feature fuzz: 20,000 requests/0 exceptions; feature benchmark: 34,854.5 req/s; E2E: 5,000 requests, 4,500 allow, 500 block, 2,354.3 req/s.
+- Phase 3 gate: 10.0/10.0 for its acceptance criteria.
 
 ## Important boundary
-- Main branch has not been modified by this work.
-- A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified.
-- TLS, production ML, behavioural learning, production storage/auth, dashboard migration, complete challenge scenario evidence, demo and final release remain open.
+- Main branch remains untouched by milestone work.
+- ModSecurity/Coraza installation, TLS, production ML, behavioural learning, production storage/auth, dashboard, complete scenario evidence, demo and final release remain open.
 - Overall Challenge 3 remains in progress.
