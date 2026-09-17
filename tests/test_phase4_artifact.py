@@ -20,6 +20,8 @@ def test_model_artifact_roundtrip(tmp_path: Path):
     assert loaded.behaviour.name == "behaviour-v1"
     assert loaded.behaviour.model is not None
     assert loaded.behaviour.model.__class__.__name__ == "LogisticRegression"
+    assert loaded.semi_supervised.name == "semi-supervised-v1"
+    assert loaded.semi_supervised.model is not None
 
 
 def test_edge_can_consume_pretrained_artifact(tmp_path: Path, monkeypatch):
@@ -30,3 +32,8 @@ def test_edge_can_consume_pretrained_artifact(tmp_path: Path, monkeypatch):
     waf = EdgeWAF(WAFConfig())
     result = waf.analyze(RequestEnvelope("r2", "GET", "https", "example.test", "/health"))
     assert result.decision is Decision.ALLOW
+    assert {s.detector for s in result.signals} >= {
+        "supervised-v1",
+        "semi-supervised-v1",
+        "behaviour-v1",
+    }
