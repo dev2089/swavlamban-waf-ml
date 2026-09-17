@@ -40,6 +40,8 @@ jobs:
           test -s models/phase4_models.joblib
       - name: Compile
         run: python -m compileall -q waf tests scripts
+      - name: Repository hygiene gate
+        run: python scripts/phase10_repository_hygiene.py
       - name: Isolated gateway startup smoke
         run: python scripts/phase10_ci_startup_fix.py
       - name: Strict Phase 10 master exam
