@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 import sys
 
@@ -17,16 +16,18 @@ from waf.features.http_v2 import ProductionHTTPFeatureExtractor
 
 def main() -> int:
     env = {"WAF_ENV": "development", "WAF_AUTH_SECRET": "phase10-rule-replay-secret-" + "x" * 32}
-    config = WAFConfig.from_env(env)
-    waf = EdgeWAF(config)
+    waf = EdgeWAF(WAFConfig.from_env(env))
     extractor = ProductionHTTPFeatureExtractor()
+
+    # Use a source request whose structured feature vector contains the same
+    # allowlisted feature that the positive replay request will exercise.
     request = RequestEnvelope(
         "phase10-rule-source",
         "GET",
         "https",
         "replay.example",
         "/search",
-        "q=' OR 1=1--",
+        "q=select%20*%20from%20users",
         body=b"",
         source_ip="192.0.2.10",
     )
@@ -45,15 +46,17 @@ def main() -> int:
     neg_features = extractor.extract(negative)
     matches_positive = rule.rule_id in waf.rule_lifecycle.match(pos_features)
     matches_negative = rule.rule_id in waf.rule_lifecycle.match(neg_features)
-    # The generated rule is a 1.0 feature-threshold rule. The replay corpus must
-    # demonstrate one match and one non-match before an administrator can deploy it.
     if not matches_positive or matches_negative:
         raise AssertionError(f"replay mismatch: positive={matches_positive}, negative={matches_negative}")
 
     evidence = {
         "rule_id": rule.rule_id,
+        "rule_name": rule.name,
+        "matcher": dict(rule.matcher),
+        "source": rule.source,
+        "source_detector": rule.source_detector,
         "validation": {"valid": validation.valid, "errors": list(validation.errors)},
-        "positive_example": {"query_profile": "sql-like", "matched": matches_positive},
+        "positive_example": {"query_profile": "sql-like-select", "matched": matches_positive},
         "negative_example": {"query_profile": "benign", "matched": matches_negative},
         "decision_source_request": result.request_id,
         "evidence_schema": result.evidence.schema_version if result.evidence else None,
