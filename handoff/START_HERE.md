@@ -28,10 +28,13 @@ Build a real demonstrable ML-augmented WAF: live HTTP(S) inspection, open-source
 - Query/header/body bounds.
 - Numeric output only, values in `[0,1]`.
 - Edge WAF is wired to v2.
-- Local full regression: 20/20 PASS.
+- Local full regression: 34/34 PASS.
 - Feature fuzz: 20,000 requests, 0 exceptions.
-- Feature benchmark: 100,000 extractions, 34,854.5 req/s.
-- E2E benchmark: 5,000 requests, 4,500 allowed, 500 blocked, 2,354.3 req/s.
+- Latest feature benchmark: 100,000 extractions, 33,527.0 req/s.
+- Latest E2E benchmark: 5,000 requests, 4,500 allow, 500 block, 2,764.7 req/s, 1,000 bounded events.
+- Static secret scan: PASS.
+- TODO/no-op scan: PASS.
+- Phase 3 self-test runner: PASS.
 
 ## Next milestone
 Phase 4: supervised + unsupervised + behavioural ML using the same canonical request/feature contracts.
@@ -48,7 +51,7 @@ Do not reintroduce raw payloads into feature state, fake model metrics, broad br
 - `handoff/WAF_STATE_PHASE3.json`
 - `handoff/WAF_CHANGELOG.md`
 - `handoff/WAF_COMMAND_LOG.md`
-- `state/project_ledger.db` in the local handoff ZIP
+- `state/project_ledger.db` in the handoff bundle
 
 ## Important honesty rule
 Never infer completion from documentation alone. Read executable code and run the tests before changing state.
