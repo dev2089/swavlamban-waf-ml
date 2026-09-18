@@ -1,25 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import os
 
 from waf.core.config import WAFConfig
-from waf.core.models import DecisionResult, RequestEnvelope
+from waf.core.models import DecisionResult, DetectionSignal, RequestEnvelope
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
 from waf.features.http_v2 import ProductionHTTPFeatureExtractor
+from waf.ml.ensemble import load_runtime
 
 
 class EdgeWAF:
-    """Live security path wired to the versioned production feature pipeline."""
+    """Phase 4 live path: deterministic signatures plus three learned ML signals."""
 
     def __init__(self, config: WAFConfig) -> None:
         self.config = config
         self.features = ProductionHTTPFeatureExtractor()
-        self.detector = OpenSourceWAFRuleEngine()
-        self.policy = EdgeDecisionPolicy(
-            config.block_threshold,
-            config.alert_threshold,
-        )
+        self.signature_detector = OpenSourceWAFRuleEngine()
+        artifact = os.getenv("WAF_MODEL_ARTIFACT", "models/phase4_models.joblib")
+        self.ml = load_runtime(artifact)
+        self.policy = EdgeDecisionPolicy(config.block_threshold, config.alert_threshold)
 
     def analyze(self, request: RequestEnvelope) -> DecisionResult:
         if len(request.body) > self.config.max_body_bytes:
@@ -27,12 +28,22 @@ class EdgeWAF:
         features = self.features.extract(request)
         if features.schema_version != self.config.feature_schema_version:
             raise ValueError(
-                f"feature schema mismatch: expected {self.config.feature_schema_version}, "
-                f"got {features.schema_version}"
+                f"feature schema mismatch: expected {self.config.feature_schema_version}, got {features.schema_version}"
             )
-        signal = self.detector.detect(request, features)
+        signature = self.signature_detector.detect(request, features)
+        try:
+            ml_signals = self.ml.detect(request, features)
+        except Exception as exc:
+            # A model failure must never silently bypass the WAF security boundary.
+            ml_signals = (
+                DetectionSignal(
+                    detector="ml-runtime-failure",
+                    score=1.0,
+                    confidence=1.0,
+                    reasons=("ML inference failure: fail-closed",),
+                    metadata={"error_type": type(exc).__name__},
+                ),
+            )
         return self.policy.decide(
-            request,
-            (signal,),
-            self.config.pipeline_version,
+            request, (signature, *ml_signals), self.config.pipeline_version
         )
