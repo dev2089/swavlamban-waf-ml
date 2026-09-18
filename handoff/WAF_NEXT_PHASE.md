@@ -1,16 +1,23 @@
-# Next Execution Step: Phase 3
+# Next Phase: Phase 4
 
-Build the production HTTP feature pipeline on top of the live Phase 2 edge.
+Phase 3 is independently verified.
 
-## Phase 3 goal
-Replace the small baseline feature set with a versioned, security-focused HTTP feature schema covering request structure, payload characteristics, encodings, headers, methods, content types, URL normalization, and safe bounded body parsing without placing database/network work on the security fast path.
+Phase 4 goal: implement real supervised, unsupervised and behavioural ML on the canonical live WAF decision seam.
 
-## Phase 3 acceptance
-- deterministic feature extraction from real intercepted HTTP requests;
-- explicit schema version and feature manifest;
-- URL/path/query normalization with encoded attack handling;
-- bounded parsing and malformed-input tests;
-- no secrets/PII unnecessarily retained in feature vectors;
-- regression tests against Phase 2 enforcement;
-- measurable extraction latency benchmark;
-- 9.9+ self-exam with critical-defect fail rule.
+Required boundaries:
+- Model inference must remain on the security fast path without database writes.
+- Training/evaluation must remain isolated from request-time enforcement.
+- Feature/model schemas must be versioned.
+- Inference latency and failure behavior must be measurable.
+- Model outputs must carry confidence/evidence suitable for later explainability.
+
+Required verification:
+- unit/regression tests
+- deterministic inference tests
+- malformed and adversarial input tests
+- model quality evaluation with held-out evidence
+- live edge integration tests
+- performance/latency benchmark
+- failure/timeout behavior
+- durable waf/database state, audit and journal updates
+- 100% phase gate before declaring Phase 4 complete.
