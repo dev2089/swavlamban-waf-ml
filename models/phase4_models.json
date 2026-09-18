@@ -1,0 +1,53 @@
+{
+  "artifact_version": "phase4-model-v1",
+  "model_version": "phase4-ml-v1",
+  "feature_schema": "http-v2",
+  "feature_count": 40,
+  "detectors": ["supervised-v1", "unsupervised-oneclasssvm-v1", "behaviour-v1"],
+  "dataset_version": "synthetic-http-v4-s5000-seed42",
+  "baseline_version": "benign-baseline-v4-s2200-seed123",
+  "artifact_path": "models/phase4_models.joblib",
+  "artifact_commit_policy": "binary joblib is reproducibly generated locally or in CI and is not required to be source-controlled",
+  "reproducibility": {
+    "artifact_bytes": 183235,
+    "artifact_sha256": "8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50",
+    "repeat_generation_hash_match": true
+  },
+  "supervised_evaluation": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "fpr": 0.0,
+    "test_samples": 1500,
+    "scope": "deterministic synthetic HTTP benchmark only"
+  },
+  "unsupervised_evaluation": {
+    "false_positive_rate": 0.017333333333333333,
+    "attack_detection_rate": 0.888,
+    "benign_eval_samples": 750,
+    "attack_eval_samples": 3000,
+    "mean_benign_score": 0.21913049424816688,
+    "mean_attack_score": 0.8880044232333727,
+    "baseline_fit": "benign-only",
+    "scope": "deterministic synthetic HTTP benchmark only"
+  },
+  "behaviour_evaluation": {
+    "normal_max_score": 0.406313,
+    "burst_final_score": 0.980486,
+    "burst_escalated": true,
+    "normal_requests": 10,
+    "burst_requests": 40,
+    "scope": "deterministic synthetic behavioural workload"
+  },
+  "risk_policy": {
+    "known_signature": 1.0,
+    "supervised_weight": 0.55,
+    "unsupervised_weight": 0.30,
+    "behaviour_weight": 0.15,
+    "block_threshold": 0.80,
+    "alert_threshold": 0.50,
+    "model_failure": "fail_closed"
+  },
+  "honesty_boundary": "These metrics are local deterministic benchmark evidence only."
+}
