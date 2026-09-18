@@ -59,7 +59,7 @@ class PipelineTests(unittest.TestCase):
         class SizeExtractor:
             def extract(self, request):
                 self.size = len(request.body)
-                return FeatureVector("http-v1", {"x": 0.0})
+                return FeatureVector("http-v2", {"x": 0.0})
         extractor = SizeExtractor()
         p = WAFPipeline(WAFConfig(max_body_bytes=16), extractor, ThresholdDecisionPolicy())
         p.analyze(self.make_request(body=b"x" * 100))
