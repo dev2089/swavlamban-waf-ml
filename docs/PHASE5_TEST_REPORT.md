@@ -20,6 +20,6 @@
 | Phase 5 gate | PASS, 10.0/10.0, 0 critical defects |
 
 Latest explanation benchmark:
-core mean 8.7411ms, evidence mean 11.3495ms, core p50 2.6798ms, evidence p50 6.0441ms, core p95 22.6373ms, evidence p95 34.1619ms, evidence/core 129.84%.
+core mean 3.4415ms, core p50 2.5138ms, core p95 7.3971ms, evidence mean 6.0215ms, evidence p50 4.9453ms, evidence p95 10.6243ms, evidence/evidence-core overhead 174.97% of core.
 
-Timing is environment-dependent and is not a production latency claim.
+Timing is environment-dependent and is not a production latency claim. No GitHub Actions PASS is claimed for the final independent branch head.
