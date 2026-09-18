@@ -1,17 +1,14 @@
 # GitHub State
 
 Baseline main commit: 1cc4f91dd6828039f834ae4dc2b466191d04f229
-Builder Phase 2 branch: phase2-final
-Independent verification branch: phase2-independent-verified
-Independent audit PR: #5 (draft, not merged)
-Main branch was not modified by this verification work.
+Independent Phase 2 branch: phase2-independent-verified
+Independent Phase 3 branch: phase3-independent-final
+Independent Phase 4 branch: phase4-independent-final
+Phase 4 base: phase3-independent-final
+Main branch remains untouched by this work.
 
-The independent Phase 2 branch contains the live edge, targeted hardening, reproducible demo/benchmark scripts, expanded tests, and the durable waf/database audit state.
+Phase 4 source includes waf/ml, live EdgeWAF ML integration, Phase 4 tests/gate, model training/reproducibility tooling, durable phase state/audit/journal and updated handoff documentation.
 
-Inspect the exact head of phase2-independent-verified. The durable Phase 2 state is in:
-- waf/database/PHASE_2_INDEPENDENT_AUDIT.md
-- waf/database/PHASE_2_STATE.json
-- waf/database/PROJECT_JOURNAL.jsonl
-- waf/database/FUTURE_CHAT_START_HERE.md
+Acceptance evidence for the final Phase 4 head was executed locally from the synchronized workspace. No GitHub Actions/CI PASS is claimed for this head.
 
 Overall Challenge 3 remains in progress.
