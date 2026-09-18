@@ -33,3 +33,14 @@
 ## Current boundary
 Authoritative branch: phase4-independent-final.
 Overall Challenge 3 remains IN_PROGRESS. No later capability is to be treated as DONE without executable/reproducible evidence.
+
+## Phase 5
+- Inspected and rejected the divergent builder phase5-final as authoritative due to stale 38-feature metadata and a reverse-proxy buffering regression.
+- Rebuilt Phase 5 from phase4-independent-final.
+- Added evidence-v1, detector contributions, feature-group attribution, deterministic explanations, provenance, privacy-safe numeric evidence and event-v2 telemetry.
+- Preserved Phase 4 enforcement semantics and fail-closed ML failures.
+- Full local regression: 63/63 PASS; Phase 5 evidence tests: 10/10 PASS; compileall/privacy/static/determinism/proxy-correlation/failure-explanation all PASS.
+- Latest explanation benchmark: 100 samples, core mean 8.7411ms, evidence mean 11.3495ms, evidence/core 129.84%, local timing only.
+- Durable Phase 5 state, audit, manifest, journal, TODO and future-chat handoff recorded under waf/database/.
+
+Current overall status: IN_PROGRESS. Next milestone: Phase 6 ML rule generation/validation/approval/deployment.
