@@ -7,12 +7,13 @@ from waf.core.config import WAFConfig
 from waf.core.models import DecisionResult, DetectionSignal, RequestEnvelope
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
+from waf.explainability import build_decision_evidence
 from waf.features.http_v2 import ProductionHTTPFeatureExtractor
 from waf.ml.ensemble import load_runtime
 
 
 class EdgeWAF:
-    """Phase 4 live path: deterministic signatures plus three learned ML signals."""
+    """Phase 5 live path: Phase 4 security signals plus structured decision evidence."""
 
     def __init__(self, config: WAFConfig) -> None:
         self.config = config
@@ -34,7 +35,6 @@ class EdgeWAF:
         try:
             ml_signals = self.ml.detect(request, features)
         except Exception as exc:
-            # A model failure must never silently bypass the WAF security boundary.
             ml_signals = (
                 DetectionSignal(
                     detector="ml-runtime-failure",
@@ -44,6 +44,8 @@ class EdgeWAF:
                     metadata={"error_type": type(exc).__name__},
                 ),
             )
-        return self.policy.decide(
+        result = self.policy.decide(
             request, (signature, *ml_signals), self.config.pipeline_version
         )
+        evidence = build_decision_evidence(request, features, result, self.ml)
+        return replace(result, evidence=evidence)
