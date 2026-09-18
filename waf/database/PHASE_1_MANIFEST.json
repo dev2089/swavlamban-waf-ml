@@ -1,14 +1,16 @@
 {
-  "schema_version": "phase1-manifest-v1",
+  "schema_version": "phase1-manifest-v2",
   "repository": "dev2089/swavlamban-waf-ml",
   "branch": "phase-1/architecture-rebuild",
-  "source_tree_before_manifest": "c0ca914bd1e2821aaa87f4ed5a749e68cf2eeb9d",
+  "snapshot_source_tree": "c0ca914bd1e2821aaa87f4ed5a749e68cf2eeb9d",
   "phase": 1,
   "status": "complete",
+  "release_status": "not_submission_ready",
   "verification": "6/6 architecture tests passed in terminal workspace; Python sources compiled successfully",
   "next_phase": 2,
   "next_phase_goal": "real WAF/reverse-proxy HTTP interception and enforcement",
-  "release_status": "not_submission_ready",
+  "note": "File inventory below covers all Phase-1 waf/ files excluding this manifest itself, to avoid a self-referential content hash.",
+  "file_count_excluding_manifest": 25,
   "files": [
     [
       "waf/__init__.py",
