@@ -4,7 +4,7 @@
 1. Architecture foundation. DONE.
 2. Real HTTP interception + open-source WAF integration + actual blocking. DONE.
 3. Production HTTP feature pipeline. DONE.
-4. Supervised + unsupervised + behavioural ML. TODO.
+4. Supervised + unsupervised + learned behavioural ML. DONE.
 5. Explainability and decision evidence. TODO.
 6. Rule generation, validation, approval and deployment loop. TODO.
 7. Baseline, feedback, drift and controlled retraining. TODO.
@@ -16,9 +16,11 @@
 13. Technical documentation, slides/report and reproducibility package. TODO.
 14. Final 9.9+/10 gate and release candidate. TODO.
 
-Phase rule: build -> execute tests -> inspect results -> score -> remediate if <=9.8 or if any critical defect -> retest.
+Phase rule: build -> execute tests -> inspect results -> remediate -> retest -> close gate.
 
-Current authoritative development branch: phase3-independent-final.
+Authoritative development branch: phase4-independent-final.
+Base: phase3-independent-final.
 Overall status: IN_PROGRESS.
-Final project gate: 100% complete with zero critical defects.
-Phase 3 evidence and durable memory live under waf/database/.
+Final project gate: 100% with zero critical defects.
+Durable project memory directory: waf/database/.
+Next phase: Phase 5 explainability and decision evidence.
