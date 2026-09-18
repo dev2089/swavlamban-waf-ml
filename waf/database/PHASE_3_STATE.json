@@ -1,34 +1,53 @@
 {
-  "schema_version": "phase3-state-v1",
+  "schema_version": "phase3-state-v2",
   "project": "swavlamban-waf-ml",
   "branch": "phase3-independent-final",
   "base": "phase2-independent-verified",
   "phase": 3,
-  "phase_status": "PENDING_FINAL_VERIFICATION",
+  "phase_status": "PASS",
   "phase_gate": "100_percent",
+  "phase_score": 10,
   "feature_schema": "http-v2",
   "feature_count": 40,
   "overall_project_status": "IN_PROGRESS",
-  "planned_evidence": {
-    "full_regression": true,
-    "fuzz_requests": 20000,
-    "feature_benchmark_requests": 100000,
-    "e2e_benchmark_requests": 5000,
-    "e2e_concurrency": 100,
-    "nginx_integration": true
+  "final_verification": {
+    "full_regression": "36/36 PASS",
+    "compileall": "PASS",
+    "fuzz": "20000 inputs, 0 extraction exceptions",
+    "feature_benchmark_direct": "100000 extractions, 18569.43 req/s",
+    "feature_benchmark_self_test": "100000 extractions, 14023.29 req/s",
+    "e2e_benchmark_direct": "5000 requests, concurrency 100, 4500 allow, 500 block, 4500 upstream hits, 1625.32 req/s, 1000 retained events",
+    "e2e_benchmark_self_test": "5000 requests, concurrency 100, 4500 allow, 500 block, 1555.51 req/s",
+    "nginx_integration": "PASS allow=200 block=403",
+    "secret_scan": "PASS",
+    "stub_scan": "PASS",
+    "self_test": "PASS"
   },
-  "left": [
-    "ModSecurity/Coraza separate engine verification",
-    "TLS/HTTPS termination",
-    "supervised/unsupervised/semi-supervised ML",
-    "behavioural detection and baselining",
-    "explainability expansion",
-    "ML rule recommendation and approval",
-    "continuous learning/drift/retraining",
-    "production auth/storage/RLS/data minimization",
-    "million-request production measurement",
-    "dashboard migration",
-    "final evidence/demo/docs/slides"
+  "fixes": [
+    "rebuilt Phase 3 on independently verified Phase 2 base",
+    "restored bounded upstream response streaming",
+    "shared three-pass URL normalization with edge rules",
+    "repaired Phase 2 oversized-response test port wiring",
+    "updated Phase 2 configuration expectations",
+    "fixed Phase 3 self-test Nginx invocation",
+    "bounded standalone fuzz case sizes while retaining large-input regression coverage"
   ],
-  "truth_boundary": "This state remains PENDING_FINAL_VERIFICATION until the executable Phase 3 test battery has passed locally and the result is recorded by the journal."
+  "left": [
+    "ModSecurity/Coraza separate engine installation and verification",
+    "HTTPS/TLS termination and inspection",
+    "production supervised/unsupervised/semi-supervised ML",
+    "behavioural anomaly detection and traffic baselining",
+    "richer explainability",
+    "ML-derived rule recommendation/approval/deployment",
+    "continuous learning, feedback, drift and controlled retraining",
+    "production persistence, authentication, RBAC, RLS and data minimization",
+    "million-request and multi-node production-scale validation",
+    "production failure/chaos matrix",
+    "dashboard migration/live analytics",
+    "challenge scenario evidence package",
+    "five-minute demo",
+    "technical document and 8-10 slides",
+    "final overall project gate"
+  ],
+  "truth_boundary": "Phase 3 PASS is only for the production HTTP feature-pipeline milestone. Overall Challenge 3 remains in progress. Local throughput is not a production capacity guarantee."
 }
