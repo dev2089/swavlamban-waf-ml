@@ -1,5 +1,5 @@
 {
-  "schema_version": "phase2-state-v2",
+  "schema_version": "phase2-state-v4",
   "project": "swavlamban-waf-ml",
   "branch": "phase2-independent-verified",
   "base": "phase2-final",
@@ -10,32 +10,35 @@
   "evidence": {
     "tests": "20/20 PASS",
     "compileall": "PASS",
-    "demo": "PASS",
+    "demo": "PASS: benign 200/allow, malicious 403/block",
     "nginx_syntax": "PASS",
     "nginx_integration": "PASS allow=200 block=403",
     "secret_scan": "PASS",
     "phase2_todo_scan": "PASS",
-    "benchmark_runs": 4,
-    "benchmark_rps": {
-      "min": 1604.495,
-      "median": 1882.312,
-      "max": 1916.277
-    },
+    "benchmark_runs": 5,
     "benchmark_requests": 5000,
     "benchmark_concurrency": 100,
-    "expected_results": "all requests matched expected result"
+    "benchmark_rps": {
+      "min": 1604.495,
+      "median": 1888.372,
+      "max": 1916.277
+    },
+    "expected_results": "all requests matched expected result",
+    "event_retention_max": 1000,
+    "github_actions": "compile/dependencies/tests/demo/benchmark passed; initial Nginx step failed on PID permissions; config fixed; post-fix Nginx verified locally; no post-fix CI rerun claimed"
   },
   "fixes": [
     "stale Phase 2 config regression test",
     "bounded upstream response streaming",
     "reproducible phase2_demo.py",
-    "reproducible phase2_benchmark.py"
+    "reproducible phase2_benchmark.py",
+    "unprivileged Nginx PID path"
   ],
   "left": [
     "ModSecurity/Coraza separate engine verification",
     "TLS/HTTPS termination",
-    "production ML",
-    "behavioural detection",
+    "production feature/behaviour pipeline",
+    "supervised/unsupervised/semi-supervised ML",
     "explainability expansion",
     "ML-derived rule lifecycle",
     "continuous learning",
