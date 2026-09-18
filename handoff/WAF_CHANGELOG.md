@@ -1,33 +1,35 @@
 # Change Log
 
 ## Cycle 0
-- Challenge 3 locked after the documented comparison.
-- Baseline main commit recorded: `1cc4f91dd6828039f834ae4dc2b466191d04f229`.
-- Prototype/production gap and major ML, WAF, security and documentation mismatches recorded.
+- Challenge 3 locked.
+- Baseline main commit: 1cc4f91dd6828039f834ae4dc2b466191d04f229.
+- Prototype/production gaps recorded.
 
 ## Phase 1
-- Added dependency-light `waf/` security core and tests.
-- Added architecture, state and handoff documentation.
-- Added portable SQLite project ledger in the handoff bundle.
-- Local validation: compileall PASS, 13/13 tests PASS, static scans PASS, mixed fuzz benchmark PASS.
-- Phase 1 gate: 10.0/10.0.
-- Legacy runtime intentionally remained beside the new core pending migration.
+- Architecture foundation and dependency-light WAF core added.
+- 13/13 tests and compile/static checks passed at the Phase 1 gate.
 
 ## Phase 2
-- Added `waf/edge/` live HTTP enforcement path.
-- Added deterministic URL-decoded SQLi, XSS, path traversal and command-injection WAF signatures.
-- Added real pre-forwarding block enforcement with HTTP 403.
-- Added bounded request/response sizes, timeout handling, request IDs and WAF decision headers.
-- Added Nginx integration configuration and automated Nginx gate.
-- Added regression coverage for `WAFConfig.from_env()` under `dataclass(slots=True)`.
-- Fixed and retested encoded XSS, initial proxy startup/502 behaviour, response headers and configuration-default handling.
-- Final local validation: 6/6 Phase 2 tests PASS; Nginx integration PASS; compileall PASS; security/static scans PASS; one-command self-test PASS.
-- Final end-to-end local benchmark: 5,000 requests, 3,477.8 req/s, 4,500 allow, 500 block; event buffer bounded to 1,000.
-- Intermediate failed attempts and fixes are preserved in the Phase 2 SQLite ledger.
-- Phase 2 gate: 10.0/10.0 for the defined Phase 2 acceptance criteria.
+- Real HTTP reverse proxy, pre-forwarding enforcement, deterministic signatures, bounded I/O, request IDs and Nginx integration added.
+- Independent regression and Nginx evidence passed.
 
-## Important boundary
-- Main branch has not been modified by this work.
-- A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified.
-- TLS, production ML, behavioural learning, production storage/auth, dashboard migration, complete challenge scenario evidence, demo and final release remain open.
-- Overall Challenge 3 remains in progress.
+## Phase 3
+- Rebuilt on the independently verified Phase 2 branch.
+- Added the authoritative 40-feature http-v2 production feature pipeline, shared decoding/normalization, bounded inspection, fuzzing and benchmarks.
+- Phase 3 gate passed at 10.0/10.0.
+
+## Phase 4
+- Rebuilt independently from phase3-independent-final rather than inheriting divergent builder ancestry.
+- Added supervised HistGradientBoostingClassifier, benign-only OneClassSVM, and learned per-source behavioural LogisticRegression.
+- Added deterministic datasets/baselines, held-out evaluation, versioned model validation and reproducible artifact generation.
+- Wired live EdgeWAF to signatures plus all three ML signals.
+- ML inference failures are fail-closed; behavioural state is bounded and runtime-local.
+- Corrected stale builder 38-feature metadata to authoritative 40-feature http-v2.
+- Full local regression: 53/53 PASS; compileall PASS; artifact reproducibility PASS.
+- Latest direct benchmark: 323.94 req/s for 2000 requests.
+- Latest E2E benchmark: 161.89 req/s for 1000 requests at concurrency 50, 0 HTTP 500 and 850 protected upstream hits.
+- Phase 3 Nginx evidence remains inherited because Phase 4 did not change the Nginx configuration; a later combined rerun timed out, so no fresh Phase 4-specific Nginx PASS is claimed.
+
+## Current boundary
+Authoritative branch: phase4-independent-final.
+Overall Challenge 3 remains IN_PROGRESS. No later capability is to be treated as DONE without executable/reproducible evidence.
