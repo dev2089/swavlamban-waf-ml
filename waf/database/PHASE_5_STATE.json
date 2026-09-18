@@ -1,5 +1,5 @@
 {
-  "schema_version": "phase5-state-v1",
+  "schema_version": "phase5-state-v2",
   "project": "swavlamban-waf-ml",
   "phase": 5,
   "status": "PASS",
@@ -21,14 +21,14 @@
     "host_retained": false
   },
   "implementation": [
-    "DecisionEvidence attached after Phase 4 policy decision",
+    "DecisionEvidence is attached after Phase 4 policy decision",
     "detector-level contribution records",
     "six feature-group summaries over all 40 features",
-    "supervised/anomaly zero-group perturbation attribution",
+    "supervised/anomaly group perturbation attribution",
     "behavioural and signature evidence",
-    "human-readable deterministic explanation",
+    "deterministic human-readable explanation",
     "pipeline/model/schema/dataset/baseline/ruleset provenance",
-    "event-v2 telemetry with embedded evidence",
+    "event-v2 telemetry embeds evidence",
     "fail-closed ML failure remains explainable",
     "backward-compatible optional evidence field"
   ],
@@ -42,12 +42,17 @@
     "ml_failure_explanation": "PASS",
     "explanation_benchmark": {
       "samples": 100,
-      "core_mean_ms": 8.7411,
-      "evidence_mean_ms": 11.3495,
-      "evidence_time_percent_of_core": 129.84,
-      "scope": "local timing only"
+      "core_mean_ms": 3.4415,
+      "core_p50_ms": 2.5138,
+      "core_p95_ms": 7.3971,
+      "evidence_mean_ms": 6.0215,
+      "evidence_p50_ms": 4.9453,
+      "evidence_p95_ms": 10.6243,
+      "evidence_time_percent_of_core": 174.97,
+      "scope": "local deterministic benchmark; timing is environment-dependent and not a production latency claim"
     },
-    "phase5_gate": "PASS"
+    "phase5_gate": "PASS",
+    "github_ci": "NOT_CLAIMED; final independent head has no workflow status"
   },
   "audit_findings": [
     "existing phase5-final was not accepted as authoritative",
@@ -59,11 +64,12 @@
   "failures_fixed": [
     "BrokenML evidence generation now uses safe fallback attribution",
     "event-v1 telemetry advanced to event-v2",
-    "Phase 3 runtime default assertions advanced to Phase 5",
-    "evidence requires exactly 40 bounded features"
+    "legacy Phase 4 runtime expectations advanced to Phase 5",
+    "evidence requires exactly 40 bounded features",
+    "temporary smoke check removed before acceptance"
   ],
   "remaining": [
-    "Phase 6 rule generation/validation/approval/deployment",
+    "Phase 6 ML rule generation/validation/approval/deployment",
     "Phase 7 baseline/feedback/drift/retraining",
     "Phase 8 production storage/auth/RBAC/secrets/data minimization",
     "Phase 9 scale/failure matrix",
@@ -76,5 +82,5 @@
     "TLS/HTTPS deployment verification",
     "separate ModSecurity/Coraza verification"
   ],
-  "truth_boundary": "Phase 5 PASS covers explainability and decision evidence only. Local timing is not production capacity evidence. Synthetic ML metrics are not real-world accuracy claims. Overall Challenge 3 remains IN_PROGRESS."
+  "truth_boundary": "Phase 5 PASS covers explainability and decision evidence only. Group perturbation is not causal feature importance. Local timing is not production latency proof. Synthetic ML metrics are not real-world Internet WAF accuracy. Overall Challenge 3 remains IN_PROGRESS."
 }
