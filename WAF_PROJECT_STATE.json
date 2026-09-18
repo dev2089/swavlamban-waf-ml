@@ -25,9 +25,9 @@
     "deterministic_evidence": "PASS",
     "proxy_evidence_correlation": "PASS",
     "ml_failure_explanation": "PASS",
-    "explanation_benchmark": "100 samples, latest recorded core mean 8.7411ms, evidence mean 11.3495ms, evidence/core 129.84%, local timing only",
-    "phase5_explanation_benchmark": "100 samples, latest recorded core_mean=8.7411ms, evidence_mean=11.3495ms, evidence/core=129.84%, local timing only",
-    "portable_local_bundle": "96 files, caches/bytecode/generated model binary excluded"
+    "explanation_benchmark": "100 samples, latest core mean 3.4415ms, evidence mean 6.0215ms, evidence/core 174.97%, local timing only",
+    "phase5_explanation_benchmark": "100 samples, latest core_mean=3.4415ms, evidence_mean=6.0215ms, evidence/core=174.97%, local timing only",
+    "portable_local_bundle": "96 files, caches/bytecode/generated model binary excluded; portable snapshot created before final GitHub-only documentation synchronization"
   },
   "done": [
     "Phase 0 freeze and baseline",
