@@ -1,0 +1,80 @@
+{
+  "schema_version": "phase5-state-v1",
+  "project": "swavlamban-waf-ml",
+  "phase": 5,
+  "status": "PASS",
+  "score": 10.0,
+  "cutoff": 9.9,
+  "critical_defects": 0,
+  "authoritative_branch": "phase5-independent-final",
+  "base_branch": "phase4-independent-final",
+  "overall_project_status": "IN_PROGRESS",
+  "feature_schema": "http-v2",
+  "feature_count": 40,
+  "evidence_schema": "evidence-v1",
+  "telemetry_schema": "event-v2",
+  "privacy": {
+    "raw_payload_retained": false,
+    "raw_query_retained": false,
+    "raw_headers_retained": false,
+    "source_ip_retained": false,
+    "host_retained": false
+  },
+  "implementation": [
+    "DecisionEvidence attached after Phase 4 policy decision",
+    "detector-level contribution records",
+    "six feature-group summaries over all 40 features",
+    "supervised/anomaly zero-group perturbation attribution",
+    "behavioural and signature evidence",
+    "human-readable deterministic explanation",
+    "pipeline/model/schema/dataset/baseline/ruleset provenance",
+    "event-v2 telemetry with embedded evidence",
+    "fail-closed ML failure remains explainable",
+    "backward-compatible optional evidence field"
+  ],
+  "verification": {
+    "compileall": "PASS",
+    "full_regression": "63/63 PASS",
+    "phase5_evidence_tests": "10/10 PASS",
+    "privacy_static_gate": "PASS",
+    "determinism": "PASS",
+    "proxy_event_correlation": "PASS",
+    "ml_failure_explanation": "PASS",
+    "explanation_benchmark": {
+      "samples": 100,
+      "core_mean_ms": 8.7411,
+      "evidence_mean_ms": 11.3495,
+      "evidence_time_percent_of_core": 129.84,
+      "scope": "local timing only"
+    },
+    "phase5_gate": "PASS"
+  },
+  "audit_findings": [
+    "existing phase5-final was not accepted as authoritative",
+    "existing phase5-final diverged from the independently verified Phase 4 lineage",
+    "existing phase5-final documented stale 38-feature metadata",
+    "existing phase5-final regressed bounded proxy response handling",
+    "new branch was rebuilt from phase4-independent-final"
+  ],
+  "failures_fixed": [
+    "BrokenML evidence generation now uses safe fallback attribution",
+    "event-v1 telemetry advanced to event-v2",
+    "Phase 3 runtime default assertions advanced to Phase 5",
+    "evidence requires exactly 40 bounded features"
+  ],
+  "remaining": [
+    "Phase 6 rule generation/validation/approval/deployment",
+    "Phase 7 baseline/feedback/drift/retraining",
+    "Phase 8 production storage/auth/RBAC/secrets/data minimization",
+    "Phase 9 scale/failure matrix",
+    "Phase 10 official scenarios/evidence",
+    "Phase 11 dashboard",
+    "Phase 12 five-minute demo",
+    "Phase 13 technical package/slides",
+    "Phase 14 final 100 percent gate",
+    "semi-supervised ML",
+    "TLS/HTTPS deployment verification",
+    "separate ModSecurity/Coraza verification"
+  ],
+  "truth_boundary": "Phase 5 PASS covers explainability and decision evidence only. Local timing is not production capacity evidence. Synthetic ML metrics are not real-world accuracy claims. Overall Challenge 3 remains IN_PROGRESS."
+}
