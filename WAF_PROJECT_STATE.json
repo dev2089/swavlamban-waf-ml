@@ -21,9 +21,9 @@
     "phase4_supervised": "accuracy=1.0 precision=1.0 recall=1.0 f1=1.0 fpr=0.0 test_n=1500 synthetic only",
     "phase4_unsupervised": "benign_fpr=0.017333 attack_detection=0.888 benign_n=750 attack_n=3000 synthetic only",
     "phase4_behaviour": "normal_max=0.406313 burst_final=0.980486 escalation=true",
-    "phase4_direct_benchmark_latest": "2000 requests, 308.30 req/s, 1900 allow, 100 block, 0 alert",
-    "phase4_e2e_benchmark_latest": "1000 requests, concurrency=50, 242.86 req/s, 850 HTTP 200, 150 HTTP 403, 0 HTTP 500, 850 upstream hits, p50=205.256ms, p95=267.413ms",
-    "nginx_integration": "PASS allow=200 block=403",
+    "phase4_direct_benchmark_latest": "2000 requests, 323.94 req/s, 1900 allow, 100 block, 0 alert",
+    "phase4_e2e_benchmark_latest": "1000 requests, concurrency=50, 161.89 req/s, 850 HTTP 200, 150 HTTP 403, 0 HTTP 500, 850 upstream hits, p50=255.985ms, p95=689.393ms",
+    "nginx_integration": "PASS inherited from Phase 3: allow=200 block=403; Phase 4 did not change Nginx configuration",
     "phase4_model_roundtrip": "PASS",
     "phase4_artifact_reproducibility": "PASS repeated local generations matched SHA-256 8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50, 183235 bytes",
     "ml_failure_policy": "PASS fail closed",
@@ -44,8 +44,8 @@
     "Phase 4 versioned model artifact validation and reproducibility",
     "Phase 4 live edge integration",
     "Phase 4 fail-closed ML inference handling",
-    "Phase 4 regression, Nginx and performance evidence",
-    "durable database state, audit, model manifest, journal and future-chat handoff"
+    "Phase 4 regression, performance and inherited Nginx evidence",
+    "durable state, audit, model manifest, journal and future-chat handoff"
   ],
   "left": [
     "semi-supervised ML",
