@@ -14,7 +14,7 @@ from waf.telemetry.events import decision_event
 
 
 class WAFReverseProxy:
-    """Real HTTP edge: inspect first, then forward only non-blocked requests."""
+    """Inspect requests before forwarding and enforce bounded proxy I/O."""
 
     def __init__(self, config: WAFConfig) -> None:
         self.config = config
@@ -27,7 +27,9 @@ class WAFReverseProxy:
 
     async def start(self) -> None:
         if self.client is None:
-            self.client = ClientSession(timeout=ClientTimeout(total=self.config.request_timeout_seconds))
+            self.client = ClientSession(
+                timeout=ClientTimeout(total=self.config.request_timeout_seconds)
+            )
 
     async def close(self) -> None:
         if self.client is not None:
@@ -40,9 +42,15 @@ class WAFReverseProxy:
                 "status": "ok",
                 "service": "swavlamban-waf-edge",
                 "pipeline_version": self.config.pipeline_version,
+                "feature_schema_version": self.config.feature_schema_version,
                 "upstream": self.config.upstream_url,
             }
         )
+
+    @staticmethod
+    def _request_id(request: web.Request) -> str:
+        supplied = request.headers.get("X-Request-ID", "")
+        return supplied[:128] if supplied else str(uuid.uuid4())
 
     async def _read_bounded_response(self, response) -> bytes | None:
         chunks: list[bytes] = []
@@ -57,8 +65,20 @@ class WAFReverseProxy:
     async def handle(self, request: web.Request) -> web.Response:
         await self.start()
         started = time.perf_counter()
-        body = await request.read()
-        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        request_id = self._request_id(request)
+
+        try:
+            body = await request.read()
+        except web.HTTPRequestEntityTooLarge:
+            return web.json_response(
+                {
+                    "error": "request_too_large",
+                    "request_id": request_id,
+                    "max_body_bytes": self.config.max_body_bytes,
+                },
+                status=413,
+            )
+
         envelope = RequestEnvelope(
             request_id=request_id,
             method=request.method,
@@ -75,15 +95,28 @@ class WAFReverseProxy:
             result = self.waf.analyze(envelope)
         except ValueError as exc:
             return web.json_response(
-                {"error": "invalid_security_input", "detail": str(exc), "request_id": request_id},
+                {
+                    "error": "invalid_security_input",
+                    "detail": str(exc),
+                    "request_id": request_id,
+                },
                 status=400,
             )
 
         event = decision_event(result)
-        event["latency_ms"] = round((time.perf_counter() - started) * 1000, 3)
+        event["latency_ms"] = round(
+            (time.perf_counter() - started) * 1000,
+            3,
+        )
         event["source_ip"] = request.remote
         self.events.append(event)
         self.events = self.events[-1000:]
+
+        waf_headers = {
+            "X-WAF-Decision": result.decision.value,
+            "X-WAF-Request-ID": request_id,
+            "X-WAF-Risk": str(result.risk_score),
+        }
 
         if result.decision is Decision.BLOCK:
             return web.json_response(
@@ -96,19 +129,25 @@ class WAFReverseProxy:
                     "rule_ids": list(result.rule_ids),
                 },
                 status=403,
-                headers={
-                    "X-WAF-Decision": "block",
-                    "X-WAF-Request-ID": request_id,
-                    "X-WAF-Risk": str(result.risk_score),
-                },
+                headers=waf_headers,
             )
 
         upstream = urlsplit(self.config.upstream_url)
-        target = urlunsplit((upstream.scheme, upstream.netloc, request.path, request.query_string, ""))
+        if upstream.scheme not in {"http", "https"} or not upstream.netloc:
+            return web.json_response(
+                {"error": "invalid_upstream_configuration", "request_id": request_id},
+                status=500,
+                headers=waf_headers,
+            )
+
+        target = urlunsplit(
+            (upstream.scheme, upstream.netloc, request.path, request.query_string, "")
+        )
         headers = {
             key: value
             for key, value in request.headers.items()
-            if key.lower() not in {"host", "content-length", "connection", "transfer-encoding"}
+            if key.lower()
+            not in {"host", "content-length", "connection", "transfer-encoding"}
         }
         headers.update(
             {
@@ -131,26 +170,36 @@ class WAFReverseProxy:
             ) as response:
                 payload = await self._read_bounded_response(response)
                 if payload is None:
-                    return web.Response(status=502, text="upstream response too large")
-
+                    return web.Response(
+                        status=502,
+                        text="upstream response too large",
+                        headers={"X-WAF-Request-ID": request_id},
+                    )
                 passthrough = {
                     key: value
                     for key, value in response.headers.items()
                     if key.lower() not in {"connection", "transfer-encoding", "content-length"}
                 }
-                passthrough.update(
-                    {
-                        "X-WAF-Decision": result.decision.value,
-                        "X-WAF-Request-ID": request_id,
-                        "X-WAF-Risk": str(result.risk_score),
-                    }
+                passthrough.update(waf_headers)
+                return web.Response(
+                    status=response.status,
+                    headers=passthrough,
+                    body=payload,
                 )
-                return web.Response(status=response.status, headers=passthrough, body=payload)
-
         except asyncio.TimeoutError:
-            return web.json_response({"error": "upstream_timeout", "request_id": request_id}, status=504)
+            return web.json_response(
+                {"error": "upstream_timeout", "request_id": request_id},
+                status=504,
+                headers=waf_headers,
+            )
+        except (OSError, asyncio.CancelledError):
+            raise
         except Exception:
-            return web.json_response({"error": "upstream_unavailable", "request_id": request_id}, status=502)
+            return web.json_response(
+                {"error": "upstream_unavailable", "request_id": request_id},
+                status=502,
+                headers=waf_headers,
+            )
 
 
 def build_app(config: WAFConfig | None = None) -> web.Application:
