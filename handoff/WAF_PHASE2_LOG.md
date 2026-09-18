@@ -1,54 +1,48 @@
 # Phase 2 Execution Log
 
 ## Control point
-- Base branch: `phase1-final`
-- Authoritative Phase 2 branch: `phase2-final`
-- Terminal workspace: `/mnt/data/waf-phase2`
-- Main branch was not modified by Phase 2.
+
+- Baseline main commit: 1cc4f91dd6828039f834ae4dc2b466191d04f229
+- Builder Phase 2 branch: phase2-final
+- Independent verification branch: phase2-independent-verified
+- Independent audit PR: #5, draft, targeting phase2-final
+- Main branch was not modified.
 
 ## Work performed
-1. Added live HTTP reverse-proxy/WAF edge runtime.
-2. Connected request normalization/features to deterministic WAF signatures and block policy.
-3. Added URL-decoded SQLi, XSS, traversal and command-injection signatures.
-4. Added real 403 enforcement before upstream forwarding.
-5. Added WAF decision/risk/request-ID response headers.
-6. Added request-body and upstream-response bounds.
-7. Added timeout and upstream-unavailable handling.
-8. Added Nginx front-end integration configuration and automated integration gate.
-9. Added Phase 2 tests, benchmark, self-test and portable execution documentation.
 
-## Failed attempts and fixes
-- Initial terminal clone failed because outbound DNS access to GitHub was unavailable; GitHub connector remained the source/control plane.
-- First local compile invocation omitted the workspace directory; rerun from `/mnt/data/waf-phase2` passed.
-- Initial review caught a `dataclass(slots=True)` configuration-default hazard in `from_env`; the class-attribute fallbacks were replaced with explicit constants and validation, then a regression test was added.
-- Encoded XSS payload initially passed; inspection now URL-decodes the target before signature evaluation.
-- Allowed responses initially lacked WAF decision headers; headers were added and retested.
-- Nginx integration initially returned 502 while the WAF process was not healthy; rerun after remediation passed.
+1. Inspected Phase 2 source/config/test files from the builder branch.
+2. Found and fixed a stale configuration regression test that still expected the Phase 1 version string.
+3. Reworked upstream-response buffering so oversized responses are bounded during streaming.
+4. Added reproducible demo and benchmark scripts.
+5. Expanded Phase 2 regression coverage.
+6. Added an independent GitHub Actions verification workflow.
+7. Ran the complete Phase 2 Python test suite in the terminal.
+8. Ran the real Nginx -> WAF -> protected-upstream integration path.
+9. Ran static secret and Phase-2 implementation scans.
+10. Ran four 5,000-request end-to-end benchmark runs.
 
-## Final evidence
-- `python -m compileall -q waf run_proxy.py phase2_demo.py phase2_benchmark.py` -> PASS
-- `python -m pytest -q tests/test_phase2.py` -> 6/6 PASS
-- `bash tests/test_nginx_integration.sh` -> PASS, allow=200 and block=403
-- `python phase2_self_test.py` -> PASS
-- Nginx configuration syntax -> PASS
-- 5,000-request local E2E benchmark -> 3,477.8 req/s, 4,500 allow, 500 block
-- static secret scan -> PASS
-- dangerous-I/O scan -> PASS
-- new-code TODO/no-op scan -> PASS
+## Failed attempts / limitations
 
-## Open after Phase 2
-- separately installed ModSecurity/Coraza engine is not present/verified
-- TLS/HTTPS termination and inspection
-- production HTTP feature pipeline
-- supervised/unsupervised/behavioural ML
-- explainability expansion
-- ML rule recommendation and approval lifecycle
-- baseline/feedback/drift/controlled retraining
-- production storage/auth/RBAC/data minimization
-- telemetry/load/failure testing beyond the Phase 2 benchmark
-- challenge scenario evidence package and five-minute demo
-- dashboard migration
-- technical docs/slides/final release gate
+- Direct git clone from the terminal failed because GitHub DNS/network access was unavailable.
+- Fresh pip installation in a clean virtual environment failed because the package index could not be resolved.
+- A temporary virtual environment was removed after that failed installation test.
+- One early Nginx cleanup command exited with signal 15 after already printing successful gate output; a clean process-control rerun exited successfully.
+- An initial static secret scan matched package metadata inside the temporary virtual environment; after removing it, the project-only scan passed.
+- The builder's historical 3,477.8 req/s benchmark was not independently reproduced. Four fresh runs are the authoritative independent measurements.
 
-## Honesty boundary
-Phase 2 is complete for its defined acceptance criteria. Nginx and the live WAF edge are verified. An external ModSecurity/Coraza engine was not available in the terminal and is not claimed as verified. Overall Challenge 3 remains in progress.
+## Independent final evidence
+
+- 20/20 Python tests: PASS.
+- Python compileall: PASS.
+- Demo: PASS.
+- Nginx syntax: PASS.
+- Nginx integration: PASS, allow=200/block=403.
+- Four 5,000-request runs at concurrency 100: 1,916.277 / 1,604.495 / 1,876.252 / 1,888.372 req/s.
+- Median: 1,882.312 req/s.
+- All expected results matched.
+- Secret scan: PASS.
+- Phase-2 TODO/no-op scan: PASS for implementation files.
+
+## Honest boundary
+
+Phase 2 is complete at its defined live-edge acceptance scope. This is not a claim that the full Challenge 3 is complete. ModSecurity/Coraza separate engine verification, HTTPS/TLS termination, production ML, behavioural detection, explainability expansion, ML-derived rule lifecycle, continuous learning, production storage/auth/RLS, large-scale/multi-node validation, final dashboard integration and final submission artifacts remain open.
