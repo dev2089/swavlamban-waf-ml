@@ -1,0 +1,24 @@
+{
+  "evidence_schema": "evidence-v1",
+  "telemetry_schema": "event-v2",
+  "feature_schema": "http-v2",
+  "feature_count": 40,
+  "feature_groups": ["request_shape","query_structure","payload_structure","encoding_obfuscation","attack_signatures","character_statistics"],
+  "detector_families": ["open-source-waf-rules","supervised-v1","unsupervised-oneclasssvm-v1","behaviour-v1"],
+  "attribution_methods": {
+    "supervised": "zero-group perturbation delta",
+    "unsupervised": "zero-group perturbation delta",
+    "behaviour": "bounded behavioural risk score linkage",
+    "signature": "rule match and rule IDs"
+  },
+  "provenance": ["pipeline_version","feature_schema","model_version","dataset_version","baseline_version","ruleset","evidence_schema"],
+  "privacy": {
+    "raw_payload": false,
+    "raw_query": false,
+    "raw_headers": false,
+    "source_ip": false,
+    "host": false,
+    "numeric_features_only": true,
+    "request_id": true
+  }
+}
