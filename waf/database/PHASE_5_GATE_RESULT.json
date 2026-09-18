@@ -1,0 +1,32 @@
+{
+  "phase": 5,
+  "score": 10.0,
+  "cutoff": 9.9,
+  "critical_defects": [],
+  "checks": {
+    "compileall": "PASS",
+    "full_regression": "63 passed",
+    "privacy_static_gate": "PASS",
+    "explanation_benchmark": "PASS, 100 samples",
+    "live_evidence_path": "PASS"
+  },
+  "latest_benchmark": {
+    "samples": 100,
+    "core_mean_ms": 8.7411,
+    "core_p50_ms": 2.6798,
+    "core_p95_ms": 22.6373,
+    "evidence_mean_ms": 11.3495,
+    "evidence_p50_ms": 6.0441,
+    "evidence_p95_ms": 34.1619,
+    "evidence_time_percent_of_core": 129.84,
+    "scope": "local deterministic benchmark, environment dependent"
+  },
+  "commands": [
+    "python -m compileall -q waf tests",
+    "python -m pytest -q tests",
+    "python phase5_explainability_benchmark.py",
+    "python scripts/phase5_gate.py"
+  ],
+  "result": "PHASE5_GATE=PASS",
+  "ci_boundary": "No GitHub Actions PASS claimed for the independent Phase 5 head."
+}
