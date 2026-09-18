@@ -3,7 +3,7 @@ import json
 import pytest
 
 from waf.core.config import WAFConfig
-from waf.core.models import Decision, DecisionResult, DetectionSignal, RequestEnvelope
+from waf.core.models import Decision, DecisionResult, DetectionSignal, FeatureVector, RequestEnvelope
 from waf.edge.pipeline import EdgeWAF
 from waf.edge.policy import EdgeDecisionPolicy
 from waf.edge.rules import OpenSourceWAFRuleEngine
@@ -29,8 +29,8 @@ def test_known_attack_rule_and_privacy():
 
 def test_evidence_has_complete_bounded_features_and_no_raw_data():
     ml = Phase4MLEnsemble.train_default(); req = RequestEnvelope('private','POST','https','private.example','/api','q=secret-query',{'X-Private':'secret-header'},b'secret-body')
-    result, features = build(req, ml); encoded = json.dumps(evidence_to_dict(build_decision_evidence(req, features, result, ml)), sort_keys=True)
-    assert len(features.values) == 40 and len(build_decision_evidence(req, features, result, ml).feature_snapshot) == 40
+    result, features = build(req, ml); e = build_decision_evidence(req, features, result, ml); encoded = json.dumps(evidence_to_dict(e), sort_keys=True)
+    assert len(features.values) == 40 and len(e.feature_snapshot) == 40
     assert all(0.0 <= v <= 1.0 for v in features.values.values())
     for bad in ('private.example','secret-query','secret-header','secret-body'): assert bad not in encoded
 
