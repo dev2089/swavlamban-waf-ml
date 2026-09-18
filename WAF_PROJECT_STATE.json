@@ -4,7 +4,7 @@
   "selected_challenge": "Challenge 3 - ML-integrated open-source WAF",
   "current_phase": 2,
   "phase_status": "PASS",
-  "phase2_exam_score": 10.0,
+  "phase2_exam_score": 10,
   "phase2_release_gate": "100_percent",
   "overall_project_status": "IN_PROGRESS",
   "current_branch": "phase2-independent-verified",
@@ -19,9 +19,11 @@
     "bounded_upstream_response": "PASS",
     "static_secret_scan": "PASS",
     "static_todo_scan": "PASS for Phase 2 implementation",
-    "e2e_benchmark": "4 runs of 5000 requests at concurrency 100; 1604.495-1916.277 req/s; median 1882.312 req/s",
+    "phase2_self_test": "PASS",
+    "e2e_benchmark": "6 runs of 5000 requests at concurrency 100; 1604.495-1916.277 req/s; median 1882.312 req/s",
     "benchmark_scope": "local end-to-end proxy; not a production capacity guarantee",
-    "requirements_install_note": "Network/DNS to package index was unavailable in terminal; tests used already-installed compatible aiohttp/pytest."
+    "requirements_install_note": "Terminal package-index DNS was unavailable for fresh local install; tests used installed compatible aiohttp/pytest. GitHub Actions independently installed dependencies successfully.",
+    "workflow_note": "GitHub Actions compile/tests/demo/benchmark passed; its initial Nginx step failed only on default PID-path permissions. Nginx config was fixed and the final Nginx integration passed locally. No post-fix CI rerun is claimed."
   },
   "done": [
     "real HTTP interception",
@@ -35,6 +37,7 @@
     "timeout and upstream failure handling",
     "reproducible demo and benchmark scripts",
     "20 independent regression tests",
+    "comprehensive phase2_self_test",
     "persistent Phase 2 audit/state/journal artifacts"
   ],
   "left": [
@@ -53,5 +56,5 @@
     "technical documentation/slides",
     "overall final 100 percent release gate"
   ],
-  "honesty_boundary": "Phase 2 is complete and independently tested for the Phase 2 acceptance scope. The current phase does not claim completion of the full Challenge 3. No separate ModSecurity/Coraza engine was available or verified in the terminal. The benchmark is local evidence, not a million-request production-capacity claim."
+  "honesty_boundary": "Phase 2 is complete and independently tested for the Phase 2 acceptance scope. The current phase does not claim completion of the full Challenge 3. No separate ModSecurity/Coraza engine was available or verified in the terminal. Benchmark measurements are local evidence, not a million-request production-capacity claim."
 }
