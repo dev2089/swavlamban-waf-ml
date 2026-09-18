@@ -7,14 +7,22 @@
   "release_status": "not_submission_ready",
   "final_quality_gate": "100_percent",
   "completed": [
-    "architecture package boundaries",
+    "architecture package boundaries for proxy, engine, rules, ml, features, telemetry, storage, api, dashboard, training, evaluation",
     "fast-path/slow-path separation",
     "typed request/decision/evidence contracts",
     "environment configuration boundary",
     "architecture/dependency documentation",
     "automated architecture tests",
-    "future-chat state and journal"
+    "future-chat handoff state and project journal"
   ],
+  "verification": {
+    "status": "passed",
+    "tests": "6/6",
+    "command": "PYTHONPATH=. python -m unittest discover -s waf/tests -p 'test_*.py'",
+    "compileall": "passed",
+    "code_test_state_commit": "63ab7006d1f1991c3f346f609b17897832dabf11",
+    "journal_record_commit": "60adc1513d210d2190fac0d428288f4415a0fba8"
+  },
   "next_phase": 2,
   "next_phase_goal": "real WAF/reverse-proxy HTTP interception and enforcement",
   "remaining_major_work": [
@@ -29,13 +37,9 @@
     "async telemetry",
     "continuous learning",
     "performance/scalability validation",
-    "dashboard integration",
+    "full dashboard integration",
     "challenge scenarios and evidence",
     "final demo/document/presentation"
   ],
-  "phase_1_verification": {
-    "command": "PYTHONPATH=. python -m unittest discover -s waf/tests -p 'test_*.py'",
-    "status": "passed in terminal workspace before publication"
-  },
-  "truth_boundary": "Phase 1 is an architecture milestone, not a claim that the overall hackathon solution is complete."
+  "truth_boundary": "Phase 1 is an architecture milestone, not a claim that the overall hackathon solution is complete. The final branch head is authoritative."
 }
