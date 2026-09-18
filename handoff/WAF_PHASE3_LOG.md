@@ -1,47 +1,63 @@
 # Phase 3 Execution Log
 
 ## Control point
-- Base milestone: Phase 2 independent verified branch.
+- Base: independently verified Phase 2 branch.
 - Working branch: phase3-independent-final.
 - Main branch intentionally untouched.
 
+## Audit-first process
+The existing Phase 3 material was inspected before acceptance. A missing self-test dependency, a Phase 2 response-buffering regression, insufficient shared normalization for double-encoded edge matching, and a Phase 2 test wiring defect were found and repaired on the independent branch.
+
 ## Work performed
-1. Audited existing Phase 3 branch and found that its self-test referenced a missing regression file.
-2. Rebuilt Phase 3 on top of the independently verified Phase 2 branch so Phase 2 hardening was not lost.
-3. Added http-v2 production feature extraction.
-4. Added bounded normalization, query parsing, headers and body inspection.
-5. Fixed edge rules to share the same multi-pass target normalization as the feature pipeline.
-6. Preserved bounded upstream response streaming from Phase 2.
-7. Repaired Phase 2 regression test wiring while integrating Phase 3.
-8. Added feature, edge and fuzz suites plus reproducible benchmarks.
-9. Added durable phase state, audit and journal records.
+1. Added versioned http-v2 production feature extraction.
+2. Added 40 bounded normalized HTTP features.
+3. Added safe path/query decoding and Unicode normalization.
+4. Added bounded query parsing, headers and body inspection.
+5. Added structural, encoding, entropy and security features.
+6. Wired EdgeWAF to http-v2.
+7. Wired edge rules to shared normalization.
+8. Preserved Phase 2 bounded response handling.
+9. Repaired the oversized-response regression test wiring.
+10. Advanced Phase 2 configuration expectations to phase3/http-v2.
+11. Added feature, edge and fuzz regression suites.
+12. Added reproducible feature/E2E benchmark tooling.
+13. Added comprehensive Phase 3 self-test and GitHub Actions verification workflow.
+14. Added durable state, manifest, audit and journal records.
 
-## Defects found
-- Existing phase3-final self-test referenced tests/test_regression.py, but the file was absent from the branch tree.
-- Existing Phase 3 branch had regressed to unbounded upstream response buffering relative to Phase 2's independent hardening.
-- Existing Phase 3 branch contained a double-encoded XSS acceptance test path without an edge-rule normalization guarantee; shared normalization is now used by the edge rule engine.
-- Existing Phase 2 oversized-response test wiring was incorrect in the audited base and was repaired.
+## Defects found and repaired
+- Missing referenced tests/test_regression.py in inherited Phase 3 self-test.
+- Regression to unbounded upstream response buffering.
+- Double-encoded XSS path not guaranteed by edge rule normalization.
+- Incorrect upstream/proxy port wiring in the oversized-response test.
+- Stale Phase 2 configuration expectations.
+- Self-test Nginx invocation needed explicit bash.
 
-## Verification plan
-- Full Python test suite.
-- Compileall.
-- 20,000 randomized feature inputs.
-- 100,000 feature extractions for performance measurement.
-- 5,000-request live proxy benchmark.
-- Nginx integration.
-- Static secret and stub scans.
+## Final independent evidence
+- 36/36 tests PASS.
+- Compileall PASS.
+- 20,000 fuzz inputs, 0 exceptions.
+- 100,000 feature extractions: 18,569.43 req/s direct run.
+- 5,000-request E2E benchmark at concurrency 100: 1,625.32 req/s direct run, 4,500 allow, 500 block, 4,500 upstream hits, 1,000 retained events.
+- Complete Phase 3 self-test PASS.
+- Nginx integration PASS.
+- Secret/stub scans PASS.
 
 ## Open after Phase 3
-- External ModSecurity/Coraza engine verification.
+- ModSecurity/Coraza external engine verification.
 - TLS/HTTPS termination and inspection.
 - Supervised, unsupervised and semi-supervised ML.
-- Behavioural detection and baselining.
+- Behavioural anomaly detection and traffic baselining.
 - Explainability expansion.
-- ML-derived rule recommendation and approval lifecycle.
+- ML-derived rule recommendation/approval/deployment.
 - Continuous learning, feedback, drift and controlled retraining.
 - Production auth/RBAC/storage/RLS/data minimization.
-- Million-request and multi-node validation.
-- Dashboard migration and final evidence/demo/docs/slides.
+- Million-request and multi-node production validation.
+- Full failure/chaos matrix.
+- Dashboard migration.
+- Challenge scenario evidence.
+- Five-minute demo.
+- Technical document and slides.
+- Final 100 percent project gate.
 
 ## Honesty boundary
-Phase 3 is complete only for the production HTTP feature-pipeline milestone. Overall Challenge 3 is not complete.
+Phase 3 is complete only for the production HTTP feature-pipeline milestone. Overall Challenge 3 remains IN_PROGRESS.
