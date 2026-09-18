@@ -10,13 +10,13 @@ def test_evaluations_have_explicit_scopes():
     assert evaluate_behaviour()["evaluation_scope"] == "deterministic synthetic behavioural workload"
 
 
-def test_config_phase4_defaults():
+def test_config_phase5_defaults():
     cfg = WAFConfig()
-    assert cfg.pipeline_version == "phase4"
+    assert cfg.pipeline_version == "phase5"
     assert cfg.feature_schema_version == "http-v2"
 
 
 def test_live_edge_preserves_http_v2():
     waf = EdgeWAF(WAFConfig())
     result = waf.analyze(RequestEnvelope("p4", "GET", "https", "example.test", "/health"))
-    assert result.pipeline_version == "phase4"
+    assert result.pipeline_version == "phase5"
