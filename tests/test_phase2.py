@@ -58,6 +58,7 @@ def test_config_from_env_defaults_are_safe(monkeypatch):
         monkeypatch.delenv(name, raising=False)
     cfg = WAFConfig.from_env()
     assert cfg.pipeline_version == "phase3"
+    assert cfg.feature_schema_version == "http-v2"
     assert cfg.listen_port == 8080
     assert cfg.max_body_bytes == 1_048_576
 
@@ -65,32 +66,38 @@ def test_config_from_env_defaults_are_safe(monkeypatch):
 def test_end_to_end_enforcement():
     async def go():
         hit = {"n": 0}
+
         async def up(req):
             hit["n"] += 1
             return web.Response(text="upstream-ok")
+
         ua = web.Application()
         ua.router.add_route("*", "/{tail:.*}", up)
         ur = web.AppRunner(ua)
         await ur.setup()
         await web.TCPSite(ur, "127.0.0.1", 19100).start()
+
         p = WAFReverseProxy(
             WAFConfig(upstream_url="http://127.0.0.1:19100", listen_port=18100)
         )
         pr = web.AppRunner(p.app)
         await pr.setup()
         await web.TCPSite(pr, "127.0.0.1", 18100).start()
+
         try:
             async with ClientSession() as client:
                 ok = await client.get("http://127.0.0.1:18100/ok")
                 assert ok.status == 200
                 assert await ok.text() == "upstream-ok"
                 assert ok.headers["X-WAF-Decision"] == "allow"
+
                 bad = await client.get(
                     "http://127.0.0.1:18100/?q=%3Cscript%3Ealert(1)%3C/script%3E"
                 )
                 assert bad.status == 403
                 assert bad.headers["X-WAF-Decision"] == "block"
                 assert hit["n"] == 1
+
                 body_bad = await client.post(
                     "http://127.0.0.1:18100/login", data="x=1; id"
                 )
@@ -100,20 +107,24 @@ def test_end_to_end_enforcement():
             await p.close()
             await pr.cleanup()
             await ur.cleanup()
+
     asyncio.run(go())
 
 
 def test_oversized_upstream_response_is_rejected():
     async def go():
         hits = {"n": 0}
+
         async def up(_request):
             hits["n"] += 1
             return web.Response(body=b"x" * 128)
+
         ua = web.Application()
         ua.router.add_route("*", "/{tail:.*}", up)
         ur = web.AppRunner(ua)
         await ur.setup()
         await web.TCPSite(ur, "127.0.0.1", 19101).start()
+
         p = WAFReverseProxy(
             WAFConfig(
                 upstream_url="http://127.0.0.1:19101",
@@ -123,7 +134,8 @@ def test_oversized_upstream_response_is_rejected():
         )
         pr = web.AppRunner(p.app)
         await pr.setup()
-        await web.TCPSite(ur, "127.0.0.1", 19103).start()
+        await web.TCPSite(pr, "127.0.0.1", 18103).start()
+
         try:
             async with ClientSession() as client:
                 response = await client.get("http://127.0.0.1:18103/large")
@@ -134,4 +146,5 @@ def test_oversized_upstream_response_is_rejected():
             await p.close()
             await pr.cleanup()
             await ur.cleanup()
+
     asyncio.run(go())
