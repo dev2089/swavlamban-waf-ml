@@ -5,7 +5,7 @@
 2. Real HTTP interception + open-source WAF integration + actual blocking. DONE.
 3. Production HTTP feature pipeline. DONE.
 4. Supervised + unsupervised + learned behavioural ML. DONE.
-5. Explainability and decision evidence. TODO.
+5. Explainability and decision evidence. DONE.
 6. Rule generation, validation, approval and deployment loop. TODO.
 7. Baseline, feedback, drift and controlled retraining. TODO.
 8. Production storage, auth/RBAC, secrets and data minimization. TODO.
