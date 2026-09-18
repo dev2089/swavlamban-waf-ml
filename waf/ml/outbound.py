@@ -111,7 +111,8 @@ class OutboundAnomalyDetector:
         _, values = extractor.extract(response)
         raw = float(self.model.decision_function(np.asarray([values], dtype=float))[0])
         scale = max(abs(self.decision_threshold), 1e-6)
-        score = 1.0 / (1.0 + math.exp(max(-60.0, min(60.0, 8.0 * (raw - self.decision_threshold) / scale))))
+        margin = (self.decision_threshold - raw) / scale
+        score = 1.0 / (1.0 + math.exp(max(-60.0, min(60.0, 8.0 * margin))))
         score = min(1.0, max(0.0, score))
         confidence = min(1.0, abs(score - 0.5) * 2.0)
         reasons: list[str] = []
