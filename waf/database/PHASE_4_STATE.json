@@ -1,0 +1,73 @@
+{
+  "schema_version": "phase4-state-v1",
+  "project": "swavlamban-waf-ml",
+  "challenge": "Challenge 3 - ML-integrated open-source WAF",
+  "branch": "phase4-independent-final",
+  "base": "phase3-independent-final",
+  "phase": 4,
+  "phase_status": "PASS",
+  "phase_gate": "100_percent",
+  "phase_score": 10.0,
+  "overall_project_status": "IN_PROGRESS",
+  "feature_schema": "http-v2",
+  "feature_count": 40,
+  "implementation": {
+    "supervised": "HistGradientBoostingClassifier",
+    "unsupervised": "OneClassSVM trained only on benign baseline",
+    "behavioural": "stateful per-source sliding-window LogisticRegression",
+    "decision_seam": "signature + supervised + unsupervised + behavioural -> deterministic policy",
+    "training_isolated_from_request_time": true,
+    "database_writes_on_fast_path": false,
+    "behaviour_state_scope": "process-local-bounded",
+    "model_failure_policy": "fail_closed"
+  },
+  "verification": {
+    "pytest": "53/53 PASS",
+    "compileall": "PASS",
+    "supervised_holdout": "accuracy=1.0 precision=1.0 recall=1.0 f1=1.0 fpr=0.0 test_n=1500",
+    "unsupervised_holdout": "benign_fpr=0.017333 attack_detection=0.888 benign_n=750 attack_n=3000",
+    "behavioural": "normal_max=0.406313 burst_final=0.980486 escalated=true",
+    "latest_direct_benchmark": "2000 requests, 308.30 req/s, 1900 allow, 100 block, 0 alert",
+    "latest_e2e_benchmark": "1000 requests, concurrency 50, 242.86 req/s, 850 HTTP 200, 150 HTTP 403, 0 HTTP 500, 850 upstream hits, p50=205.256ms, p95=267.413ms",
+    "nginx_integration": "PASS allow=200 block=403",
+    "model_artifact_roundtrip": "PASS",
+    "artifact_reproducibility": "two independent generations matched SHA-256 8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50 and 183235 bytes",
+    "secret_scan": "PASS",
+    "stub_scan": "PASS",
+    "phase4_gate": "PASS"
+  },
+  "fixes_and_decisions": [
+    "rebuilt on phase3-independent-final instead of inheriting divergent phase4 builder ancestry",
+    "corrected stale builder expectation of 38 features to authoritative http-v2 count of 40",
+    "kept joblib artifact reproducibly generated rather than relying on an unverified binary",
+    "isolated behavioural mutable state per EdgeWAF runtime while sharing fitted stateless models",
+    "validated artifact version/schema/feature manifest before runtime use",
+    "added fail-closed behavior for ML inference exceptions",
+    "updated config tests to the intentional phase4 pipeline default",
+    "bounded behavioural source windows to prevent unbounded memory growth",
+    "avoided root self-test naming collisions with pytest collection"
+  ],
+  "known_limitations": [
+    "training/evaluation data are deterministic synthetic datasets",
+    "no semi-supervised learner",
+    "behavioural state is process-local and not distributed",
+    "no TLS termination/HTTPS inspection milestone",
+    "no separate ModSecurity/Coraza engine verification",
+    "no drift detection, feedback loop or controlled retraining",
+    "no million-request or multi-node validation",
+    "no final challenge demo/submission package"
+  ],
+  "remaining_after_phase4": [
+    "Phase 5 explainability and decision evidence",
+    "Phase 6 ML rule generation, validation, approval and deployment",
+    "Phase 7 baseline, feedback, drift and controlled retraining",
+    "Phase 8 production storage, authentication/RBAC, secrets and data minimization",
+    "Phase 9 telemetry, scale and failure testing",
+    "Phase 10 official challenge scenarios and evidence",
+    "Phase 11 dashboard migration",
+    "Phase 12 deterministic five-minute demo",
+    "Phase 13 technical document, 8-10 slides and reproducibility package",
+    "Phase 14 final 100 percent release gate"
+  ],
+  "truth_boundary": "Phase 4 PASS covers the defined supervised, unsupervised and learned behavioural ML milestone. Overall Challenge 3 remains IN_PROGRESS."
+}
