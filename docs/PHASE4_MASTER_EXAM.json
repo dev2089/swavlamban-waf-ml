@@ -1,0 +1,43 @@
+{
+  "protocol": "PHASE4 100_PERCENT GATE / critical-defect-fail",
+  "milestone": "Phase 4",
+  "score": 10.0,
+  "cutoff": 9.9,
+  "critical_defects": [],
+  "gates": {
+    "compile": "PASS",
+    "full_regression": "53/53 PASS",
+    "supervised": "PASS",
+    "unsupervised": "PASS",
+    "learned_behaviour": "PASS",
+    "live_edge": "PASS",
+    "artifact_roundtrip": "PASS",
+    "artifact_reproducibility": "PASS",
+    "fail_closed_model_failure": "PASS",
+    "security_scans": "PASS"
+  },
+  "ml": {
+    "supervised": {"accuracy": 1.0, "precision": 1.0, "recall": 1.0, "f1": 1.0, "fpr": 0.0, "test_samples": 1500, "scope": "deterministic synthetic HTTP benchmark only"},
+    "unsupervised": {"false_positive_rate": 0.017333333333333333, "attack_detection_rate": 0.888, "benign_eval_samples": 750, "attack_eval_samples": 3000, "scope": "deterministic synthetic HTTP benchmark only"},
+    "behaviour": {"normal_max_score": 0.406313, "burst_final_score": 0.980486, "burst_escalated": true, "normal_requests": 10, "burst_requests": 40, "scope": "deterministic synthetic behavioural workload"}
+  },
+  "artifact": {
+    "path": "models/phase4_models.joblib",
+    "artifact_version": "phase4-model-v1",
+    "model_version": "phase4-ml-v1",
+    "feature_schema": "http-v2",
+    "feature_count": 40,
+    "bytes": 183235,
+    "sha256": "8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50"
+  },
+  "runtime": {
+    "direct_latest_req_per_s": 323.94,
+    "e2e_latest_req_per_s": 161.89,
+    "e2e_status_200": 850,
+    "e2e_status_403": 150,
+    "e2e_status_500": 0,
+    "e2e_upstream_hits": 850
+  },
+  "scope": "local deterministic synthetic ML evidence",
+  "overall_project_status": "IN_PROGRESS"
+}
