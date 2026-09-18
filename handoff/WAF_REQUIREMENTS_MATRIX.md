@@ -1,33 +1,21 @@
 # Challenge Requirement Mapping
 
-| Need | Status after Phase 4 | Evidence / next work |
+| Need | Status after Phase 5 | Evidence / next work |
 |---|---|---|
-| ML integrated with open-source WAF | PARTIAL | Live EdgeWAF now combines deterministic signatures, supervised, unsupervised and behavioural ML; separate ModSecurity/Coraza verification remains |
-| HTTP(S) analysis | PARTIAL | HTTP interception and http-v2 inspection verified; full TLS termination/inspection remains |
-| traffic baselining | PARTIAL | Benign-only ML baseline exists for anomaly training; production traffic baseline/feedback remains |
-| behavioural analysis | DONE | Learned per-source bounded sliding-window detector with live-edge evidence |
-| anomaly detection | DONE | Benign-only OneClassSVM with held-out evaluation |
-| dashboard | NOT DONE | Final migration remains |
-| supervised/unsupervised/semi-supervised ML | PARTIAL | Supervised and unsupervised are implemented; semi-supervised remains |
-| explainability | FOUNDATION | Signal reasons/confidence/metadata exist; richer decision evidence remains |
-| rule recommendation | FOUNDATION | Rule lifecycle not yet ML-driven |
-| low latency/high throughput | MEASURED LOCALLY | Phase 4 direct/E2E benchmarks exist; production-scale proof remains |
-| continuous learning/retraining | NOT DONE | Feedback/drift/retraining phase |
-| logs/metrics/reports | PARTIAL | Bounded edge event history exists; durable telemetry/reporting remains |
-| demo | NOT DONE | Final scenario/demo package remains |
+| ML integrated with open-source WAF | PARTIAL | Live WAF has signatures + supervised/unsupervised/behavioural ML; separate ModSecurity/Coraza verification remains |
+| HTTP(S) analysis | PARTIAL | HTTP inspection verified; full TLS termination/inspection remains |
+| traffic baselining | PARTIAL | benign training baseline exists; production traffic baseline/feedback remains |
+| behavioural analysis | DONE | learned bounded per-source detector |
+| anomaly detection | DONE | benign-only OneClassSVM with held-out evaluation |
+| dashboard | NOT DONE | final migration remains |
+| supervised/unsupervised/semi-supervised ML | PARTIAL | supervised + unsupervised implemented; semi-supervised remains |
+| explainability | DONE | evidence-v1 with detector contributions, group attribution and provenance |
+| rule recommendation | FOUNDATION | evidence exists; ML-derived rule lifecycle is Phase 6 |
+| low latency/high throughput | MEASURED LOCALLY | local benchmarks only |
+| continuous learning/retraining | NOT DONE | Phase 7 |
+| logs/metrics/reports | PARTIAL | event-v2 evidence integration; durable production telemetry remains |
+| demo | NOT DONE | final scenario/demo remains |
 
-## Phase 4 delivered
+Phase 5 delivered evidence-v1, complete 40-feature numeric snapshot, detector contributions, supervised/anomaly group attribution, behaviour/signature evidence, human explanation, provenance, privacy contract and event-v2 telemetry.
 
-- HistGradientBoostingClassifier supervised detector on http-v2.
-- Benign-only OneClassSVM anomaly detector.
-- Learned per-source LogisticRegression behavioural detector.
-- Held-out synthetic evaluation for supervised and anomaly models.
-- Bounded behavioural state.
-- Versioned model artifact validation and reproducibility.
-- Live EdgeWAF ML integration with known-signature hard block preservation.
-- Fail-closed ML inference failures.
-- 53/53 regression tests, compileall, Nginx integration and local performance evidence.
-
-## Critical truth boundary
-
-Phase status is based on executable/reproducible evidence. Phase 4 does not establish Internet-scale WAF accuracy, TLS inspection, ModSecurity/Coraza integration, distributed production behavior or overall Challenge 3 completion.
+Phase 5 completion does not imply overall Challenge 3 completion or production-scale/model-accuracy guarantees.
