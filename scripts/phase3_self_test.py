@@ -32,7 +32,7 @@ def main() -> None:
     run(sys.executable, "-m", "pytest", "-q", "tests")
     run(sys.executable, "phase3_fuzz.py")
     run(sys.executable, "phase3_benchmark.py")
-    run(sys.executable, "tests/test_nginx_integration.sh")
+    run("bash", "tests/test_nginx_integration.sh")
     print("PHASE3_SELF_TEST=PASS")
 
 
