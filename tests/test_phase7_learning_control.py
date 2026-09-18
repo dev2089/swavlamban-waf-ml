@@ -88,13 +88,13 @@ class Phase7LearningControlTests(unittest.TestCase):
             self.assertTrue(candidate.artifact_sha256)
             registry = ModelRegistry(registry_path)
             champion = registry.champion
-            self.assertEqual(champion["model_version"], "phase4-ml-v1")
+            self.assertEqual(champion["model_version"], self.ml.model_version)
             decision = registry.evaluate(candidate, champion)
             self.assertTrue(decision.eligible)
             promoted = registry.promote(candidate, "release-reviewer")
             self.assertEqual(promoted["model_version"], candidate.model_version)
             rolled_back = registry.rollback("release-reviewer")
-            self.assertEqual(rolled_back["model_version"], "phase4-ml-v1")
+            self.assertEqual(rolled_back["model_version"], self.ml.model_version)
             self.assertGreaterEqual(PROMOTION_MAX_F1_DROP, 0.0)
 
     def test_retraining_never_auto_replaces_runtime_default(self):
