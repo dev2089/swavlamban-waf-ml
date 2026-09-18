@@ -35,7 +35,7 @@ ML inference failure remains fail-closed and is also explainable without requiri
 - deterministic evidence comparison: PASS
 - proxy telemetry correlation: PASS
 - ML failure explanation: PASS
-- explanation benchmark: 100 samples, core mean 8.7411 ms, evidence mean 11.3495 ms, evidence/core 129.84%, local timing only
+- explanation benchmark: 100 samples, core mean 3.4415 ms, evidence mean 6.0215 ms, evidence/core 174.97%, local timing only
 - Phase 5 gate: PASS, 10.0/10.0 equivalent, zero critical defects
 
 ## Boundary
