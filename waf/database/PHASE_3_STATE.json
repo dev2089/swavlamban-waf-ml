@@ -1,0 +1,34 @@
+{
+  "schema_version": "phase3-state-v1",
+  "project": "swavlamban-waf-ml",
+  "branch": "phase3-independent-final",
+  "base": "phase2-independent-verified",
+  "phase": 3,
+  "phase_status": "PENDING_FINAL_VERIFICATION",
+  "phase_gate": "100_percent",
+  "feature_schema": "http-v2",
+  "feature_count": 40,
+  "overall_project_status": "IN_PROGRESS",
+  "planned_evidence": {
+    "full_regression": true,
+    "fuzz_requests": 20000,
+    "feature_benchmark_requests": 100000,
+    "e2e_benchmark_requests": 5000,
+    "e2e_concurrency": 100,
+    "nginx_integration": true
+  },
+  "left": [
+    "ModSecurity/Coraza separate engine verification",
+    "TLS/HTTPS termination",
+    "supervised/unsupervised/semi-supervised ML",
+    "behavioural detection and baselining",
+    "explainability expansion",
+    "ML rule recommendation and approval",
+    "continuous learning/drift/retraining",
+    "production auth/storage/RLS/data minimization",
+    "million-request production measurement",
+    "dashboard migration",
+    "final evidence/demo/docs/slides"
+  ],
+  "truth_boundary": "This state remains PENDING_FINAL_VERIFICATION until the executable Phase 3 test battery has passed locally and the result is recorded by the journal."
+}
