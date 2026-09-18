@@ -1,0 +1,31 @@
+{
+  "schema": "http-v2",
+  "feature_count": 40,
+  "artifact_version": "phase4-model-v1",
+  "model_version": "phase4-ml-v1",
+  "components": {
+    "supervised": {"type": "HistGradientBoostingClassifier", "version": "supervised-v1"},
+    "unsupervised": {"type": "OneClassSVM", "version": "unsupervised-oneclasssvm-v1", "fit_scope": "benign-only"},
+    "behaviour": {"type": "LogisticRegression", "version": "behaviour-v1", "state_scope": "process-local-bounded"}
+  },
+  "training": {
+    "labelled_dataset": "synthetic-http-v4-s5000-seed42",
+    "benign_baseline": "benign-baseline-v4-s2200-seed123",
+    "deterministic_seed": 42,
+    "evaluation": "held-out deterministic synthetic benchmark"
+  },
+  "fast_path_contract": {
+    "raw_payload_in_feature_vector": false,
+    "database_write": false,
+    "feature_schema_validation": true,
+    "model_schema_validation": true,
+    "failure_mode": "fail_closed"
+  },
+  "artifact": {
+    "path": "models/phase4_models.joblib",
+    "source_controlled": false,
+    "generate_command": "python scripts/train_phase4_models.py --output models/phase4_models.joblib",
+    "bytes": 183235,
+    "sha256": "8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50"
+  }
+}
