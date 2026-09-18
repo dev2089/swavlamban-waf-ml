@@ -1,33 +1,33 @@
 # Challenge Requirement Mapping
 
-| Need | Status after Phase 3 | Evidence / next work |
+| Need | Status after Phase 4 | Evidence / next work |
 |---|---|---|
-| ML integrated with open-source WAF | PARTIAL | Live WAF + ML-compatible contracts; production ML pending |
-| HTTP(S) analysis | PARTIAL | Live HTTP interception + http-v2; HTTPS/TLS termination remains |
-| traffic baselining | NOT DONE | Learning/baseline phase |
-| behavioural analysis | NOT DONE | Behavioural detector phase |
-| anomaly detection | PARTIAL | Signature foundation only; ML anomaly detector pending |
-| dashboard | NOT DONE | Legacy dashboard exists; final migration pending |
-| supervised/unsupervised/semi-supervised ML | NOT DONE | Production ML phase |
-| explainability | FOUNDATION | Reasons/rule IDs; richer model explanations pending |
-| rule recommendation | FOUNDATION | Rule lifecycle seam; ML-derived recommendation pending |
-| low latency/high throughput | MEASURED LOCALLY | Feature and E2E benchmarks; production-scale proof pending |
+| ML integrated with open-source WAF | PARTIAL | Live EdgeWAF now combines deterministic signatures, supervised, unsupervised and behavioural ML; separate ModSecurity/Coraza verification remains |
+| HTTP(S) analysis | PARTIAL | HTTP interception and http-v2 inspection verified; full TLS termination/inspection remains |
+| traffic baselining | PARTIAL | Benign-only ML baseline exists for anomaly training; production traffic baseline/feedback remains |
+| behavioural analysis | DONE | Learned per-source bounded sliding-window detector with live-edge evidence |
+| anomaly detection | DONE | Benign-only OneClassSVM with held-out evaluation |
+| dashboard | NOT DONE | Final migration remains |
+| supervised/unsupervised/semi-supervised ML | PARTIAL | Supervised and unsupervised are implemented; semi-supervised remains |
+| explainability | FOUNDATION | Signal reasons/confidence/metadata exist; richer decision evidence remains |
+| rule recommendation | FOUNDATION | Rule lifecycle not yet ML-driven |
+| low latency/high throughput | MEASURED LOCALLY | Phase 4 direct/E2E benchmarks exist; production-scale proof remains |
 | continuous learning/retraining | NOT DONE | Feedback/drift/retraining phase |
-| logs/metrics/reports | PARTIAL | Event schema + bounded edge history; durable telemetry pending |
-| demo | NOT DONE | Final scenario/demo package pending |
+| logs/metrics/reports | PARTIAL | Bounded edge event history exists; durable telemetry/reporting remains |
+| demo | NOT DONE | Final scenario/demo package remains |
 
-## Phase 3 completed
+## Phase 4 delivered
 
-- Versioned http-v2 feature contract.
-- Exactly 40 normalized numeric features.
-- Safe path/query URL decoding with up to 3 passes.
-- Unicode NFKC normalization.
-- Bounded query parsing, headers and body inspection.
-- Encoding anomaly, entropy, shape and security-indicator features.
-- Edge rules share feature-pipeline normalization.
-- Feature, fuzz, live-edge, regression and performance evidence.
-- Durable project state, feature manifest, independent audit and journal.
+- HistGradientBoostingClassifier supervised detector on http-v2.
+- Benign-only OneClassSVM anomaly detector.
+- Learned per-source LogisticRegression behavioural detector.
+- Held-out synthetic evaluation for supervised and anomaly models.
+- Bounded behavioural state.
+- Versioned model artifact validation and reproducibility.
+- Live EdgeWAF ML integration with known-signature hard block preservation.
+- Fail-closed ML inference failures.
+- 53/53 regression tests, compileall, Nginx integration and local performance evidence.
 
-## Critical honesty boundary
+## Critical truth boundary
 
-A requirement becomes DONE only when the intended final capability has executable or reproducible evidence. Contracts, placeholders and UI alone do not count. Overall Challenge 3 remains IN_PROGRESS.
+Phase status is based on executable/reproducible evidence. Phase 4 does not establish Internet-scale WAF accuracy, TLS inspection, ModSecurity/Coraza integration, distributed production behavior or overall Challenge 3 completion.
