@@ -23,18 +23,8 @@ Final release gate: 100% with zero critical defects
 | 13 | Technical document, 8-10 slides, report and reproducibility package | ☐ TODO |
 | 14 | Final 9.9+/10 gate and release candidate | ☐ TODO |
 
-## Phase 0-5 done
+Phase 0-5 are completed milestones. Phase 5 delivered evidence-v1 explainability, detector contributions, feature-group attribution, provenance, privacy-safe numeric evidence and event-v2 telemetry.
 
-0 baseline/freeze; 1 architecture; 2 live HTTP interception and blocking; 3 40-feature http-v2 pipeline; 4 supervised/unsupervised/behavioural ML; 5 evidence-v1 explainability, detector contribution, feature-group attribution, provenance, privacy-safe numeric evidence and event-v2 telemetry.
+Remaining: Phase 6-14 plus semi-supervised ML, TLS/HTTPS deployment verification and separate ModSecurity/Coraza verification.
 
-## Phase 5 evidence
-
-63/63 full regression PASS, 10/10 Phase 5 evidence tests PASS, compileall PASS, privacy/static PASS, deterministic evidence PASS, proxy evidence correlation PASS, ML failure explanation PASS, 100-sample explanation benchmark executed.
-
-## Remaining
-
-Phase 6-14 remain open. Semi-supervised ML, TLS/HTTPS deployment verification and separate ModSecurity/Coraza verification also remain open.
-
-## Release blockers
-
-Any critical security defect, missing required capability, unverified production claim, unreproducible required test or missing final deliverable blocks final release.
+Release blockers: critical security defects, missing capabilities, unverified production claims, unreproducible tests or missing final deliverables.
