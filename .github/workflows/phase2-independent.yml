@@ -1,0 +1,44 @@
+name: Phase 2 Independent Verification
+
+on:
+  push:
+    branches:
+      - phase2-independent-verified
+  pull_request:
+    branches:
+      - phase2-final
+
+permissions:
+  contents: read
+
+jobs:
+  phase2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Phase 2 dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements-phase2.txt
+      - name: Compile Python sources
+        run: python -m compileall -q waf run_proxy.py phase2_demo.py phase2_benchmark.py
+      - name: Run complete test suite
+        run: python -m pytest -q tests
+      - name: Run deterministic demo
+        run: timeout 30 python phase2_demo.py
+      - name: Run 5000-request benchmark
+        run: python phase2_benchmark.py --requests 5000 --concurrency 100 | tee phase2-benchmark-output.txt
+      - name: Install Nginx
+        run: sudo apt-get update && sudo apt-get install -y nginx
+      - name: Run Nginx integration gate
+        run: bash tests/test_nginx_integration.sh
+      - name: Static secret guard
+        run: |
+          ! grep -RInE 'AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' --exclude-dir=.git . || exit 1
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-independent-evidence
+          path: phase2-benchmark-output.txt
+          if-no-files-found: error

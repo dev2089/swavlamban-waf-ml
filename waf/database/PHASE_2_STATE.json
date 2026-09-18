@@ -1,0 +1,53 @@
+{
+  "schema_version": "phase2-state-v5",
+  "project": "swavlamban-waf-ml",
+  "branch": "phase2-independent-verified",
+  "base": "phase2-final",
+  "phase": 2,
+  "phase_status": "PASS",
+  "phase_gate": "100_percent",
+  "overall_project_status": "IN_PROGRESS",
+  "evidence": {
+    "tests": "20/20 PASS",
+    "compileall": "PASS",
+    "demo": "PASS: benign 200/allow, malicious 403/block",
+    "nginx_syntax": "PASS",
+    "nginx_integration": "PASS allow=200 block=403",
+    "secret_scan": "PASS",
+    "phase2_todo_scan": "PASS",
+    "phase2_self_test": "PASS",
+    "benchmark_runs": 6,
+    "benchmark_requests": 5000,
+    "benchmark_concurrency": 100,
+    "benchmark_rps": {
+      "min": 1604.495,
+      "median": 1882.312,
+      "max": 1916.277
+    },
+    "expected_results": "all requests matched expected result",
+    "event_retention_max": 1000,
+    "latest_benchmark": 1818.595
+  },
+  "fixes": [
+    "stale Phase 2 config regression test",
+    "bounded upstream response streaming",
+    "reproducible phase2_demo.py",
+    "reproducible phase2_benchmark.py",
+    "unprivileged Nginx PID path",
+    "readiness-hardened Nginx integration test"
+  ],
+  "left": [
+    "ModSecurity/Coraza separate engine verification",
+    "TLS/HTTPS termination",
+    "production feature/behaviour pipeline",
+    "supervised/unsupervised/semi-supervised ML",
+    "explainability expansion",
+    "ML-derived rule lifecycle",
+    "continuous learning",
+    "production auth/storage/RLS/data minimization",
+    "million-request production measurement",
+    "dashboard migration",
+    "final challenge evidence/demo/docs/slides"
+  ],
+  "truth_boundary": "Phase 2 PASS covers only the defined Phase 2 live-edge milestone; it is not a final Challenge 3 completion claim."
+}
