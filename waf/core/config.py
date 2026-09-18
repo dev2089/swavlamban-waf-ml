@@ -6,9 +6,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class WAFConfig:
-    """Validated non-secret runtime configuration for the WAF edge."""
-
-    pipeline_version: str = "phase3"
+    pipeline_version: str = "phase4"
     block_threshold: float = 0.80
     alert_threshold: float = 0.50
     max_body_bytes: int = 1_048_576
@@ -40,14 +38,12 @@ class WAFConfig:
             raise ValueError("WAF_LISTEN_PORT must be in [1, 65535]")
         if timeout <= 0:
             raise ValueError("WAF_REQUEST_TIMEOUT_SECONDS must be positive")
-
         block_threshold = bounded_float("WAF_BLOCK_THRESHOLD", 0.80)
         alert_threshold = bounded_float("WAF_ALERT_THRESHOLD", 0.50)
         if alert_threshold > block_threshold:
             raise ValueError("WAF_ALERT_THRESHOLD cannot exceed WAF_BLOCK_THRESHOLD")
-
         return cls(
-            pipeline_version=os.getenv("WAF_PIPELINE_VERSION", "phase3"),
+            pipeline_version=os.getenv("WAF_PIPELINE_VERSION", "phase4"),
             block_threshold=block_threshold,
             alert_threshold=alert_threshold,
             max_body_bytes=max_body,
