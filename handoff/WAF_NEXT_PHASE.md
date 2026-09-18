@@ -1,23 +1,20 @@
-# Next Phase: Phase 4
+# Next Phase: Phase 5
 
-Phase 3 is independently verified.
+Phase 4 is independently verified for its defined ML milestone.
 
-Phase 4 goal: implement real supervised, unsupervised and behavioural ML on the canonical live WAF decision seam.
+Phase 5 goal: make every security decision explainable, auditable and reproducible without unnecessary raw-payload retention.
 
-Required boundaries:
-- Model inference must remain on the security fast path without database writes.
-- Training/evaluation must remain isolated from request-time enforcement.
-- Feature/model schemas must be versioned.
-- Inference latency and failure behavior must be measurable.
-- Model outputs must carry confidence/evidence suitable for later explainability.
+Required capabilities:
+- Stable evidence for signature, supervised, anomaly and behavioural signals.
+- Decision trace tied to request ID and pipeline/model/schema versions.
+- Serializable bounded evidence suitable for logs and dashboard use.
+- No unnecessary raw payload persistence.
+- Deterministic explanations for repeated inputs.
+- Known signature, unseen anomaly and behavioural explanations.
+- Edge and reverse-proxy evidence propagation.
+- Performance measurement with evidence collection enabled.
+- Tests for trace completeness, schema/version correlation, bounds and privacy/data minimization.
+- Durable waf/database state, audit and journal.
+- 100% Phase 5 gate before declaring completion.
 
-Required verification:
-- unit/regression tests
-- deterministic inference tests
-- malformed and adversarial input tests
-- model quality evaluation with held-out evidence
-- live edge integration tests
-- performance/latency benchmark
-- failure/timeout behavior
-- durable waf/database state, audit and journal updates
-- 100% phase gate before declaring Phase 4 complete.
+Carry-forward Phase 4 limitations: synthetic ML evaluation data, process-local behavioural state, no semi-supervised model, no TLS milestone, no separate ModSecurity/Coraza verification, no production storage/auth, no million-request/multi-node proof.
