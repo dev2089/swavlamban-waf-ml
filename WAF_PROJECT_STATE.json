@@ -27,7 +27,8 @@
     "ml_failure_explanation": "PASS",
     "explanation_benchmark": "100 samples, latest core mean 3.4415ms, evidence mean 6.0215ms, evidence/core 174.97%, local timing only",
     "phase5_explanation_benchmark": "100 samples, latest core_mean=3.4415ms, evidence_mean=6.0215ms, evidence/core=174.97%, local timing only",
-    "portable_local_bundle": "96 files, caches/bytecode/generated model binary excluded; portable snapshot created before final GitHub-only documentation synchronization"
+    "portable_local_bundle": "96 files, caches/bytecode/generated model binary excluded; portable snapshot created before final GitHub-only documentation synchronization",
+    "github_ci": "NOT_CLAIMED; final independent head has no workflow status"
   },
   "done": [
     "Phase 0 freeze and baseline",
@@ -60,5 +61,5 @@
     "separate ModSecurity/Coraza verification"
   ],
   "honesty_boundary": "Phase 5 PASS covers the explainability and decision-evidence milestone only. Group perturbation attribution is not causal feature importance. Local explanation timing is not production latency proof. Synthetic ML metrics are not real-world Internet WAF accuracy. Overall Challenge 3 remains IN_PROGRESS.",
-  "latest_documented_commit": "5d6963ba42687ceeb836f00cbd0105980f051809"
+  "latest_documented_commit": "fbb4424948dc8fe5d25365509c22b0d4889b6046"
 }
