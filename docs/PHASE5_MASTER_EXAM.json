@@ -1,0 +1,48 @@
+{
+  "protocol": "PHASE5 100_PERCENT GATE / critical-defect-fail",
+  "phase": 5,
+  "score": 10.0,
+  "cutoff": 9.9,
+  "critical_defects": [],
+  "gates": {
+    "compileall": "PASS",
+    "full_regression": "63/63 PASS",
+    "phase5_evidence_tests": "10/10 PASS",
+    "privacy_static": "PASS",
+    "deterministic_evidence": "PASS",
+    "proxy_evidence_correlation": "PASS",
+    "ml_failure_explanation": "PASS",
+    "explanation_benchmark": "PASS"
+  },
+  "evidence": {
+    "evidence_schema": "evidence-v1",
+    "telemetry_schema": "event-v2",
+    "feature_schema": "http-v2",
+    "feature_count": 40,
+    "privacy": {
+      "raw_payload": false,
+      "raw_query": false,
+      "raw_headers": false,
+      "source_ip": false,
+      "host": false
+    },
+    "latest_explanation_benchmark": {
+      "samples": 100,
+      "core_mean_ms": 8.7411,
+      "evidence_mean_ms": 11.3495,
+      "core_p50_ms": 2.6798,
+      "evidence_p50_ms": 6.0441,
+      "core_p95_ms": 22.6373,
+      "evidence_p95_ms": 34.1619,
+      "evidence_time_percent_of_core": 129.84,
+      "scope": "local timing only"
+    }
+  },
+  "audit": {
+    "authoritative_branch": "phase5-independent-final",
+    "base": "phase4-independent-final",
+    "builder_phase5_final_rejected_as_authoritative": true
+  },
+  "overall_project_status": "IN_PROGRESS",
+  "honesty_boundary": "Phase 5 milestone only. Group attribution is not causal importance. Local timing is not production capacity evidence."
+}
