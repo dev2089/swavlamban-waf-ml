@@ -1,0 +1,48 @@
+name: Phase 3 Independent Verification
+
+on:
+  push:
+    branches:
+      - phase3-independent-final
+  pull_request:
+    branches:
+      - phase3-final
+
+permissions:
+  contents: read
+
+jobs:
+  phase3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements-phase2.txt
+      - name: Compile all Python sources
+        run: python -m compileall -q waf tests run_proxy.py phase2_demo.py phase2_benchmark.py phase3_benchmark.py phase3_fuzz.py
+      - name: Run complete pytest suite
+        run: python -m pytest -q tests
+      - name: Run 20000-input fuzz campaign
+        run: python phase3_fuzz.py
+      - name: Run Phase 3 benchmark
+        run: python phase3_benchmark.py | tee phase3-benchmark-output.txt
+      - name: Install Nginx
+        run: sudo apt-get update && sudo apt-get install -y nginx
+      - name: Run Nginx integration
+        run: bash tests/test_nginx_integration.sh
+      - name: Static secret guard
+        run: |
+          ! grep -RInE 'AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' --exclude-dir=.git --exclude='*.pyc' . || exit 1
+      - name: Static stub guard
+        run: |
+          ! grep -RInE 'TODO|FIXME|NotImplementedError' waf phase3_*.py tests || exit 1
+          ! grep -RInE '^[[:space:]]*pass[[:space:]]*(#.*)?$' waf phase3_*.py tests || exit 1
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3-independent-evidence
+          path: phase3-benchmark-output.txt
+          if-no-files-found: error
