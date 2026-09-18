@@ -3,7 +3,8 @@
 {"timestamp":"2026-09-18","phase":2,"event":"fix_response_bound","result":"Changed reverse proxy upstream response handling to stream and reject once max_response_bytes is exceeded."}
 {"timestamp":"2026-09-18","phase":2,"event":"reproducibility","result":"Added phase2_demo.py and phase2_benchmark.py."}
 {"timestamp":"2026-09-18","phase":2,"event":"independent_tests","result":"20/20 Python tests passed; Python compileall passed; deterministic demo passed; Nginx syntax and end-to-end Nginx integration passed."}
-{"timestamp":"2026-09-18","phase":2,"event":"performance","result":"Four independent 5000-request runs at concurrency 100 measured 1916.277, 1604.495, 1876.252 and 1888.372 req/s; median 1882.312 req/s; all expected results matched."}
+{"timestamp":"2026-09-18","phase":2,"event":"performance","result":"Five independent 5000-request runs at concurrency 100 measured 1916.277, 1604.495, 1876.252, 1888.372 and 1907.636 req/s; median 1888.372 req/s; all expected results matched."}
 {"timestamp":"2026-09-18","phase":2,"event":"security_scans","result":"Project-only secret scan and Phase-2 TODO/no-op scan passed."}
-{"timestamp":"2026-09-18","phase":2,"event":"environment_limit","result":"Direct GitHub clone and fresh package-index installation were blocked by terminal DNS/network restrictions; this was recorded rather than hidden."}
-{"timestamp":"2026-09-18","phase":2,"event":"phase_verdict","result":"Phase 2 passes its defined internal 100 percent acceptance gate. Overall Challenge 3 remains in progress."}
+{"timestamp":"2026-09-18","phase":2,"event":"workflow_validation","result":"GitHub Actions independently ran compile, 20-test suite and benchmark successfully, then failed only at Nginx permission due default /run/nginx.pid; nginx config was corrected to use a writable /tmp PID path."}
+{"timestamp":"2026-09-18","phase":2,"event":"environment_limit","result":"Direct GitHub clone and fresh package-index installation were blocked by terminal DNS/network restrictions; local tests used already-installed compatible aiohttp/pytest packages. GitHub-hosted Actions confirmed dependency installation succeeds."}
+{"timestamp":"2026-09-18","phase":2,"event":"phase_verdict","result":"Phase 2 passes the defined internal 100 percent acceptance gate after independent remediation. Overall Challenge 3 remains in progress."}
