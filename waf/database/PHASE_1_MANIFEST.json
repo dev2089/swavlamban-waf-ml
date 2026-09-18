@@ -1,0 +1,139 @@
+{
+  "schema_version": "phase1-manifest-v1",
+  "repository": "dev2089/swavlamban-waf-ml",
+  "branch": "phase-1/architecture-rebuild",
+  "source_tree_before_manifest": "c0ca914bd1e2821aaa87f4ed5a749e68cf2eeb9d",
+  "phase": 1,
+  "status": "complete",
+  "verification": "6/6 architecture tests passed in terminal workspace; Python sources compiled successfully",
+  "next_phase": 2,
+  "next_phase_goal": "real WAF/reverse-proxy HTTP interception and enforcement",
+  "release_status": "not_submission_ready",
+  "files": [
+    [
+      "waf/__init__.py",
+      "efaa971e759c4adef2a7c50d45e6f83ed6d851ef",
+      97
+    ],
+    [
+      "waf/api/__init__.py",
+      "c35ae080edc08199e257cd39aa4b3b98f2c9d01c",
+      54
+    ],
+    [
+      "waf/config.py",
+      "23c333ddfed233717f0af6365d7ffdb771ee42c8",
+      1101
+    ],
+    [
+      "waf/core/__init__.py",
+      "5e5826222cff5cb6ff40d09c9971b473b1824dfc",
+      407
+    ],
+    [
+      "waf/core/models.py",
+      "8928ed31b9ff97a70425de9724320a540e300a94",
+      3989
+    ],
+    [
+      "waf/core/pipeline.py",
+      "83bff913bbbeffb6cb62d7aebf0055584f5c9b11",
+      931
+    ],
+    [
+      "waf/dashboard/__init__.py",
+      "3d3ee7380f115e07d15972b0b6c3faa6ad6a5ec0",
+      36
+    ],
+    [
+      "waf/database/PROJECT_JOURNAL.jsonl",
+      "28e3099e7a8a9cadf4f4ac545854948bce3c3dbb",
+      1631
+    ],
+    [
+      "waf/database/README.md",
+      "9252567973b18882fb1570863bc6369e66a21a70",
+      542
+    ],
+    [
+      "waf/docs/ARCHITECTURE.md",
+      "6f3cee4684413573d949b5e2ff31f282da10b85c",
+      1865
+    ],
+    [
+      "waf/docs/DEPENDENCY_RULES.md",
+      "0b988af56e9dc2729fb55679c448523756bc34e8",
+      960
+    ],
+    [
+      "waf/docs/PHASE_1_COMPLETE.md",
+      "79a5c37dca6ffb3271de8d49be44323e6207c98c",
+      1201
+    ],
+    [
+      "waf/engine/__init__.py",
+      "bf9904a45d214adad4b41fb4b9d39306c15f2305",
+      49
+    ],
+    [
+      "waf/evaluation/__init__.py",
+      "d1ef920ee7add47bb4eef6ba5437cf064b0c1667",
+      39
+    ],
+    [
+      "waf/features/__init__.py",
+      "f69e0e3e8d5c508afd366d02234cf55324431bbb",
+      43
+    ],
+    [
+      "waf/ml/__init__.py",
+      "bf69b5f0a9950d65675d06dc4210b2f52cd62cf1",
+      41
+    ],
+    [
+      "waf/proxy/__init__.py",
+      "35d64eb77c4668d8fcbba430304e2ec9f0d5331a",
+      56
+    ],
+    [
+      "waf/rules/__init__.py",
+      "85df2b5365dfdcf9893f2d943aab85b9a016a8c6",
+      198
+    ],
+    [
+      "waf/rules/lifecycle.py",
+      "060fab4bd144fcf2d17d2df96f1cf8ffb69cb2e8",
+      12328
+    ],
+    [
+      "waf/state/PROJECT_STATE.json",
+      "a97d420780ace82ea8516105cae8c623289082b9",
+      1828
+    ],
+    [
+      "waf/storage/__init__.py",
+      "d4e1fa3d6c642fbb5070b5d939afaff02d13f51f",
+      31
+    ],
+    [
+      "waf/telemetry/__init__.py",
+      "baae6d5ad50c84745c55957c7fdcba14ee008f2f",
+      48
+    ],
+    [
+      "waf/tests/__init__.py",
+      "d8731088b52251846c9847516b994eadd2fcd964",
+      37
+    ],
+    [
+      "waf/tests/test_architecture.py",
+      "62161e53cddd77d9e3d29916030a6d7fc667cdda",
+      2628
+    ],
+    [
+      "waf/training/__init__.py",
+      "b552bb8108d6f4ebde1cc6bc2be09de384d79db7",
+      47
+    ]
+  ]
+}
