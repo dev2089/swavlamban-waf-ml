@@ -34,7 +34,7 @@ Final local evidence:
 - deterministic evidence PASS
 - proxy evidence correlation PASS
 - ML failure explanation PASS
-- latest 100-sample explanation benchmark: core mean 8.7411ms, evidence mean 11.3495ms, evidence/core 129.84%, local timing only
+- latest 100-sample explanation benchmark: core mean 3.4415ms, evidence mean 6.0215ms, evidence/core 174.97%, local timing only
 - phase5_gate PASS, 10.0/10.0, zero critical defects
 
 Failures fixed:
