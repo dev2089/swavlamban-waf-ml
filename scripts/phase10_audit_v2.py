@@ -154,7 +154,7 @@ def main() -> int:
         "project": "dev2089/swavlamban-waf-ml",
         "challenge": "Challenge 3 - ML-integrated open-source WAF",
         "phase": 10,
-        "branch": sh("branch", "--show-current"),
+        "branch": sh("git", "branch", "--show-current"),
         "commit_sha": current_sha,
         "baseline_commit_sha": BASELINE,
         "gate_green": gate_green,
