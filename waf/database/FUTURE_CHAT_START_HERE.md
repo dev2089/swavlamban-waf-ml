@@ -27,17 +27,17 @@ Phase 0: baseline/freeze.
 Phase 1: architecture foundation verified.
 Phase 2: live HTTP interception, actual pre-forwarding blocking and Nginx integration independently verified.
 Phase 3: versioned 40-feature http-v2 pipeline independently verified.
-Phase 4: supervised, unsupervised and learned behavioural ML independently verified locally, with 53/53 regression tests, held-out synthetic evaluations, artifact reproducibility, live-edge enforcement, Nginx integration and fail-closed model failure handling.
+Phase 4: supervised, unsupervised and learned behavioural ML independently verified locally, with 53/53 regression tests, held-out synthetic evaluations, artifact reproducibility, live-edge enforcement and fail-closed model failure handling.
 
 ## Phase 4 evidence
 
 Supervised F1=1.0 and FPR=0.0 on 1500 deterministic synthetic holdout samples.
 Unsupervised benign FPR=0.017333 and attack detection=0.888 on deterministic synthetic evaluation sets.
 Behaviour normal max=0.406313 and burst final=0.980486 on deterministic synthetic workload.
-Latest local direct benchmark=308.30 req/s for 2000 requests.
-Latest local E2E benchmark=242.86 req/s for 1000 requests at concurrency 50 with 0 HTTP 500 responses and 850 upstream hits.
+Latest local direct benchmark=323.94 req/s for 2000 requests.
+Latest local E2E benchmark=161.89 req/s for 1000 requests at concurrency 50 with 0 HTTP 500 responses and 850 upstream hits.
 Two local deterministic model generations matched at 183235 bytes and SHA-256 8fe56e23ea19a6dc2e82563b0ae4f1d0754a3df2ee5be1e4042a51910edabf50.
-Nginx integration passed with allow=200 and block=403.
+Inherited Nginx evidence remains allow=200/block=403 because Phase 4 did not change the Nginx configuration.
 
 ## Next milestone
 
