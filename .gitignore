@@ -1,2 +1,5 @@
-node_modules/
-.env
+__pycache__/
+.pytest_cache/
+*.pyc
+models/*.joblib
+models/.phase4_*.joblib
