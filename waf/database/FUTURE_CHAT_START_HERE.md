@@ -2,18 +2,29 @@
 
 Project: Swavlamban 2025 Hackathon Challenge 3 - ML-enabled WAF.
 Repository: dev2089/swavlamban-waf-ml.
-Current verified milestone: Phase 2.
-Verification branch: phase2-independent-verified.
-Overall project is still IN_PROGRESS.
+Current verified milestone: Phase 3.
+Current branch: phase3-independent-final.
+Base branch: phase2-independent-verified.
+Overall project: IN_PROGRESS.
+Final overall release gate: 100% with zero critical defects.
 
-Read `waf/database/PHASE_2_INDEPENDENT_AUDIT.md`, `waf/database/PHASE_2_STATE.json`, `waf/database/PROJECT_JOURNAL.jsonl`, and the exact branch head before doing work.
+Read these before changing anything:
+1. WAF_PROJECT_STATE.json
+2. waf/database/PHASE_3_STATE.json
+3. waf/database/PHASE_3_FEATURE_MANIFEST.json
+4. waf/database/PHASE_3_INDEPENDENT_AUDIT.md
+5. waf/database/PROJECT_JOURNAL.jsonl
+6. handoff/WAF_PHASE3_LOG.md
+7. handoff/WAF_REQUIREMENTS_MATRIX.md
 
-Do not trust a score alone. Re-run the tests and inspect the source.
+Do not trust a score without executable evidence. Inspect the exact branch head and rerun the relevant tests.
 
-Phase 2 completed: real HTTP reverse-proxy interception, deterministic security signatures, actual 403 enforcement before upstream, Nginx integration, bounds, timeout handling, deterministic demo/benchmark and independent regression testing.
+Phase 1: architecture foundation verified.
+Phase 2: real HTTP reverse-proxy interception, pre-forwarding block enforcement and Nginx integration independently verified.
+Phase 3: versioned http-v2 production HTTP feature pipeline independently verified.
 
-Next phase: Phase 3 production HTTP feature pipeline.
+Phase 3 evidence: 36/36 tests, compileall PASS, 20,000 fuzz inputs with 0 extraction exceptions, 100,000 feature extractions benchmarked, 5,000-request E2E benchmark, Nginx integration PASS, secret/stub scans PASS, complete Phase 3 self-test PASS.
 
-Final release gate for the whole project: 100%. Any unverified requirement or critical defect blocks release.
+Next milestone: production ML and behavioural anomaly detection.
 
-Official challenge core: HTTP(S) inbound/outbound analysis, baselining, behavioural anomaly detection, supervised/unsupervised/semi-supervised ML, explainability, rule recommendation, high-performance low-latency operation, continuous learning, admin GUI, scenario evidence, logs/metrics/reports, source/build/README, five-minute demo, 2-3 page technical document and 8-10 slide presentation.
+Overall Challenge 3 requirements still open include production ML, TLS/HTTPS, behavioural baselining, continuous learning, explainability, ML-derived rule lifecycle, production auth/storage, million-request and multi-node validation, dashboard migration, final scenario evidence, five-minute demo and final documentation/slides.
