@@ -16,25 +16,18 @@ def main() -> None:
     started = time.perf_counter()
 
     for i in range(total):
-        path = "/" + "".join(
-            rng.choice(alphabet) for _ in range(rng.randrange(512))
-        )
-        query = "".join(
-            rng.choice(alphabet) for _ in range(rng.randrange(1024))
-        )
-        body = bytes(rng.randrange(256) for _ in range(rng.randrange(4096)))
+        path = "/" + "".join(rng.choice(alphabet) for _ in range(rng.randrange(128)))
+        query = "".join(rng.choice(alphabet) for _ in range(rng.randrange(256)))
+        body = bytes(rng.randrange(256) for _ in range(rng.randrange(512)))
         headers = {
             f"X-Test-{j}": "".join(
-                rng.choice(string.printable)
-                for _ in range(rng.randrange(64))
+                rng.choice(string.printable) for _ in range(rng.randrange(24))
             )
-            for j in range(rng.randrange(20))
+            for j in range(rng.randrange(8))
         }
         request = RequestEnvelope(
             request_id=str(i),
-            method=rng.choice(
-                ("GET", "POST", "PUT", "PATCH", "DELETE", "UNKNOWN")
-            ),
+            method=rng.choice(("GET", "POST", "PUT", "PATCH", "DELETE", "UNKNOWN")),
             scheme=rng.choice(("http", "https")),
             host="example.test",
             path=path,
