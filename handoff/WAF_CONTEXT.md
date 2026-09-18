@@ -1,26 +1,22 @@
 # WAF Handoff Context
 
-Read this file, `WAF_PROJECT_STATE.json`, `handoff/WAF_BASELINE_AUDIT.md`, `handoff/WAF_MASTER_PLAN.md`, `handoff/WAF_CHANGELOG.md`, and the latest phase state/test report before changing the project in a new conversation.
+Read waf/database/FUTURE_CHAT_START_HERE.md, WAF_PROJECT_STATE.json, waf/database/PHASE_4_STATE.json, waf/database/PHASE_4_INDEPENDENT_AUDIT.md, waf/database/PROJECT_JOURNAL.jsonl, waf/database/ALL_PHASES_TODO.md and the current requirement matrix before changing the project in a new conversation.
 
 ## Goal
-Build a real, demonstrable ML-augmented open-source WAF for Challenge 3: real HTTP(S) inspection, rule+ML decisions, explanations, actual allow/block enforcement, feedback/retraining, measurable telemetry, dashboard and reproducible evidence.
+Build a real demonstrable ML-augmented open-source WAF for Challenge 3 with HTTP(S) inspection, rule+ML decisions, explanations, enforcement, feedback/retraining, telemetry, dashboard and reproducible evidence.
 
 ## Constraints
-- target cost: ₹0;
-- user primarily has phone + ChatGPT/free trials, not a personal PC workflow;
-- terminal workspace is the lab/build/test environment;
-- GitHub is the source/control plane;
-- repository: `dev2089/swavlamban-waf-ml`;
-- baseline main commit: `1cc4f91dd6828039f834ae4dc2b466191d04f229`.
+- target cost: ₹0
+- terminal is the local build/test lab
+- GitHub is the source/control plane
+- repository: dev2089/swavlamban-waf-ml
+- baseline main commit: 1cc4f91dd6828039f834ae4dc2b466191d04f229
 
-## Locked challenge
-Challenge 3. Do not switch unless the user explicitly reopens it.
+## Current milestone
+Phase 4 is PASS on phase4-independent-final, based on phase3-independent-final.
 
-## Quality
-MASTER 9.9+ protocol applies to all deliverables. Final project requires executable evidence; critical defects fail regardless of arithmetic score.
+## Phase 4 truth
+The live path contains deterministic signatures plus supervised, benign-only unsupervised anomaly and learned behavioural detectors over the 40-feature http-v2 contract. Model inference is fail-closed, training/evaluation are outside request-time enforcement, and no database writes occur on the ML fast path.
 
-## Current phase
-Phase 2 is complete on branch `phase2-final`. The live edge now inspects real HTTP requests before forwarding, blocks high-risk requests with 403, and has an automated Nginx integration gate. Phase 3 is next: production HTTP feature pipeline.
-
-## Important honesty boundary
-Nginx integration is verified. A separately installed ModSecurity/Coraza engine was not present in the terminal and is not claimed as verified. Overall Challenge 3 remains in progress.
+## Critical boundary
+Phase 4 metrics are deterministic synthetic/local evidence, not Internet-scale accuracy or production capacity claims. Semi-supervised ML, TLS, ModSecurity/Coraza, distributed behaviour, continuous learning, production persistence/auth, final dashboard/demo/submission and the final project gate remain open.
