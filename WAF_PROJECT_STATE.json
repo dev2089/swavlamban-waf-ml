@@ -3,7 +3,7 @@
   "selected_challenge": "Challenge 3 - ML-integrated open-source WAF",
   "current_phase": 5,
   "phase_status": "PASS",
-  "phase_score": 10.0,
+  "phase_score": 10,
   "phase_cutoff": 9.9,
   "phase_gate": "100_percent",
   "overall_project_status": "IN_PROGRESS",
@@ -25,7 +25,8 @@
     "deterministic_evidence": "PASS",
     "proxy_evidence_correlation": "PASS",
     "ml_failure_explanation": "PASS",
-    "explanation_benchmark": "100 samples, latest recorded core mean 8.7411ms, evidence mean 11.3495ms, evidence/core 129.84%, local timing only"
+    "explanation_benchmark": "100 samples, latest recorded core mean 8.7411ms, evidence mean 11.3495ms, evidence/core 129.84%, local timing only",
+    "phase5_explanation_benchmark": "100 samples, latest recorded core_mean=8.7411ms, evidence_mean=11.3495ms, evidence/core=129.84%, local timing only"
   },
   "done": [
     "Phase 0 freeze and baseline",
@@ -57,5 +58,6 @@
     "TLS/HTTPS deployment verification",
     "separate ModSecurity/Coraza verification"
   ],
-  "honesty_boundary": "Phase 5 PASS covers the explainability and decision-evidence milestone only. Group perturbation attribution is not causal feature importance. Local explanation timing is not production latency proof. Synthetic ML metrics are not real-world Internet WAF accuracy. Overall Challenge 3 remains IN_PROGRESS."
+  "honesty_boundary": "Phase 5 PASS covers the explainability and decision-evidence milestone only. Group perturbation attribution is not causal feature importance. Local explanation timing is not production latency proof. Synthetic ML metrics are not real-world Internet WAF accuracy. Overall Challenge 3 remains IN_PROGRESS.",
+  "latest_documented_commit": "6602d18fae2dd97412887fb853704f86340d8e08"
 }
